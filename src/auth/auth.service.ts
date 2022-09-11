@@ -1,0 +1,9 @@
+import { Injectable } from '@nestjs/common';
+import { AuthDto } from './dto';
+
+@Injectable()
+export class AuthService {
+  siginin(dto: AuthDto) {
+    return dto;
+  }
+}

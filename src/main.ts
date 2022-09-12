@@ -4,13 +4,16 @@ import { useContainer } from 'class-validator';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    cors: true,
+    logger: ['error', 'warn', 'log'], // <--- Add this line in options object
+  });
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
     }),
   );
-  await app.listen(3000);
+  await app.listen(3300);
 }
 bootstrap();

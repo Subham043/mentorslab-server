@@ -9,13 +9,13 @@ export class UserService {
   constructor(private prisma: PrismaService) {}
 
   async create(dto: UserCreateDto): Promise<UserGetDto> {
-    const checkUserByEmail = this.findByEmail(dto.email);
-    if (checkUserByEmail)
-      throw new HttpException('Email is already taken', HttpStatus.BAD_REQUEST);
-
-    const checkUserByPhone = this.findByPhone(dto.phone);
-    if (checkUserByPhone)
-      throw new HttpException('Phone is already taken', HttpStatus.BAD_REQUEST);
+    const validateEmail = await this.validateUniqueEmail(dto.email);
+    if(validateEmail.status) throw new HttpException('Email is already taken', HttpStatus.BAD_REQUEST)
+    
+    if(dto.phone){
+      const validatePhone = await this.validateUniquePhone(dto.phone);
+      if(validatePhone.status) throw new HttpException('Phone is already taken', HttpStatus.BAD_REQUEST)
+    }
 
     const user = await this.prisma.user.create({
       data: { ...dto },
@@ -24,6 +24,19 @@ export class UserService {
   }
 
   async update(id: number, dto: UserUpdateDto): Promise<UserGetDto> {
+    const user = await this.findOne(id);
+    if(dto.email){
+      const validateEmail = await this.validateUniqueEmail(dto.email);
+      if(validateEmail.status && validateEmail.email!==user.email) 
+        throw new HttpException('Email is already taken', HttpStatus.BAD_REQUEST)
+    }
+
+    if(dto.phone){
+      const validatePhone = await this.validateUniquePhone(dto.phone);
+      if(validatePhone.status && validatePhone.phone!==user.phone) 
+        throw new HttpException('Phone is already taken', HttpStatus.BAD_REQUEST)
+    }
+
     await this.prisma.user.update({
       where: { id: Number(id) },
       data: { ...dto },
@@ -61,7 +74,6 @@ export class UserService {
         updatedAt: true,
       },
     });
-    this.logger.log(user);
     if (!user)
       throw new HttpException("User doesn't exist", HttpStatus.NOT_FOUND);
     return user;
@@ -82,6 +94,43 @@ export class UserService {
   async remove(id: number): Promise<User> {
     return this.prisma.user.delete({
       where: { id: Number(id) },
+    });
+  }
+
+  async validateUniqueEmail(email: string): Promise<{status: boolean, email: string|null}> {
+    const checkUserByEmail = await this.prisma.user.findFirst({
+      where: {
+        email
+      },
+      select: {
+        email: true,
+      },
+    });
+    if (checkUserByEmail)
+      return {status:true, email:checkUserByEmail.email};
+    return {status:false, email:null};  
+  }
+  
+  async validateUniquePhone(phone: string): Promise<{status: boolean, phone: string|null}> {
+    const checkUserByPhone = await this.prisma.user.findFirst({
+      where: {
+        phone
+      },
+      select: {
+        phone: true,
+      },
+    });
+    if (checkUserByPhone)
+      return {status:true, phone:checkUserByPhone.phone};
+    return {status:false, phone:null};  
+  }
+
+  async generateAndSendOtp(email: string):Promise<void> {
+    const validateEmail = await this.validateUniqueEmail(email);
+    if(!validateEmail.status) throw new HttpException('Invalid Email', HttpStatus.BAD_REQUEST)
+    await this.prisma.user.update({
+      where: { email },
+      data: { otp:Math.floor(1000 + Math.random() * 9000) },
     });
   }
 }

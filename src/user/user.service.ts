@@ -9,40 +9,54 @@ export class UserService {
   private readonly logger = new Logger();
   constructor(private prisma: PrismaService) {}
 
-  async create(dto: UserCreateDto): Promise<UserGetDto> {
+  async create(dto: UserCreateDto): Promise<UserGetDto | undefined> {
     const validateEmail = await this.validateUniqueEmail(dto.email);
-    if(validateEmail.status) throw new HttpException('Email is already taken', HttpStatus.BAD_REQUEST)
-    
-    if(dto.phone){
+    if (validateEmail.status)
+      throw new HttpException('Email is already taken', HttpStatus.BAD_REQUEST);
+
+    if (dto.phone) {
       const validatePhone = await this.validateUniquePhone(dto.phone);
-      if(validatePhone.status) throw new HttpException('Phone is already taken', HttpStatus.BAD_REQUEST)
+      if (validatePhone.status)
+        throw new HttpException(
+          'Phone is already taken',
+          HttpStatus.BAD_REQUEST,
+        );
     }
 
     const user = await this.prisma.user.create({
       data: { ...dto },
     });
-    return await this.find({ id: user.id });
+    return await this.findOne(user.id);
   }
 
-  async update(id: number, dto: UserUpdateDto): Promise<UserGetDto> {
+  async update(
+    id: number,
+    dto: UserUpdateDto,
+  ): Promise<UserGetDto | undefined> {
     const user = await this.findOne(id);
-    if(dto.email){
+    if (dto.email) {
       const validateEmail = await this.validateUniqueEmail(dto.email);
-      if(validateEmail.status && validateEmail.email!==user.email) 
-        throw new HttpException('Email is already taken', HttpStatus.BAD_REQUEST)
+      if (validateEmail.status && validateEmail.email !== user.email)
+        throw new HttpException(
+          'Email is already taken',
+          HttpStatus.BAD_REQUEST,
+        );
     }
 
-    if(dto.phone){
+    if (dto.phone) {
       const validatePhone = await this.validateUniquePhone(dto.phone);
-      if(validatePhone.status && validatePhone.phone!==user.phone) 
-        throw new HttpException('Phone is already taken', HttpStatus.BAD_REQUEST)
+      if (validatePhone.status && validatePhone.phone !== user.phone)
+        throw new HttpException(
+          'Phone is already taken',
+          HttpStatus.BAD_REQUEST,
+        );
     }
 
     await this.prisma.user.update({
       where: { id: Number(id) },
       data: { ...dto },
     });
-    return await this.find({ id });
+    return await this.findOne(user.id);
   }
 
   async findAll(): Promise<UserGetDto[]> {
@@ -60,7 +74,7 @@ export class UserService {
   }
 
   // eslint-disable-next-line @typescript-eslint/ban-types
-  async find(value: {}): Promise<UserGetDto> {
+  async find(value: {}): Promise<UserGetDto | undefined> {
     const user = await this.prisma.user.findUnique({
       where: {
         ...value,
@@ -75,20 +89,18 @@ export class UserService {
         updatedAt: true,
       },
     });
-    if (!user)
-      throw new HttpException("User doesn't exist", HttpStatus.NOT_FOUND);
     return user;
   }
 
-  async findOne(id: number): Promise<UserGetDto> {
+  async findOne(id: number): Promise<UserGetDto | undefined> {
     return await this.find({ id });
   }
 
-  async findByEmail(email: string): Promise<UserGetDto> {
+  async findByEmail(email: string): Promise<UserGetDto | undefined> {
     return await this.find({ email });
   }
 
-  async findByPhone(phone: string): Promise<UserGetDto> {
+  async findByPhone(phone: string): Promise<UserGetDto | undefined> {
     return await this.find({ phone });
   }
 
@@ -98,59 +110,67 @@ export class UserService {
     });
   }
 
-  async validateUniqueEmail(email: string): Promise<{status: boolean, email: string|null}> {
+  async validateUniqueEmail(
+    email: string,
+  ): Promise<{ status: boolean; email: string | null }> {
     const checkUserByEmail = await this.prisma.user.findFirst({
       where: {
-        email
+        email,
       },
       select: {
         email: true,
       },
     });
     if (checkUserByEmail)
-      return {status:true, email:checkUserByEmail.email};
-    return {status:false, email:null};  
+      return { status: true, email: checkUserByEmail.email };
+    return { status: false, email: null };
   }
-  
-  async validateUniquePhone(phone: string): Promise<{status: boolean, phone: string|null}> {
+
+  async validateUniquePhone(
+    phone: string,
+  ): Promise<{ status: boolean; phone: string | null }> {
     const checkUserByPhone = await this.prisma.user.findFirst({
       where: {
-        phone
+        phone,
       },
       select: {
         phone: true,
       },
     });
     if (checkUserByPhone)
-      return {status:true, phone:checkUserByPhone.phone};
-    return {status:false, phone:null};  
+      return { status: true, phone: checkUserByPhone.phone };
+    return { status: false, phone: null };
   }
 
-  async generateAndSendOtp(email: string):Promise<void> {
+  async generateAndSendOtp(email: string): Promise<boolean> {
     const validateEmail = await this.validateUniqueEmail(email);
-    if(!validateEmail.status) throw new HttpException('Invalid Email', HttpStatus.BAD_REQUEST)
+    if (!validateEmail.status) return false;
     await this.prisma.user.update({
       where: { email },
-      data: { otp:Math.floor(1000 + Math.random() * 9000) },
+      data: { otp: Math.floor(1000 + Math.random() * 9000) },
     });
+    return true;
   }
 
-  async validateUserLogin(dto: AuthDto): Promise<{status: boolean, message: string}> {
+  async validateUserLogin(
+    dto: AuthDto,
+  ): Promise<{ status: boolean; message: string }> {
     const validateEmail = await this.validateUniqueEmail(dto.email);
-    if(!validateEmail.status) return {status: false, message: 'Invalid credentials'};
-    
+    if (!validateEmail.status)
+      return { status: false, message: 'Invalid credentials' };
+
     const user = await this.prisma.user.findFirst({
       where: {
         email: dto.email,
-        otp: Number(dto.otp)
+        otp: Number(dto.otp),
       },
       select: {
         email: true,
-        otp: true
+        otp: true,
       },
     });
 
-    if(!user) return {status: false, message: 'Invalid otp'};
-    return {status: true, message: 'Login successful'};
+    if (!user) return { status: false, message: 'Invalid otp' };
+    return { status: true, message: 'Login successful' };
   }
 }

@@ -2,6 +2,7 @@ import { Injectable, HttpException, HttpStatus, Logger } from '@nestjs/common';
 import { UserCreateDto, UserGetDto, UserUpdateDto } from './dto/user.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { User } from '@prisma/client';
+import { AuthDto } from 'src/auth/dto';
 
 @Injectable()
 export class UserService {
@@ -132,5 +133,24 @@ export class UserService {
       where: { email },
       data: { otp:Math.floor(1000 + Math.random() * 9000) },
     });
+  }
+
+  async validateUserLogin(dto: AuthDto): Promise<{status: boolean, message: string}> {
+    const validateEmail = await this.validateUniqueEmail(dto.email);
+    if(!validateEmail.status) return {status: false, message: 'Invalid credentials'};
+    
+    const user = await this.prisma.user.findFirst({
+      where: {
+        email: dto.email,
+        otp: Number(dto.otp)
+      },
+      select: {
+        email: true,
+        otp: true
+      },
+    });
+
+    if(!user) return {status: false, message: 'Invalid otp'};
+    return {status: true, message: 'Login successful'};
   }
 }

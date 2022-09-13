@@ -6,7 +6,7 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     cors: true,
-    logger: ['error', 'warn', 'log'], // <--- Add this line in options object
+    logger: ['error', 'warn', 'log'],
   });
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
   app.useGlobalPipes(

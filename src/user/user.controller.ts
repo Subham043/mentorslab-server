@@ -5,9 +5,11 @@ import {
   ParseIntPipe,
   Patch,
   Post,
-  Get
+  Get,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common';
-import { UserCreateDto, UserUpdateDto } from './dto/user.dto';
+import { UserCreateDto, UserGetDto, UserUpdateDto } from './dto/user.dto';
 import { UserService } from './user.service';
 
 @Controller('user')
@@ -15,27 +17,39 @@ export class UserController {
   constructor(private userService: UserService) {}
 
   @Post()
-  createUser(@Body() userCreateDto: UserCreateDto) {
-    return this.userService.create(userCreateDto);
+  async createUser(
+    @Body() userCreateDto: UserCreateDto,
+  ): Promise<{ data: UserGetDto }> {
+    const result = await this.userService.create(userCreateDto);
+    if (!result)
+      throw new HttpException('Data not found', HttpStatus.NOT_FOUND);
+    return { data: result };
   }
 
   @Patch(':id')
-  updateUser(@Param('id', ParseIntPipe) id: number, @Body() userUpdateDto: UserUpdateDto) {
-    return this.userService.update(id, userUpdateDto);
-  }
-  
-  @Get()
-  getAllUser() {
-    return this.userService.findAll();
-  }
-  
-  @Get(':id')
-  getUser(@Param('id', ParseIntPipe) id: number) {
-    return this.userService.findOne(id);
+  async updateUser(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() userUpdateDto: UserUpdateDto,
+  ): Promise<{ data: UserGetDto }> {
+    const result = await this.userService.update(id, userUpdateDto);
+    if (!result)
+      throw new HttpException('Data not found', HttpStatus.NOT_FOUND);
+    return { data: result };
   }
 
-  @Post('send-otp')
-  sendOtpUser(@Body() userCreateDto: UserCreateDto) {
-    return this.userService.generateAndSendOtp(userCreateDto.email);
+  @Get()
+  async getAllUser(): Promise<{ data: UserGetDto[] }> {
+    const result = await this.userService.findAll();
+    return { data: result };
+  }
+
+  @Get(':id')
+  async getUser(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<{ data: UserGetDto }> {
+    const result = await this.userService.findOne(id);
+    if (!result)
+      throw new HttpException('Data not found', HttpStatus.NOT_FOUND);
+    return { data: result };
   }
 }

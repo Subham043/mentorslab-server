@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, IsNumber, Length, Matches } from 'class-validator';
+import { IsEmail, IsNotEmpty, Length, Matches } from 'class-validator';
 
 export class AuthDto {
   @IsNotEmpty()
@@ -6,7 +6,7 @@ export class AuthDto {
   email: string;
 
   @IsNotEmpty()
-  @Length(4,4)
-  @Matches(/^\d+$/,{ message: 'otp must be a number'})
+  @Length(4, 4)
+  @Matches(/^\d+$/, { message: 'otp must be a number' })
   otp: string;
 }

@@ -6,7 +6,9 @@ import {
   Get,
   HttpException,
   HttpStatus,
+  SetMetadata,
 } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { GetCurrentUserId } from 'src/common/decorator/get_current_user_id.decorator';
 import { GetCurrentUserIdAndRefreshToken } from 'src/common/decorator/get_current_user_id_with_refresh_token.decorator';
 import { Public } from 'src/common/decorator/public.decorator';
@@ -27,18 +29,22 @@ export class AuthController {
 
   @Post('sign-in')
   @Public()
+  @Throttle(3, 60)
   async signIn(@Body() authDto: AuthDto): Promise<Token> {
     const result = await this.authService.validateUserLogin(authDto);
     return result;
   }
 
   @Post('send-otp')
+  @Public()
+  @Throttle(3, 60 * 2)
   async sendOtpUser(@Body() otpDto: OtpDto): Promise<{ message: string }> {
     return await this.authService.generateAndSendOtp(otpDto);
   }
 
   @UseGuards(AccessTokenGuard)
   @Get('profile')
+  @SetMetadata('roles', ['ADMIN', 'USER'])
   async getProfile(@GetCurrentUserId() id: number): Promise<UserGetDto> {
     const result = await this.userService.findOne(id);
     if (!result)

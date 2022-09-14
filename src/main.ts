@@ -1,6 +1,7 @@
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { useContainer } from 'class-validator';
+import helmet from 'helmet';
 import { AppModule } from './app.module';
 import { TransformInterceptor } from './common/interceptor/transform.interceptor';
 
@@ -11,6 +12,7 @@ async function bootstrap() {
   });
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
   app.useGlobalInterceptors(new TransformInterceptor());
+  app.use(helmet());
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,

@@ -74,7 +74,7 @@ export class UserService {
 
   // eslint-disable-next-line @typescript-eslint/ban-types
   async find(value: {}): Promise<UserGetDto | undefined> {
-    const user = await this.prisma.user.findUnique({
+    const user = await this.prisma.user.findFirst({
       where: {
         ...value,
       },

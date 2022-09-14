@@ -9,6 +9,7 @@ import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service';
 import { UserService } from 'src/user/user.service';
 import { Token } from './dto/token.dto';
+import { User } from '@prisma/client';
 
 @Injectable()
 export class AuthService {
@@ -18,9 +19,12 @@ export class AuthService {
     private usersService: UserService,
   ) {}
 
-  async generateTokens(id: number): Promise<Token> {
+  async generateTokens(user: any): Promise<Token> {
     const jwtPayload: JwtPayload = {
-      id,
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
     };
 
     const [at, rt] = await Promise.all([
@@ -55,12 +59,14 @@ export class AuthService {
       select: {
         id: true,
         email: true,
+        name: true,
+        role: true,
         otp: true,
       },
     });
 
     if (!user) throw new HttpException('Invalid OTP', HttpStatus.BAD_REQUEST);
-    const token = await this.generateTokens(user.id);
+    const token = await this.generateTokens(user);
     return token;
   }
 
@@ -72,7 +78,7 @@ export class AuthService {
     //   refreshToken,
     // );
     // if (!refreshTokenMatches) throw new ForbiddenException('Access Denied');
-    const token = await this.generateTokens(user.id);
+    const token = await this.generateTokens(user);
     return token;
   }
 

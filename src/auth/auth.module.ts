@@ -6,6 +6,8 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { AccessTokenStrategy } from './strategy/access_token.strategy';
 import { RefreshTokenStrategy } from './strategy/refresh_token.strategy';
+import { ThrottlerGuard } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
 
 @Module({
   imports: [
@@ -16,7 +18,15 @@ import { RefreshTokenStrategy } from './strategy/refresh_token.strategy';
       signOptions: { expiresIn: process.env.JWT_EXPIRY_TIME || '60s' },
     }),
   ],
-  providers: [AuthService, AccessTokenStrategy, RefreshTokenStrategy],
+  providers: [
+    AuthService,
+    AccessTokenStrategy,
+    RefreshTokenStrategy,
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+  ],
   controllers: [AuthController],
   exports: [AuthService],
 })

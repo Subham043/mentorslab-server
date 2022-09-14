@@ -11,6 +11,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AccessTokenGuard } from 'src/auth/guards/access_token.guard';
+import { Roles } from 'src/common/decorator/roles.decorator';
 import { UserCreateDto, UserGetDto, UserUpdateDto } from './dto/user.dto';
 import { UserService } from './user.service';
 
@@ -20,6 +21,7 @@ export class UserController {
   constructor(private userService: UserService) {}
 
   @Post()
+  @Roles('ADMIN')
   async createUser(@Body() userCreateDto: UserCreateDto): Promise<UserGetDto> {
     const result = await this.userService.create(userCreateDto);
     if (!result)
@@ -28,6 +30,7 @@ export class UserController {
   }
 
   @Patch(':id')
+  @Roles('ADMIN')
   async updateUser(
     @Param('id', ParseIntPipe) id: number,
     @Body() userUpdateDto: UserUpdateDto,
@@ -39,12 +42,14 @@ export class UserController {
   }
 
   @Get()
+  @Roles('ADMIN')
   async getAllUser(): Promise<UserGetDto[]> {
     const result = await this.userService.findAll();
     return result;
   }
 
   @Get(':id')
+  @Roles('ADMIN')
   async getUser(@Param('id', ParseIntPipe) id: number): Promise<UserGetDto> {
     const result = await this.userService.findOne(id);
     if (!result)

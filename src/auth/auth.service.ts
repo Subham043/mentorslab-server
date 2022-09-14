@@ -1,4 +1,9 @@
-import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
+import {
+  Injectable,
+  HttpException,
+  HttpStatus,
+  ForbiddenException,
+} from '@nestjs/common';
 import { AuthDto, JwtPayload, OtpDto } from './dto';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service';
@@ -55,6 +60,18 @@ export class AuthService {
     });
 
     if (!user) throw new HttpException('Invalid OTP', HttpStatus.BAD_REQUEST);
+    const token = await this.generateTokens(user.id);
+    return token;
+  }
+
+  async refreshTokens(userId: number, refreshToken: string): Promise<Token> {
+    const user = await this.usersService.findOne(userId);
+    if (!user) throw new ForbiddenException('Access Denied');
+    // const refreshTokenMatches = await argon2.verify(
+    //   user.refreshToken,
+    //   refreshToken,
+    // );
+    // if (!refreshTokenMatches) throw new ForbiddenException('Access Denied');
     const token = await this.generateTokens(user.id);
     return token;
   }

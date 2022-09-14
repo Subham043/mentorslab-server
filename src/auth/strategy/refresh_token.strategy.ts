@@ -5,18 +5,21 @@ import { ForbiddenException, Injectable } from '@nestjs/common';
 import { JwtPayload, JwtRefreshPayload } from '../dto';
 
 @Injectable()
-export class RtStrategy extends PassportStrategy(Strategy, 'jwt-refresh') {
+export class RefreshTokenStrategy extends PassportStrategy(
+  Strategy,
+  'jwt-refresh',
+) {
   constructor() {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      secretOrKey: process.env.JWT_SECRET_KEY || 'secretKey',
+      secretOrKey: process.env.JWT_REFRESH_SECRET_KEY || 'secretKey',
       passReqToCallback: true,
     });
   }
 
   validate(req: Request, payload: JwtPayload): JwtRefreshPayload {
     const refreshToken = req
-      ?.get('authorization')
+      ?.get('Authorization')
       ?.replace('Bearer', '')
       .trim();
 

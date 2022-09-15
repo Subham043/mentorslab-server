@@ -27,10 +27,15 @@ export class UserController {
     if (checkEmail)
       throw new HttpException('Email is already taken', HttpStatus.BAD_REQUEST);
 
-    if(userCreateDto.phone){
-      const checkPhone = await this.userService.findByPhone(userCreateDto.phone);
+    if (userCreateDto.phone) {
+      const checkPhone = await this.userService.findByPhone(
+        userCreateDto.phone,
+      );
       if (checkPhone)
-        throw new HttpException('Phone is already taken', HttpStatus.BAD_REQUEST);
+        throw new HttpException(
+          'Phone is already taken',
+          HttpStatus.BAD_REQUEST,
+        );
     }
     const result = await this.userService.create(userCreateDto);
     if (!result)
@@ -45,13 +50,11 @@ export class UserController {
     @Body() userUpdateDto: UserUpdateDto,
   ): Promise<UserGetDto> {
     const user = await this.userService.findOne(id);
-    if(!user)
-      throw new HttpException(
-        'User Not Found',
-        HttpStatus.NOT_FOUND,
-      );
+    if (!user) throw new HttpException('User Not Found', HttpStatus.NOT_FOUND);
     if (userUpdateDto.email) {
-      const validateEmail = await this.userService.validateUniqueEmail(userUpdateDto.email);
+      const validateEmail = await this.userService.validateUniqueEmail(
+        userUpdateDto.email,
+      );
       if (validateEmail.status && validateEmail.email !== user.email)
         throw new HttpException(
           'Email is already taken',
@@ -60,7 +63,9 @@ export class UserController {
     }
 
     if (userUpdateDto.phone) {
-      const validatePhone = await this.userService.validateUniquePhone(userUpdateDto.phone);
+      const validatePhone = await this.userService.validateUniquePhone(
+        userUpdateDto.phone,
+      );
       if (validatePhone.status && validatePhone.phone !== user.phone)
         throw new HttpException(
           'Phone is already taken',

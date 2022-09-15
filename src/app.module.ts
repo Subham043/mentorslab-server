@@ -35,7 +35,12 @@ import { ContentModule } from './content/content.module';
     }),
     ContentModule,
   ],
-  controllers: [AppController, AuthController, UserController, ContentController],
+  controllers: [
+    AppController,
+    AuthController,
+    UserController,
+    ContentController,
+  ],
   providers: [
     AppService,
     AuthService,

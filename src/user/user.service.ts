@@ -28,7 +28,6 @@ export class UserService {
     id: number,
     dto: UserUpdateDto,
   ): Promise<UserGetDto | undefined> {
-
     const user = await this.prisma.user.update({
       where: { id: Number(id) },
       data: { ...dto },

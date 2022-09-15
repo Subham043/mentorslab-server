@@ -1,34 +1,33 @@
 import {
-    IsBoolean,
-    IsEnum,
-    IsNotEmpty,
-    IsNumber,
-    IsOptional,
-    IsString,
+  IsBoolean,
+  IsEnum,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
 } from 'class-validator';
-import { ContentType } from './content_type.enum'
+import { ContentType } from './content_type.enum';
 
 export class ContentCreateDto {
-    @IsNotEmpty()
-    @IsEnum(ContentType)
-    type: ContentType;
-    
-    @IsString()
-    @IsNotEmpty()
-    file_path: string;
-    
-    @IsNotEmpty()
-    heading: string;
+  @IsNotEmpty()
+  @IsEnum(ContentType)
+  type: ContentType;
 
-    @IsOptional()
-    @IsString()
-    description: string;
+  @IsString()
+  @IsNotEmpty()
+  file_path: string;
 
-    @IsOptional()
-    @IsBoolean()
-    draft: boolean;
-    
-    @IsOptional()
-    @IsBoolean()
-    restricted: boolean;
+  @IsNotEmpty()
+  heading: string;
+
+  @IsOptional()
+  @IsString()
+  description: string;
+
+  @IsOptional()
+  @IsBoolean()
+  draft: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  restricted: boolean;
 }

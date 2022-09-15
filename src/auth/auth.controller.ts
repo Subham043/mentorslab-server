@@ -12,7 +12,7 @@ import { Throttle } from '@nestjs/throttler';
 import { GetCurrentUserId } from 'src/common/decorator/get_current_user_id.decorator';
 import { GetCurrentUserIdAndRefreshToken } from 'src/common/decorator/get_current_user_id_with_refresh_token.decorator';
 import { Public } from 'src/common/decorator/public.decorator';
-import { UserGetDto } from 'src/user/dto/user.dto';
+import { UserGetDto } from 'src/user/dto';
 import { UserService } from 'src/user/user.service';
 import { AuthService } from './auth.service';
 import { AuthDto, OtpDto } from './dto';

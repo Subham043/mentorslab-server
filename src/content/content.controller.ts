@@ -1,9 +1,11 @@
-import { Controller, UseGuards, Post, Body, HttpException, HttpStatus, Get, Patch, Delete, Param, ParseIntPipe } from '@nestjs/common';
+import { Controller, UseGuards, UploadedFile, Post, Body, HttpException, HttpStatus, Get, Patch, Delete, Param, ParseIntPipe, UseInterceptors, ParseFilePipe, MaxFileSizeValidator, FileTypeValidator } from '@nestjs/common';
 import { AccessTokenGuard } from 'src/auth/guards/access_token.guard';
 import { GetCurrentUserId } from 'src/common/decorator/get_current_user_id.decorator';
 import { Roles } from 'src/common/decorator/roles.decorator';
 import { ContentService } from './content.service';
 import { ContentCreateDto, ContentGetDto, ContentUpdateDto } from './dto';
+import { Express } from 'express';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @UseGuards(AccessTokenGuard)
 @Controller('content')
@@ -58,5 +60,17 @@ export class ContentController {
             throw new HttpException('Data not found', HttpStatus.NOT_FOUND);
         const res = await this.contentService.remove(id);
         return res;
+    }
+
+    @Post('upload')
+    @UseInterceptors(FileInterceptor('file'))
+    uploadFile(@UploadedFile(new ParseFilePipe({
+        validators: [
+        //   new MaxFileSizeValidator({ maxSize: 1000 }),
+          new FileTypeValidator({ fileType: 'jpeg' }),
+          new FileTypeValidator({ fileType: 'jpg' }),
+        ],
+      }),) file: Express.Multer.File) {
+        console.log(file);
     }
 }

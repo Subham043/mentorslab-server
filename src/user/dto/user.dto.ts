@@ -4,7 +4,6 @@ import {
   IsOptional,
   IsPhoneNumber,
   IsString,
-  Validate,
 } from 'class-validator';
 
 export class UserCreateDto {
@@ -21,26 +20,6 @@ export class UserCreateDto {
   phone: string;
 }
 
-export class UserUpdateDto {
-  @IsOptional()
-  @IsEmail()
-  email: string;
 
-  @IsOptional()
-  @IsString()
-  name: string;
 
-  @IsOptional()
-  @IsPhoneNumber()
-  phone: string;
-}
 
-export interface UserGetDto {
-  id: number;
-  name: string;
-  email: string;
-  phone: string;
-  role: string;
-  createdAt: Date;
-  updatedAt: Date;
-}

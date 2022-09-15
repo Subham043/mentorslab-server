@@ -3,6 +3,7 @@ import {
   CanActivate,
   ExecutionContext,
   ForbiddenException,
+  UnauthorizedException
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
@@ -39,9 +40,7 @@ export class RolesGuard implements CanActivate {
 
       return matchRoles(roles, user.role);
     } catch (error) {
-      throw new ForbiddenException(
-        'You dont have the permission to access this',
-      );
+      throw new UnauthorizedException();
     }
   }
 }

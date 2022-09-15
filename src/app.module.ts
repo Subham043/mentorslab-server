@@ -13,6 +13,9 @@ import { ConfigModule } from '@nestjs/config';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { RolesGuard } from './common/guards/roles.guard';
+import { ContentController } from './content/content.controller';
+import { ContentService } from './content/content.service';
+import { ContentModule } from './content/content.module';
 
 @Module({
   imports: [
@@ -30,8 +33,9 @@ import { RolesGuard } from './common/guards/roles.guard';
       ttl: 60,
       limit: 20,
     }),
+    ContentModule,
   ],
-  controllers: [AppController, AuthController, UserController],
+  controllers: [AppController, AuthController, UserController, ContentController],
   providers: [
     AppService,
     AuthService,
@@ -40,6 +44,7 @@ import { RolesGuard } from './common/guards/roles.guard';
       provide: APP_GUARD,
       useClass: RolesGuard,
     },
+    ContentService,
   ],
 })
 export class AppModule {}

@@ -19,9 +19,29 @@ model User {
   name      String?
   otp      Int?
   role      Role     @default(USER)
+  Content   Content[]
 }
 
 enum Role {
   USER
   ADMIN
+}
+
+model Content {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  type      MEDIA_TYPE     @default(VIDEO)
+  file_path String    @db.Text
+  heading     String  @db.Text
+  description     String?   @db.Text
+  User   User? @relation(fields: [uploadedBy], references: [id])
+  uploadedBy Int?
+  draft  Boolean    @default(false)
+  restricted  Boolean    @default(false)
+}
+
+enum MEDIA_TYPE {
+  PDF
+  VIDEO
 }

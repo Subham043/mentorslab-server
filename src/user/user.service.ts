@@ -1,5 +1,5 @@
 import { Injectable, HttpException, HttpStatus, Logger } from '@nestjs/common';
-import { UserCreateDto, UserGetDto, UserUpdateDto } from './dto/user.dto';
+import { UserCreateDto, UserGetDto, UserUpdateDto } from './dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { User } from '@prisma/client';
 
@@ -9,53 +9,40 @@ export class UserService {
   constructor(private prisma: PrismaService) {}
 
   async create(dto: UserCreateDto): Promise<UserGetDto | undefined> {
-    const validateEmail = await this.validateUniqueEmail(dto.email);
-    if (validateEmail.status)
-      throw new HttpException('Email is already taken', HttpStatus.BAD_REQUEST);
-
-    if (dto.phone) {
-      const validatePhone = await this.validateUniquePhone(dto.phone);
-      if (validatePhone.status)
-        throw new HttpException(
-          'Phone is already taken',
-          HttpStatus.BAD_REQUEST,
-        );
-    }
-
     const user = await this.prisma.user.create({
       data: { ...dto },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        phone: true,
+        role: true,
+        createdAt: true,
+        updatedAt: true,
+      },
     });
-    return await this.findOne(user.id);
+    return user;
   }
 
   async update(
     id: number,
     dto: UserUpdateDto,
   ): Promise<UserGetDto | undefined> {
-    const user = await this.findOne(id);
-    if (dto.email) {
-      const validateEmail = await this.validateUniqueEmail(dto.email);
-      if (validateEmail.status && validateEmail.email !== user.email)
-        throw new HttpException(
-          'Email is already taken',
-          HttpStatus.BAD_REQUEST,
-        );
-    }
 
-    if (dto.phone) {
-      const validatePhone = await this.validateUniquePhone(dto.phone);
-      if (validatePhone.status && validatePhone.phone !== user.phone)
-        throw new HttpException(
-          'Phone is already taken',
-          HttpStatus.BAD_REQUEST,
-        );
-    }
-
-    await this.prisma.user.update({
+    const user = await this.prisma.user.update({
       where: { id: Number(id) },
       data: { ...dto },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        phone: true,
+        role: true,
+        createdAt: true,
+        updatedAt: true,
+      },
     });
-    return await this.findOne(user.id);
+    return user;
   }
 
   async findAll(): Promise<UserGetDto[]> {

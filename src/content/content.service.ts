@@ -1,6 +1,7 @@
 import { Injectable, HttpStatus, HttpException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ContentCreateDto, ContentGetDto, ContentUpdateDto } from './dto';
+import * as fs from 'fs/promises';
 
 @Injectable()
 export class ContentService {
@@ -8,10 +9,24 @@ export class ContentService {
 
   async create(
     dto: ContentCreateDto,
-    userId: number,
+    userId: number
   ): Promise<ContentGetDto | undefined> {
     const content = await this.prisma.content.create({
       data: { ...dto, uploadedBy: userId },
+      include: {
+        User: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true,
+            role: true,
+            createdAt: true,
+            updatedAt: true,
+          },
+        },
+        
+      },
     });
     return await this.findOne(content.id);
   }
@@ -23,12 +38,29 @@ export class ContentService {
     const content = await this.prisma.content.update({
       where: { id: Number(id) },
       data: { ...dto },
+      include: {
+        User: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true,
+            role: true,
+            createdAt: true,
+            updatedAt: true,
+          },
+        },
+      },
     });
     return content;
   }
 
   async findAll(): Promise<ContentGetDto[]> {
-    return await this.prisma.content.findMany({});
+    return await this.prisma.content.findMany({
+      include: {
+        User: true,
+      },
+    });
   }
 
   // eslint-disable-next-line @typescript-eslint/ban-types
@@ -36,6 +68,19 @@ export class ContentService {
     const content = await this.prisma.content.findFirst({
       where: {
         ...value,
+      },
+      include: {
+        User: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true,
+            role: true,
+            createdAt: true,
+            updatedAt: true,
+          },
+        },
       },
     });
     return content;
@@ -50,5 +95,15 @@ export class ContentService {
       where: { id: Number(id) },
     });
     return 'Content deleted successfully';
+  }
+
+  async removeFile(filePath: string): Promise<boolean> {
+      try {
+        await fs.unlink(filePath);
+        return true;
+    } catch (error) {
+      // console.log(error);
+      return false;
+    }
   }
 }

@@ -1,3 +1,4 @@
+import { UserGetDto } from "src/user/dto";
 export interface ContentGetDto {
     id?: number,
     createdAt?: Date,
@@ -8,4 +9,5 @@ export interface ContentGetDto {
     description: string;
     draft: boolean;
     restricted: boolean;
+    User: UserGetDto;
 }

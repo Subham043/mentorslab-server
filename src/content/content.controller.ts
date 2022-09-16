@@ -12,10 +12,6 @@ import {
   Param,
   ParseIntPipe,
   UseInterceptors,
-  ParseFilePipe,
-  MaxFileSizeValidator,
-  FileTypeValidator,
-  Req,
   Res,
 } from '@nestjs/common';
 import { AccessTokenGuard } from 'src/auth/guards/access_token.guard';
@@ -36,11 +32,32 @@ export class ContentController {
   constructor(private contentService: ContentService) {}
 
   @Post()
-  // @Roles('ADMIN')
+  @Roles('ADMIN')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: './uploads/pdf',
+        filename: editFileName,
+      }),
+      fileFilter: imageFileFilter,
+    }),
+  )
   async createContent(
     @Body() contentCreateDto: ContentCreateDto,
     @GetCurrentUserId() userId: number,
+    @UploadedFile() file?: Express.Multer.File,
   ): Promise<ContentGetDto> {
+    if(contentCreateDto.type==='PDF' && !file){
+        throw new HttpException('PDF File is required', HttpStatus.BAD_REQUEST);
+    }else if(contentCreateDto.type==='PDF' && file){
+        contentCreateDto.file_path = file.filename;
+    }else if(contentCreateDto.type!=='PDF' && file){
+        await this.contentService.removeFile(file.path);
+        throw new HttpException('File cannot be attached to this request', HttpStatus.BAD_REQUEST);
+    }else if(contentCreateDto.type!=='PDF' && !contentCreateDto.file_path){
+        throw new HttpException('Video link is required', HttpStatus.BAD_REQUEST);
+    }
+    
     const result = await this.contentService.create(contentCreateDto, userId);
     if (!result)
       throw new HttpException('Data not found', HttpStatus.NOT_FOUND);
@@ -48,13 +65,41 @@ export class ContentController {
   }
 
   @Patch(':id')
-  //   @Roles('ADMIN')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: './uploads/pdf',
+        filename: editFileName,
+      }),
+      fileFilter: imageFileFilter,
+    }),
+  )
+  @Roles('ADMIN')
   async updateContent(
     @Param('id', ParseIntPipe) id: number,
     @Body() contentUpdateDto: ContentUpdateDto,
+    @UploadedFile() file?: Express.Multer.File,
   ): Promise<ContentGetDto> {
     const res = await this.contentService.findOne(id);
     if (!res) throw new HttpException('Data not found', HttpStatus.NOT_FOUND);
+
+    if(contentUpdateDto.type==='PDF' && res.type!=='PDF' && !file){
+        throw new HttpException('PDF File is required', HttpStatus.BAD_REQUEST);
+    }else if(contentUpdateDto.type==='PDF' && res.type!=='PDF' && file){
+        contentUpdateDto.file_path = file.filename;
+        await this.contentService.removeFile('./uploads/pdf/'+res.file_path);
+    }else if( res.type==='PDF' && file){
+        contentUpdateDto.file_path = file.filename;
+        await this.contentService.removeFile('./uploads/pdf/'+res.file_path);
+    }
+
+    if(contentUpdateDto.type!=='PDF' && file){
+        await this.contentService.removeFile(file.path);
+        throw new HttpException('File cannot be attached to this request', HttpStatus.BAD_REQUEST);
+    }else if(contentUpdateDto.type!=='PDF' && res.type==='PDF' && !contentUpdateDto.file_path){
+        throw new HttpException('Video link is required', HttpStatus.BAD_REQUEST);
+    }
+
     const result = await this.contentService.update(id, contentUpdateDto);
     if (!result)
       throw new HttpException('Data not found', HttpStatus.NOT_FOUND);
@@ -62,14 +107,14 @@ export class ContentController {
   }
 
   @Get()
-  //   @Roles('ADMIN')
+  @Roles('ADMIN')
   async getAllContent(): Promise<ContentGetDto[]> {
     const result = await this.contentService.findAll();
     return result;
   }
 
   @Get(':id')
-  //   @Roles('ADMIN')
+  @Roles('ADMIN')
   async getContent(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<ContentGetDto> {
@@ -80,42 +125,22 @@ export class ContentController {
   }
 
   @Delete(':id')
-  //   @Roles('ADMIN')
+  @Roles('ADMIN')
   async deleteContent(@Param('id', ParseIntPipe) id: number): Promise<string> {
+    
     const result = await this.contentService.findOne(id);
-    if (!result)
-      throw new HttpException('Data not found', HttpStatus.NOT_FOUND);
+    if (!result){
+        throw new HttpException('Data not found', HttpStatus.NOT_FOUND);
+    }else if(result.type === 'PDF'){
+        await this.contentService.removeFile('./uploads/pdf/'+result.file_path);
+    }
     const res = await this.contentService.remove(id);
     return res;
   }
 
-  @Post('upload')
-  @UseInterceptors(
-    FileInterceptor('file', {
-      storage: diskStorage({
-        destination: './uploads',
-        filename: editFileName,
-      }),
-      fileFilter: imageFileFilter,
-    }),
-  )
-  uploadFile(
-    @Req() req: Request,
-    @UploadedFile()
-    file?: Express.Multer.File,
-  ) {
-    if (!req)
-      throw new HttpException(
-        'Please fill in the required fields',
-        HttpStatus.BAD_REQUEST,
-      );
-    console.log(file);
-    return 'test';
-  }
-
   @Public()
-  @Get('view/:imgpath')
+  @Get('file/:imgpath')
   seeUploadedFile(@Param('imgpath') image, @Res() res: Response) {
-    return res.sendFile('logo-4fefd8feb67311b6.jpg', { root: './uploads' });
+    return res.sendFile(image, { root: './uploads/pdf' });
   }
 }

@@ -13,7 +13,7 @@ export class ContentCreateDto {
   type: ContentType;
 
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   file_path: string;
 
   @IsNotEmpty()

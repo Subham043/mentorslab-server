@@ -15,7 +15,7 @@ import { Roles } from 'src/common/decorator/roles.decorator';
 import { UserCreateDto, UserGetDto, UserUpdateDto } from './dto';
 import { UserService } from './user.service';
 
-@UseGuards(AccessTokenGuard)
+// @UseGuards(AccessTokenGuard)
 @Controller('user')
 export class UserController {
   constructor(private userService: UserService) {}

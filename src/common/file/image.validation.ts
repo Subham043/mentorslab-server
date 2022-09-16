@@ -7,14 +7,15 @@ export const imageFileFilter = (
 ) => {
   if (req.type == 'PDF' && !file) {
     return callback(
-      new HttpException('Image file is required', HttpStatus.BAD_REQUEST),
+      new HttpException('PDF file is required', HttpStatus.BAD_REQUEST),
       false,
     );
   }
-  if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/)) {
+  // if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/)) {
+  if (!file.originalname.match(/\.(pdf)$/)) {
     return callback(
       new HttpException(
-        'Only image files are allowed!',
+        'Only pdf files are allowed!',
         HttpStatus.UNSUPPORTED_MEDIA_TYPE,
       ),
       false,

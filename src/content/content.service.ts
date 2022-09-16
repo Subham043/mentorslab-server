@@ -1,4 +1,4 @@
-import { Injectable, HttpStatus, HttpException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ContentCreateDto, ContentGetDto, ContentUpdateDto } from './dto';
 import * as fs from 'fs/promises';
@@ -14,21 +14,17 @@ export class ContentService {
     const content = await this.prisma.content.create({
       data: { ...dto, uploadedBy: userId },
       include: {
-        User: {
+        uploadBy: {
           select: {
             id: true,
             name: true,
             email: true,
-            phone: true,
-            role: true,
-            createdAt: true,
-            updatedAt: true,
           },
         },
         
       },
     });
-    return await this.findOne(content.id);
+    return content;
   }
 
   async update(
@@ -39,15 +35,11 @@ export class ContentService {
       where: { id: Number(id) },
       data: { ...dto },
       include: {
-        User: {
+        uploadBy: {
           select: {
             id: true,
             name: true,
             email: true,
-            phone: true,
-            role: true,
-            createdAt: true,
-            updatedAt: true,
           },
         },
       },
@@ -58,7 +50,13 @@ export class ContentService {
   async findAll(): Promise<ContentGetDto[]> {
     return await this.prisma.content.findMany({
       include: {
-        User: true,
+        uploadBy: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
       },
     });
   }
@@ -70,15 +68,11 @@ export class ContentService {
         ...value,
       },
       include: {
-        User: {
+        uploadBy: {
           select: {
             id: true,
             name: true,
             email: true,
-            phone: true,
-            role: true,
-            createdAt: true,
-            updatedAt: true,
           },
         },
       },

@@ -19,7 +19,7 @@ import { GetCurrentUserId } from 'src/common/decorator/get_current_user_id.decor
 import { Roles } from 'src/common/decorator/roles.decorator';
 import { ContentService } from './content.service';
 import { ContentCreateDto, ContentGetDto, ContentUpdateDto } from './dto';
-import { Express, Request, Response } from 'express';
+import { Express, Response } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { editFileName } from 'src/common/file/image_name.interceptor';
 import { imageFileFilter } from 'src/common/file/image.validation';

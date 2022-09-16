@@ -16,6 +16,9 @@ import { RolesGuard } from './common/guards/roles.guard';
 import { ContentController } from './content/content.controller';
 import { ContentService } from './content/content.service';
 import { ContentModule } from './content/content.module';
+import { AssignedContentService } from './assigned_content/assigned_content.service';
+import { AssignedContentController } from './assigned_content/assigned_content.controller';
+import { AssignedContentModule } from './assigned_content/assigned_content.module';
 
 @Module({
   imports: [
@@ -34,12 +37,14 @@ import { ContentModule } from './content/content.module';
       limit: 20,
     }),
     ContentModule,
+    AssignedContentModule,
   ],
   controllers: [
     AppController,
     AuthController,
     UserController,
     ContentController,
+    AssignedContentController,
   ],
   providers: [
     AppService,
@@ -50,6 +55,7 @@ import { ContentModule } from './content/content.module';
       useClass: RolesGuard,
     },
     ContentService,
+    AssignedContentService,
   ],
 })
 export class AppModule {}

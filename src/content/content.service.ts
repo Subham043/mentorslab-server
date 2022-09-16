@@ -9,7 +9,7 @@ export class ContentService {
 
   async create(
     dto: ContentCreateDto,
-    userId: number
+    userId: number,
   ): Promise<ContentGetDto | undefined> {
     const content = await this.prisma.content.create({
       data: { ...dto, uploadedBy: userId },
@@ -21,7 +21,6 @@ export class ContentService {
             email: true,
           },
         },
-        
       },
     });
     return content;
@@ -92,9 +91,9 @@ export class ContentService {
   }
 
   async removeFile(filePath: string): Promise<boolean> {
-      try {
-        await fs.unlink(filePath);
-        return true;
+    try {
+      await fs.unlink(filePath);
+      return true;
     } catch (error) {
       // console.log(error);
       return false;

@@ -47,17 +47,20 @@ export class ContentController {
     @GetCurrentUserId() userId: number,
     @UploadedFile() file?: Express.Multer.File,
   ): Promise<ContentGetDto> {
-    if(contentCreateDto.type==='PDF' && !file){
-        throw new HttpException('PDF File is required', HttpStatus.BAD_REQUEST);
-    }else if(contentCreateDto.type==='PDF' && file){
-        contentCreateDto.file_path = file.filename;
-    }else if(contentCreateDto.type!=='PDF' && file){
-        await this.contentService.removeFile(file.path);
-        throw new HttpException('File cannot be attached to this request', HttpStatus.BAD_REQUEST);
-    }else if(contentCreateDto.type!=='PDF' && !contentCreateDto.file_path){
-        throw new HttpException('Video link is required', HttpStatus.BAD_REQUEST);
+    if (contentCreateDto.type === 'PDF' && !file) {
+      throw new HttpException('PDF File is required', HttpStatus.BAD_REQUEST);
+    } else if (contentCreateDto.type === 'PDF' && file) {
+      contentCreateDto.file_path = file.filename;
+    } else if (contentCreateDto.type !== 'PDF' && file) {
+      await this.contentService.removeFile(file.path);
+      throw new HttpException(
+        'File cannot be attached to this request',
+        HttpStatus.BAD_REQUEST,
+      );
+    } else if (contentCreateDto.type !== 'PDF' && !contentCreateDto.file_path) {
+      throw new HttpException('Video link is required', HttpStatus.BAD_REQUEST);
     }
-    
+
     const result = await this.contentService.create(contentCreateDto, userId);
     if (!result)
       throw new HttpException('Data not found', HttpStatus.NOT_FOUND);
@@ -83,21 +86,28 @@ export class ContentController {
     const res = await this.contentService.findOne(id);
     if (!res) throw new HttpException('Data not found', HttpStatus.NOT_FOUND);
 
-    if(contentUpdateDto.type==='PDF' && res.type!=='PDF' && !file){
-        throw new HttpException('PDF File is required', HttpStatus.BAD_REQUEST);
-    }else if(contentUpdateDto.type==='PDF' && res.type!=='PDF' && file){
-        contentUpdateDto.file_path = file.filename;
-        await this.contentService.removeFile('./uploads/pdf/'+res.file_path);
-    }else if( res.type==='PDF' && file){
-        contentUpdateDto.file_path = file.filename;
-        await this.contentService.removeFile('./uploads/pdf/'+res.file_path);
+    if (contentUpdateDto.type === 'PDF' && res.type !== 'PDF' && !file) {
+      throw new HttpException('PDF File is required', HttpStatus.BAD_REQUEST);
+    } else if (contentUpdateDto.type === 'PDF' && res.type !== 'PDF' && file) {
+      contentUpdateDto.file_path = file.filename;
+      await this.contentService.removeFile('./uploads/pdf/' + res.file_path);
+    } else if (res.type === 'PDF' && file) {
+      contentUpdateDto.file_path = file.filename;
+      await this.contentService.removeFile('./uploads/pdf/' + res.file_path);
     }
 
-    if(contentUpdateDto.type!=='PDF' && file){
-        await this.contentService.removeFile(file.path);
-        throw new HttpException('File cannot be attached to this request', HttpStatus.BAD_REQUEST);
-    }else if(contentUpdateDto.type!=='PDF' && res.type==='PDF' && !contentUpdateDto.file_path){
-        throw new HttpException('Video link is required', HttpStatus.BAD_REQUEST);
+    if (contentUpdateDto.type !== 'PDF' && file) {
+      await this.contentService.removeFile(file.path);
+      throw new HttpException(
+        'File cannot be attached to this request',
+        HttpStatus.BAD_REQUEST,
+      );
+    } else if (
+      contentUpdateDto.type !== 'PDF' &&
+      res.type === 'PDF' &&
+      !contentUpdateDto.file_path
+    ) {
+      throw new HttpException('Video link is required', HttpStatus.BAD_REQUEST);
     }
 
     const result = await this.contentService.update(id, contentUpdateDto);
@@ -127,12 +137,11 @@ export class ContentController {
   @Delete(':id')
   @Roles('ADMIN')
   async deleteContent(@Param('id', ParseIntPipe) id: number): Promise<string> {
-    
     const result = await this.contentService.findOne(id);
-    if (!result){
-        throw new HttpException('Data not found', HttpStatus.NOT_FOUND);
-    }else if(result.type === 'PDF'){
-        await this.contentService.removeFile('./uploads/pdf/'+result.file_path);
+    if (!result) {
+      throw new HttpException('Data not found', HttpStatus.NOT_FOUND);
+    } else if (result.type === 'PDF') {
+      await this.contentService.removeFile('./uploads/pdf/' + result.file_path);
     }
     const res = await this.contentService.remove(id);
     return res;

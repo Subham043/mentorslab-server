@@ -6,7 +6,5 @@ export class AuthDto {
   email: string;
 
   @IsNotEmpty()
-  @Length(4, 4)
-  @Matches(/^\d+$/, { message: 'otp must be a number' })
-  otp: string;
+  password: string;
 }

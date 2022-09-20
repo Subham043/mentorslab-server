@@ -6,6 +6,7 @@ CREATE TABLE `User` (
     `email` VARCHAR(191) NOT NULL,
     `phone` VARCHAR(191) NULL,
     `name` VARCHAR(191) NULL,
+    `password` VARCHAR(191) NOT NULL,
     `otp` INTEGER NULL,
     `role` ENUM('USER', 'ADMIN') NOT NULL DEFAULT 'USER',
 

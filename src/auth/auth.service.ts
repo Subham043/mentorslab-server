@@ -10,6 +10,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { UserService } from 'src/user/user.service';
 import { Token } from './dto/token.dto';
 import { User } from '@prisma/client';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AuthService {
@@ -54,18 +55,18 @@ export class AuthService {
     const user = await this.prisma.user.findFirst({
       where: {
         email: dto.email,
-        otp: Number(dto.otp),
       },
       select: {
         id: true,
         email: true,
-        name: true,
-        role: true,
-        otp: true,
+        password: true,
       },
     });
 
-    if (!user) throw new HttpException('Invalid OTP', HttpStatus.BAD_REQUEST);
+    const isMatch = await bcrypt.compare(dto.password, user.password);
+
+    if (!isMatch)
+      throw new HttpException('Invalid credentials', HttpStatus.BAD_REQUEST);
     const token = await this.generateTokens(user);
     return token;
   }

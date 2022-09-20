@@ -7,7 +7,6 @@ import { TransformInterceptor } from './common/interceptor/transform.interceptor
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
-    cors: true,
     logger: ['error', 'warn', 'log'],
   });
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
@@ -18,6 +17,19 @@ async function bootstrap() {
       whitelist: true,
     }),
   );
+  app.enableCors({
+    origin: function (origin, callback) {
+      // const whitelist = ['http://127.0.0.1:3000', 'http://localhost:3000'];
+      // if (origin) {
+      //   if (whitelist.find((x) => origin.endsWith(x))) {
+      //     callback(null, true);
+      //   } else {
+      //     callback(new Error('Not allowed by CORS'));
+      //   }
+      // } else callback(null, true);
+      callback(null, true);
+    },
+  });
   await app.listen(process.env.PORT || 3300);
 }
 bootstrap();

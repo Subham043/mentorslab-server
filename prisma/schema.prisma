@@ -19,6 +19,8 @@ model User {
   name      String?
   password     String   
   otp      Int?
+  verified  Boolean    @default(false)
+  blocked  Boolean    @default(false)
   role      Role     @default(USER)
   Content   Content[]
   ContentAssignedBy ContentAssigned[] @relation("assignedBy")

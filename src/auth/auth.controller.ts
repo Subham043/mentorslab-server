@@ -7,12 +7,14 @@ import {
   HttpException,
   HttpStatus,
   SetMetadata,
+  Param,
+  Patch,
 } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import { GetCurrentUserId } from 'src/common/decorator/get_current_user_id.decorator';
 import { GetCurrentUserIdAndRefreshToken } from 'src/common/decorator/get_current_user_id_with_refresh_token.decorator';
 import { Public } from 'src/common/decorator/public.decorator';
-import { UserGetDto } from 'src/user/dto';
+import { UserCreateDto, UserGetDto } from 'src/user/dto';
 import { UserService } from 'src/user/user.service';
 import { AuthService } from './auth.service';
 import { AuthDto, OtpDto } from './dto';
@@ -35,11 +37,21 @@ export class AuthController {
     return result;
   }
 
-  @Post('send-otp')
+  @Post('sign-up')
   @Public()
-  @Throttle(3, 60 * 2)
-  async sendOtpUser(@Body() otpDto: OtpDto): Promise<{ message: string }> {
-    return await this.authService.generateAndSendOtp(otpDto);
+  async signUp(@Body() authDto: UserCreateDto): Promise<number> {
+    const result = await this.authService.signUp(authDto);
+    return result;
+  }
+
+  @Post('verify-user/:encryptedId')
+  @Public()
+  async verifyUser(
+    @Param('encryptedId') encryptedId: string,
+    @Body() otpDto: OtpDto,
+  ): Promise<Token> {
+    const result = await this.authService.verifyUser(otpDto, encryptedId);
+    return result;
   }
 
   @UseGuards(AccessTokenGuard)

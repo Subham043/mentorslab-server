@@ -14,7 +14,11 @@ export class UserService {
     const hash = await bcrypt.hash(password, Number(process.env.saltOrRounds));
     dto.password = hash;
     const user = await this.prisma.user.create({
-      data: { ...dto },
+      data: {
+        ...dto,
+        otp: Math.floor(1111 + Math.random() * 9999),
+        verified: true,
+      },
       select: {
         id: true,
         name: true,

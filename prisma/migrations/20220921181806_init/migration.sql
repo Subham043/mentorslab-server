@@ -8,6 +8,8 @@ CREATE TABLE `User` (
     `name` VARCHAR(191) NULL,
     `password` VARCHAR(191) NOT NULL,
     `otp` INTEGER NULL,
+    `verified` BOOLEAN NOT NULL DEFAULT false,
+    `blocked` BOOLEAN NOT NULL DEFAULT false,
     `role` ENUM('USER', 'ADMIN') NOT NULL DEFAULT 'USER',
 
     UNIQUE INDEX `User_email_key`(`email`),

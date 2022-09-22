@@ -21,10 +21,8 @@ export class UserController {
   constructor(private userService: UserService) {}
 
   @Post()
-  @Roles('ADMIN')
+  // @Roles('ADMIN')
   async createUser(@Body() userCreateDto: UserCreateDto): Promise<UserGetDto> {
-    const checkEmail = await this.userService.findByEmail(userCreateDto.email);
-
     const result = await this.userService.create(userCreateDto);
     if (!result)
       throw new HttpException('Data not found', HttpStatus.NOT_FOUND);
@@ -32,35 +30,12 @@ export class UserController {
   }
 
   @Patch(':id')
-  @Roles('ADMIN')
+  // @Roles('ADMIN')
   async updateUser(
     @Param('id', ValidUserIdPipe) id: number,
     @Body() userUpdateDto: UserUpdateDto,
   ): Promise<UserGetDto> {
-    const user = await this.userService.findOne(id);
-    if (!user) throw new HttpException('User Not Found', HttpStatus.NOT_FOUND);
-    if (userUpdateDto.email) {
-      const validateEmail = await this.userService.validateUniqueEmail(
-        userUpdateDto.email,
-      );
-      if (validateEmail.status && validateEmail.email !== user.email)
-        throw new HttpException(
-          'Email is already taken',
-          HttpStatus.BAD_REQUEST,
-        );
-    }
-
-    if (userUpdateDto.phone) {
-      const validatePhone = await this.userService.validateUniquePhone(
-        userUpdateDto.phone,
-      );
-      if (validatePhone.status && validatePhone.phone !== user.phone)
-        throw new HttpException(
-          'Phone is already taken',
-          HttpStatus.BAD_REQUEST,
-        );
-    }
-    const result = await this.userService.update(id, userUpdateDto);
+    const result = await this.userService.updateUser(id, userUpdateDto);
     if (!result)
       throw new HttpException('Data not found', HttpStatus.NOT_FOUND);
     return result;

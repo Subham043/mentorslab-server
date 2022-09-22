@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ExecutionContext, Injectable } from '@nestjs/common';
 import {
   registerDecorator,
   ValidationArguments,
@@ -8,18 +8,20 @@ import {
 } from 'class-validator';
 import { UserService } from 'src/user/user.service';
 
-@ValidatorConstraint({ name: 'UniquePhoneRule', async: true })
+@ValidatorConstraint({ name: 'EmailExistsRule', async: true })
 @Injectable()
-export class UniquePhoneRule implements ValidatorConstraintInterface {
+export class EmailExistsRule implements ValidatorConstraintInterface {
   constructor(private userService: UserService) {}
 
   async validate(value: string) {
     try {
-      const user = await this.userService.findByPhone(value);
-      if (user) return false;
+      const user = await this.userService.find({
+        email: value,
+        verified: true,
+        blocked: false,
+      });
+      if (!user) return false;
     } catch (e) {
-      console.log(e);
-
       return false;
     }
 
@@ -27,18 +29,18 @@ export class UniquePhoneRule implements ValidatorConstraintInterface {
   }
 
   defaultMessage(args: ValidationArguments) {
-    return `Phone is already taken`;
+    return `Email doesnot exists!`;
   }
 }
 
-export function UniquePhone(validationOptions?: ValidationOptions) {
+export function EmailExists(validationOptions?: ValidationOptions) {
   return function (object: any, propertyName: string) {
     registerDecorator({
-      name: 'UniquePhone',
+      name: 'EmailExists',
       target: object.constructor,
       propertyName: propertyName,
       options: validationOptions,
-      validator: UniquePhoneRule,
+      validator: EmailExistsRule,
     });
   };
 }

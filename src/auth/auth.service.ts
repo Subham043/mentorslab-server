@@ -6,18 +6,16 @@ import {
 } from '@nestjs/common';
 import { AuthDto, JwtPayload, OtpDto } from './dto';
 import { JwtService } from '@nestjs/jwt';
-import { PrismaService } from '../prisma/prisma.service';
 import { UserService } from 'src/user/user.service';
 import { Token } from './dto/token.dto';
 import * as bcrypt from 'bcrypt';
-import { UserCreateDto } from 'src/user/dto';
 import { decrypt, encrypt } from 'src/common/hooks/encryption.hooks';
+import { RegisterDto } from './dto/register.dto';
 
 @Injectable()
 export class AuthService {
   constructor(
     private jwtService: JwtService,
-    private prisma: PrismaService,
     private usersService: UserService,
   ) {}
 
@@ -47,23 +45,8 @@ export class AuthService {
   }
 
   async validateUserLogin(dto: AuthDto): Promise<Token> {
-    const validateEmail = await this.usersService.find({
+    const user = await this.usersService.find({
       email: dto.email,
-      verified: true,
-      blocked: false,
-    });
-    if (!validateEmail)
-      throw new HttpException('Invalid credentials', HttpStatus.BAD_REQUEST);
-
-    const user = await this.prisma.user.findFirst({
-      where: {
-        email: dto.email,
-      },
-      select: {
-        id: true,
-        email: true,
-        password: true,
-      },
     });
 
     const isMatch = await bcrypt.compare(dto.password, user.password);
@@ -74,21 +57,13 @@ export class AuthService {
     return token;
   }
 
-  async signUp(dto: UserCreateDto): Promise<any> {
+  async signUp(dto: RegisterDto): Promise<any> {
     const { password } = dto;
     const hash = await bcrypt.hash(password, Number(process.env.saltOrRounds));
     dto.password = hash;
-    const user = await this.prisma.user.create({
-      data: { ...dto, otp: Math.floor(1111 + Math.random() * 9999) },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        phone: true,
-        role: true,
-        createdAt: true,
-        updatedAt: true,
-      },
+    const user = await this.usersService.create({
+      ...dto,
+      otp: Math.floor(1111 + Math.random() * 9999),
     });
     const result = await encrypt(String(user.id));
     return result;
@@ -104,15 +79,15 @@ export class AuthService {
     });
 
     if (!user) throw new HttpException('Invalid otp', HttpStatus.BAD_REQUEST);
-    const userUpdate = await this.prisma.user.update({
-      where: {
+    await this.usersService.update(
+      {
         id: Number(id),
       },
-      data: {
+      {
         verified: true,
         otp: Math.floor(1111 + Math.random() * 9999),
       },
-    });
+    );
     const token = await this.generateTokens(user);
     return token;
   }

@@ -1,14 +1,16 @@
-import { Injectable } from '@nestjs/common';
+import { ExecutionContext, Injectable } from '@nestjs/common';
 import {
+  registerDecorator,
   ValidationArguments,
+  ValidationOptions,
   ValidatorConstraint,
   ValidatorConstraintInterface,
 } from 'class-validator';
 import { UserService } from 'src/user/user.service';
 
-@ValidatorConstraint({ name: 'UniqueEmail', async: true })
+@ValidatorConstraint({ name: 'UniqueEmailRule', async: true })
 @Injectable()
-export class UniqueEmail implements ValidatorConstraintInterface {
+export class UniqueEmailRule implements ValidatorConstraintInterface {
   constructor(private userService: UserService) {}
 
   async validate(value: string) {
@@ -25,4 +27,16 @@ export class UniqueEmail implements ValidatorConstraintInterface {
   defaultMessage(args: ValidationArguments) {
     return `Email is already taken`;
   }
+}
+
+export function UniqueEmail(validationOptions?: ValidationOptions) {
+  return function (object: any, propertyName: string) {
+    registerDecorator({
+      name: 'UniqueEmail',
+      target: object.constructor,
+      propertyName: propertyName,
+      options: validationOptions,
+      validator: UniqueEmailRule,
+    });
+  };
 }

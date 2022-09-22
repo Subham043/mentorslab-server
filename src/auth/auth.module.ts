@@ -8,6 +8,9 @@ import { AccessTokenStrategy } from './strategy/access_token.strategy';
 import { RefreshTokenStrategy } from './strategy/refresh_token.strategy';
 import { ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
+import { EmailExistsRule } from 'src/common/validator/email_exists.validator';
+import { UniqueEmailRule } from 'src/common/validator/unique_email.validator';
+import { UniquePhoneRule } from 'src/common/validator/unique_phone.validator';
 
 @Module({
   imports: [
@@ -26,6 +29,9 @@ import { APP_GUARD } from '@nestjs/core';
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
     },
+    EmailExistsRule,
+    UniqueEmailRule,
+    UniquePhoneRule,
   ],
   controllers: [AuthController],
   exports: [AuthService],

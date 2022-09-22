@@ -9,7 +9,7 @@ import {
 import { UniqueEmail } from 'src/common/validator/unique_email.validator';
 import { UniquePhone } from 'src/common/validator/unique_phone.validator';
 
-export class UserCreateDto {
+export class RegisterDto {
   @IsNotEmpty()
   @IsEmail()
   @UniqueEmail()

@@ -25,6 +25,7 @@ import { editFileName } from 'src/common/file/image_name.interceptor';
 import { imageFileFilter } from 'src/common/file/image.validation';
 import { diskStorage } from 'multer';
 import { Public } from 'src/common/decorator/public.decorator';
+import { ValidContentIdPipe } from 'src/common/pipes/valid_content_id.pipes';
 
 @UseGuards(AccessTokenGuard)
 @Controller('content')
@@ -32,7 +33,7 @@ export class ContentController {
   constructor(private contentService: ContentService) {}
 
   @Post()
-  @Roles('ADMIN')
+  // @Roles('ADMIN')
   @UseInterceptors(
     FileInterceptor('file', {
       storage: diskStorage({
@@ -41,6 +42,7 @@ export class ContentController {
       }),
       fileFilter: imageFileFilter,
     }),
+    ValidContentIdPipe,
   )
   async createContent(
     @Body() contentCreateDto: ContentCreateDto,
@@ -79,7 +81,7 @@ export class ContentController {
   )
   @Roles('ADMIN')
   async updateContent(
-    @Param('id', ParseIntPipe) id: number,
+    @Param('id', ValidContentIdPipe) id: number,
     @Body() contentUpdateDto: ContentUpdateDto,
     @UploadedFile() file?: Express.Multer.File,
   ): Promise<ContentGetDto> {
@@ -124,9 +126,9 @@ export class ContentController {
   }
 
   @Get(':id')
-  @Roles('ADMIN')
+  // @Roles('ADMIN')
   async getContent(
-    @Param('id', ParseIntPipe) id: number,
+    @Param('id', ValidContentIdPipe) id: number,
   ): Promise<ContentGetDto> {
     const result = await this.contentService.findOne(id);
     if (!result)
@@ -136,7 +138,9 @@ export class ContentController {
 
   @Delete(':id')
   @Roles('ADMIN')
-  async deleteContent(@Param('id', ParseIntPipe) id: number): Promise<string> {
+  async deleteContent(
+    @Param('id', ValidContentIdPipe) id: number,
+  ): Promise<string> {
     const result = await this.contentService.findOne(id);
     if (!result) {
       throw new HttpException('Data not found', HttpStatus.NOT_FOUND);

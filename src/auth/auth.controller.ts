@@ -14,10 +14,11 @@ import { Throttle } from '@nestjs/throttler';
 import { GetCurrentUserId } from 'src/common/decorator/get_current_user_id.decorator';
 import { GetCurrentUserIdAndRefreshToken } from 'src/common/decorator/get_current_user_id_with_refresh_token.decorator';
 import { Public } from 'src/common/decorator/public.decorator';
-import { UserCreateDto, UserGetDto } from 'src/user/dto';
+import { UserGetDto } from 'src/user/dto';
 import { UserService } from 'src/user/user.service';
 import { AuthService } from './auth.service';
 import { AuthDto, OtpDto } from './dto';
+import { RegisterDto } from './dto/register.dto';
 import { Token } from './dto/token.dto';
 import { AccessTokenGuard } from './guards/access_token.guard';
 import { RefreshTokenGuard } from './guards/refresh_token.guard';
@@ -39,7 +40,7 @@ export class AuthController {
 
   @Post('sign-up')
   @Public()
-  async signUp(@Body() authDto: UserCreateDto): Promise<number> {
+  async signUp(@Body() authDto: RegisterDto): Promise<number> {
     const result = await this.authService.signUp(authDto);
     return result;
   }

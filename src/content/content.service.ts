@@ -1,7 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ContentCreateDto, ContentGetDto, ContentUpdateDto } from './dto';
 import * as fs from 'fs/promises';
+import { fileName } from 'src/common/hooks/fileName.hooks';
 
 @Injectable()
 export class ContentService {
@@ -11,8 +12,23 @@ export class ContentService {
     dto: ContentCreateDto,
     userId: number,
   ): Promise<ContentGetDto | undefined> {
+    if (dto.type === 'PDF' && !dto.file) {
+      throw new HttpException('PDF File is required', HttpStatus.BAD_REQUEST);
+    } else if (dto.type === 'PDF' && dto.file) {
+      const savedFileName = await this.saveFile(dto.file);
+      dto.file_path = savedFileName;
+    } else if (dto.type !== 'PDF' && dto.file) {
+      throw new HttpException(
+        'File cannot be attached to this request',
+        HttpStatus.BAD_REQUEST,
+      );
+    } else if (dto.type !== 'PDF' && !dto.file_path) {
+      throw new HttpException('Video link is required', HttpStatus.BAD_REQUEST);
+    }
+
+    const {type, file_path, heading, description} = dto;
     const content = await this.prisma.content.create({
-      data: { ...dto, uploadedBy: userId },
+      data: { type, file_path, heading, description, uploadedBy: userId },
       include: {
         uploadBy: {
           select: {
@@ -30,9 +46,37 @@ export class ContentService {
     id: number,
     dto: ContentUpdateDto,
   ): Promise<ContentGetDto | undefined> {
+    const res = await this.findOne(id);
+
+    if (dto.type === 'PDF' && res.type !== 'PDF' && !dto.file) {
+      throw new HttpException('PDF File is required', HttpStatus.BAD_REQUEST);
+    } else if (dto.type === 'PDF' && res.type !== 'PDF' && dto.file) {
+      const savedFileName = await this.saveFile(dto.file);
+      dto.file_path = savedFileName;
+      await this.removeFile('./uploads/pdf/' + res.file_path);
+    } else if (res.type === 'PDF' && dto.file) {
+      const savedFileName = await this.saveFile(dto.file);
+      dto.file_path = savedFileName;
+      await this.removeFile('./uploads/pdf/' + res.file_path);
+    }
+
+    if (dto.type !== 'PDF' && dto.file) {
+      throw new HttpException(
+        'File cannot be attached to this request',
+        HttpStatus.BAD_REQUEST,
+      );
+    } else if (
+      dto.type !== 'PDF' &&
+      res.type === 'PDF' &&
+      !dto.file_path
+    ) {
+      throw new HttpException('Video link is required', HttpStatus.BAD_REQUEST);
+    }
+
+    const {type, file_path, heading, description} = dto;
     const content = await this.prisma.content.update({
       where: { id: Number(id) },
-      data: { ...dto },
+      data: { type, file_path, heading, description },
       include: {
         uploadBy: {
           select: {
@@ -97,6 +141,17 @@ export class ContentService {
     } catch (error) {
       // console.log(error);
       return false;
+    }
+  }
+  
+  async saveFile(file: any): Promise<string | undefined> {
+    try {
+      const generateFileName = fileName(file.originalName);
+      await fs.appendFile('./uploads/pdf/'+generateFileName,file.buffer);
+      return generateFileName;
+    } catch (error) {
+      // console.log(error);
+      return undefined;
     }
   }
 }

@@ -4,7 +4,8 @@ import {
     IsOptional,
     IsString,
 } from 'class-validator';
-import { ContentType } from './content_type.enum'
+import { ContentType } from './content_type.enum';
+import { MemoryStoredFile, IsFile, MaxFileSize, HasMimeType } from 'nestjs-form-data';
 
 export class ContentUpdateDto {
     @IsOptional()
@@ -29,4 +30,10 @@ export class ContentUpdateDto {
     @IsOptional()
     @IsBoolean()
     restricted: boolean;
+
+    @IsOptional()
+    @IsFile()
+    @MaxFileSize(1e6)
+    @HasMimeType(['image/jpeg', 'image/png'])
+    file: MemoryStoredFile;
 }

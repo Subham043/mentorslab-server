@@ -19,6 +19,7 @@ import { ContentModule } from './content/content.module';
 import { AssignedContentService } from './assigned_content/assigned_content.service';
 import { AssignedContentController } from './assigned_content/assigned_content.controller';
 import { AssignedContentModule } from './assigned_content/assigned_content.module';
+import { NestjsFormDataModule } from 'nestjs-form-data';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { AssignedContentModule } from './assigned_content/assigned_content.modul
     }),
     ContentModule,
     AssignedContentModule,
+    NestjsFormDataModule,
   ],
   controllers: [
     AppController,

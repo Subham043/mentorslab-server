@@ -15,13 +15,13 @@ import { ValidUserIdPipe } from 'src/common/pipes/valid_user_id.pipes';
 import { UserCreateDto, UserGetDto, UserUpdateDto } from './dto';
 import { UserService } from './user.service';
 
-// @UseGuards(AccessTokenGuard)
+@UseGuards(AccessTokenGuard)
 @Controller('user')
 export class UserController {
   constructor(private userService: UserService) {}
 
   @Post()
-  // @Roles('ADMIN')
+  @Roles('ADMIN')
   async createUser(@Body() userCreateDto: UserCreateDto): Promise<UserGetDto> {
     const result = await this.userService.create(userCreateDto);
     if (!result)
@@ -30,7 +30,7 @@ export class UserController {
   }
 
   @Patch(':id')
-  // @Roles('ADMIN')
+  @Roles('ADMIN')
   async updateUser(
     @Param('id', ValidUserIdPipe) id: number,
     @Body() userUpdateDto: UserUpdateDto,

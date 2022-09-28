@@ -61,6 +61,7 @@ export class AuthService {
     if (!isMatch)
       throw new HttpException('Invalid credentials', HttpStatus.BAD_REQUEST);
     const token = await this.generateTokens(user);
+    await this.storeRefreshToken({ email: dto.email }, token.refresh_token);
     return token;
   }
 
@@ -139,18 +140,42 @@ export class AuthService {
       },
     );
     const token = await this.generateTokens(user);
+    await this.storeRefreshToken({ id: Number(id) }, token.refresh_token);
     return token;
   }
 
+  async storeRefreshToken(
+    data: { id?: number; email?: string },
+    refresh_token: string,
+  ): Promise<void> {
+    const hash = await bcrypt.hash(
+      refresh_token,
+      Number(process.env.saltOrRounds),
+    );
+    await this.usersService.update(
+      {
+        ...data,
+      },
+      {
+        hashed_refresh_token: hash,
+      },
+    );
+  }
+
   async refreshTokens(userId: number, refreshToken: string): Promise<Token> {
-    const user = await this.usersService.findOne(userId);
+    const user = await this.usersService.find({ id: userId });
     if (!user) throw new ForbiddenException('Access Denied');
-    // const refreshTokenMatches = await argon2.verify(
-    //   user.refreshToken,
-    //   refreshToken,
-    // );
-    // if (!refreshTokenMatches) throw new ForbiddenException('Access Denied');
+
+    if (!user.hashed_refresh_token)
+      throw new ForbiddenException('Access Denied');
+    const refreshTokenMatches = await bcrypt.compare(
+      refreshToken,
+      user.hashed_refresh_token,
+    );
+
+    if (!refreshTokenMatches) throw new ForbiddenException('Access Denied');
     const token = await this.generateTokens(user);
+    await this.storeRefreshToken({ id: Number(userId) }, token.refresh_token);
     return token;
   }
 }

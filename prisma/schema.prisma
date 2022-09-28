@@ -21,6 +21,7 @@ model User {
   otp      Int?
   verified  Boolean    @default(false)
   blocked  Boolean    @default(false)
+  hashed_refresh_token     String?   @db.Text
   role      Role     @default(USER)
   Content   Content[]
   ContentAssignedBy ContentAssigned[] @relation("assignedBy")

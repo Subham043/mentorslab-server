@@ -10,7 +10,8 @@ const algorithm = 'aes-256-cbc';
 const initVector = randomBytes(16);
 
 // secret key generate 32 bytes of random data
-const Securitykey = 'abcdefghijklmnopqrstuvwxyz123456';
+const Securitykey =
+  process.env.encryptionKey || 'abcdefghijklmnopqrstuvwxyz123456';
 
 export const encrypt = async (value: string): Promise<string> => {
   // the cipher function

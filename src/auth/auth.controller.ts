@@ -17,7 +17,7 @@ import { Public } from 'src/common/decorator/public.decorator';
 import { UserGetDto } from 'src/user/dto';
 import { UserService } from 'src/user/user.service';
 import { AuthService } from './auth.service';
-import { AuthDto, OtpDto } from './dto';
+import { AuthDto, ForgotPasswordDto, OtpDto, ResetPasswordDto } from './dto';
 import { RegisterDto } from './dto/register.dto';
 import { Token } from './dto/token.dto';
 import { AccessTokenGuard } from './guards/access_token.guard';
@@ -52,6 +52,23 @@ export class AuthController {
     @Body() otpDto: OtpDto,
   ): Promise<Token> {
     const result = await this.authService.verifyUser(otpDto, encryptedId);
+    return result;
+  }
+
+  @Post('reset-password/:encryptedId')
+  @Public()
+  async resetPassword(
+    @Param('encryptedId') encryptedId: string,
+    @Body() resetDto: ResetPasswordDto,
+  ): Promise<string> {
+    const result = await this.authService.resetPassword(resetDto, encryptedId);
+    return result;
+  }
+
+  @Post('forgot-password')
+  @Public()
+  async forgotPassword(@Body() authDto: ForgotPasswordDto): Promise<number> {
+    const result = await this.authService.forgotPassword(authDto);
     return result;
   }
 

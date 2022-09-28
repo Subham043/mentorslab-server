@@ -17,7 +17,7 @@ async function bootstrap() {
       exceptionFactory: (validationErrors: ValidationError[] = []) => {
         const result = {};
         validationErrors.forEach((element) => {
-          console.log(element);
+          // console.log(element);
           result[element.property] = Object.values(element.constraints);
         });
 

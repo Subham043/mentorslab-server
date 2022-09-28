@@ -4,13 +4,20 @@ import {
   HttpStatus,
   ForbiddenException,
 } from '@nestjs/common';
-import { AuthDto, JwtPayload, OtpDto } from './dto';
+import {
+  AuthDto,
+  ForgotPasswordDto,
+  JwtPayload,
+  OtpDto,
+  ResetPasswordDto,
+} from './dto';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from 'src/user/user.service';
 import { Token } from './dto/token.dto';
 import * as bcrypt from 'bcrypt';
 import { decrypt, encrypt } from 'src/common/hooks/encryption.hooks';
 import { RegisterDto } from './dto/register.dto';
+import { UserGetDto } from 'src/user/dto';
 
 @Injectable()
 export class AuthService {
@@ -69,6 +76,48 @@ export class AuthService {
     return result;
   }
 
+  async forgotPassword(dto: ForgotPasswordDto): Promise<any> {
+    const user = await this.usersService.update(
+      {
+        email: dto.email,
+      },
+      {
+        otp: Math.floor(1111 + Math.random() * 9999),
+      },
+    );
+    const result = await encrypt(String(user.id));
+    return result;
+  }
+
+  async resetPassword(
+    resetDto: ResetPasswordDto,
+    encryptedId: string,
+  ): Promise<string> {
+    const id = await decrypt(encryptedId);
+    const user = await this.usersService.find({
+      id: Number(id),
+      otp: Number(resetDto.otp),
+      verified: true,
+      blocked: false,
+    });
+
+    if (!user) throw new HttpException('Invalid otp', HttpStatus.BAD_REQUEST);
+    const { password } = resetDto;
+    const hash = await bcrypt.hash(password, Number(process.env.saltOrRounds));
+
+    await this.usersService.update(
+      {
+        id: Number(id),
+      },
+      {
+        password: hash,
+        otp: Math.floor(1111 + Math.random() * 9999),
+      },
+    );
+
+    return 'Password reset successful';
+  }
+
   async verifyUser(otpDto: OtpDto, encryptedId: string): Promise<Token> {
     const id = await decrypt(encryptedId);
     const user = await this.usersService.find({
@@ -79,6 +128,7 @@ export class AuthService {
     });
 
     if (!user) throw new HttpException('Invalid otp', HttpStatus.BAD_REQUEST);
+
     await this.usersService.update(
       {
         id: Number(id),

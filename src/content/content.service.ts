@@ -26,7 +26,7 @@ export class ContentService {
       throw new HttpException('Video link is required', HttpStatus.BAD_REQUEST);
     }
 
-    const {type, file_path, heading, description} = dto;
+    const { type, file_path, heading, description } = dto;
     const content = await this.prisma.content.create({
       data: { type, file_path, heading, description, uploadedBy: userId },
       include: {
@@ -65,15 +65,11 @@ export class ContentService {
         'File cannot be attached to this request',
         HttpStatus.BAD_REQUEST,
       );
-    } else if (
-      dto.type !== 'PDF' &&
-      res.type === 'PDF' &&
-      !dto.file_path
-    ) {
+    } else if (dto.type !== 'PDF' && res.type === 'PDF' && !dto.file_path) {
       throw new HttpException('Video link is required', HttpStatus.BAD_REQUEST);
     }
 
-    const {type, file_path, heading, description} = dto;
+    const { type, file_path, heading, description } = dto;
     const content = await this.prisma.content.update({
       where: { id: Number(id) },
       data: { type, file_path, heading, description },
@@ -143,11 +139,11 @@ export class ContentService {
       return false;
     }
   }
-  
+
   async saveFile(file: any): Promise<string | undefined> {
     try {
       const generateFileName = fileName(file.originalName);
-      await fs.appendFile('./uploads/pdf/'+generateFileName,file.buffer);
+      await fs.appendFile('./uploads/pdf/' + generateFileName, file.buffer);
       return generateFileName;
     } catch (error) {
       // console.log(error);

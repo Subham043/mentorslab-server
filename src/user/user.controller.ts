@@ -8,11 +8,19 @@ import {
   HttpException,
   HttpStatus,
   UseGuards,
+  Query,
+  Delete,
 } from '@nestjs/common';
 import { AccessTokenGuard } from 'src/auth/guards/access_token.guard';
 import { Roles } from 'src/common/decorator/roles.decorator';
+import { ValidPaginatePipe } from 'src/common/pipes/valid_paginate.pipes';
 import { ValidUserIdPipe } from 'src/common/pipes/valid_user_id.pipes';
-import { UserCreateDto, UserGetDto, UserUpdateDto } from './dto';
+import {
+  UserCreateDto,
+  UserGetDto,
+  UserPaginateDto,
+  UserUpdateDto,
+} from './dto';
 import { UserService } from './user.service';
 
 @UseGuards(AccessTokenGuard)
@@ -48,6 +56,19 @@ export class UserController {
     return result;
   }
 
+  @Get('paginate')
+  @Roles('ADMIN')
+  async getAllUserPaginate(
+    @Query('skip', ValidPaginatePipe) skip: string,
+    @Query('take', ValidPaginatePipe) take: string,
+  ): Promise<UserPaginateDto> {
+    const result = await this.userService.findAllPaginate({
+      skip: Number(skip),
+      take: Number(take),
+    });
+    return result;
+  }
+
   @Get(':id')
   @Roles('ADMIN')
   async getUser(@Param('id', ValidUserIdPipe) id: number): Promise<UserGetDto> {
@@ -55,5 +76,12 @@ export class UserController {
     if (!result)
       throw new HttpException('Data not found', HttpStatus.NOT_FOUND);
     return result;
+  }
+
+  @Delete(':id')
+  @Roles('ADMIN')
+  async deleteUser(@Param('id', ValidUserIdPipe) id: number): Promise<string> {
+    const res = await this.userService.remove(id);
+    return 'User deleted successfully';
   }
 }

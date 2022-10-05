@@ -34,7 +34,6 @@ export class ContentController {
     @Body() contentCreateDto: ContentCreateDto,
     @GetCurrentUserId() userId: number,
   ): Promise<ContentGetDto> {
-
     const result = await this.contentService.create(contentCreateDto, userId);
     if (!result)
       throw new HttpException('Data not found', HttpStatus.NOT_FOUND);
@@ -92,5 +91,4 @@ export class ContentController {
   seeUploadedFile(@Param('imgpath') image, @Res() res: Response) {
     return res.sendFile(image, { root: './uploads/pdf' });
   }
-
 }

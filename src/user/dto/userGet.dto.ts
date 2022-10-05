@@ -4,6 +4,8 @@ export interface UserGetDto {
   email?: string;
   phone?: string;
   role?: string;
+  verified?: boolean;
+  blocked?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
 }

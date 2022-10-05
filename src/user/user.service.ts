@@ -1,7 +1,12 @@
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { User } from '@prisma/client';
-import { UserCreateDto, UserGetDto, UserUpdateDto } from './dto';
+import {
+  UserCreateDto,
+  UserGetDto,
+  UserPaginateDto,
+  UserUpdateDto,
+} from './dto';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -112,6 +117,40 @@ export class UserService {
     });
   }
 
+  async findAllPaginate(params: {
+    skip?: number;
+    take?: number;
+  }): Promise<UserPaginateDto> {
+    const { skip, take } = params;
+    const data = await this.prisma.user.findMany({
+      skip: skip ? skip : 0,
+      take: take ? take : 10,
+      where: {
+        role: 'USER',
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        phone: true,
+        role: true,
+        verified: true,
+        blocked: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+    const count = await this.prisma.user.count({
+      where: {
+        role: 'USER',
+      },
+    });
+    return {
+      data,
+      count,
+    };
+  }
+
   // eslint-disable-next-line @typescript-eslint/ban-types
   async find(value: {}): Promise<any | undefined> {
     const user = await this.prisma.user.findFirst({
@@ -131,6 +170,8 @@ export class UserService {
       email: user.email,
       phone: user.phone,
       role: user.role,
+      verified: user.verified,
+      blocked: user.blocked,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     };

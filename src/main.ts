@@ -4,6 +4,7 @@ import { useContainer, ValidationError } from 'class-validator';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
 import { TransformInterceptor } from './common/interceptor/transform.interceptor';
+import * as cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -12,6 +13,7 @@ async function bootstrap() {
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
   app.useGlobalInterceptors(new TransformInterceptor());
   app.use(helmet());
+  app.use(cookieParser());
   app.useGlobalPipes(
     new ValidationPipe({
       exceptionFactory: (validationErrors: ValidationError[] = []) => {
@@ -30,6 +32,13 @@ async function bootstrap() {
     }),
   );
   app.enableCors({
+    allowedHeaders: [
+      'Accept',
+      'Authorization',
+      'Content-Type',
+      'X-Requested-With',
+      'Range',
+    ],
     origin: function (origin, callback) {
       const whitelist = ['http://127.0.0.1:3000', 'http://localhost:3000'];
       if (origin) {
@@ -39,8 +48,10 @@ async function bootstrap() {
           callback(new Error('Not allowed by CORS'));
         }
       } else callback(null, true);
-      // callback(null, true);
     },
+    credentials: true,
+    exposedHeaders: 'Content-Length',
+    methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'],
   });
   await app.listen(process.env.PORT || 3300);
 }

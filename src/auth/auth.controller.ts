@@ -75,11 +75,13 @@ export class AuthController {
   @UseGuards(AccessTokenGuard)
   @Get('profile')
   @SetMetadata('roles', ['ADMIN', 'USER'])
-  async getProfile(@GetCurrentUserId() id: number): Promise<UserGetDto> {
+  async getProfile(
+    @GetCurrentUserId() id: number,
+  ): Promise<{ user: UserGetDto }> {
     const result = await this.userService.findOne(id);
     if (!result)
       throw new HttpException('User Not Found', HttpStatus.NOT_FOUND);
-    return result;
+    return { user: result };
   }
 
   @UseGuards(RefreshTokenGuard)

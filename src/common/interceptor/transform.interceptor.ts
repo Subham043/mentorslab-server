@@ -23,6 +23,6 @@ export class TransformInterceptor<T>
         data: data,
       })),
     );
-    // return next.handle().pipe(map((data) => ({ data })));
+    // return next.handle().pipe(map((data) => data));
   }
 }

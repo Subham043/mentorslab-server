@@ -12,17 +12,25 @@ export class RefreshTokenStrategy extends PassportStrategy(
 ) {
   constructor(private prismaService: PrismaService) {
     super({
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      jwtFromRequest: ExtractJwt.fromExtractors([
+        (request: Request) => {
+          const refreshToken =
+            request?.cookies['auth._refresh_token.local']
+              ?.replace('Bearer', '')
+              .trim() ||
+            request?.get('Authorization')?.replace('Bearer', '').trim();
+          return refreshToken;
+        },
+      ]),
       secretOrKey: process.env.JWT_REFRESH_SECRET_KEY || 'secretKey',
       passReqToCallback: true,
     });
   }
 
-  validate(req: Request, payload: JwtPayload): JwtRefreshPayload {
-    const refreshToken = req
-      ?.get('Authorization')
-      ?.replace('Bearer', '')
-      .trim();
+  validate(req: Request, payload: any): JwtRefreshPayload {
+    const refreshToken =
+      req?.cookies['auth._refresh_token.local']?.replace('Bearer', '').trim() ||
+      req?.get('Authorization')?.replace('Bearer', '').trim();
 
     if (!refreshToken) throw new ForbiddenException('Refresh token malformed');
     const result = this.prismaService.user.findFirst({

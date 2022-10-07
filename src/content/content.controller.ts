@@ -11,16 +11,23 @@ import {
   Delete,
   Param,
   Res,
+  Query,
 } from '@nestjs/common';
 import { AccessTokenGuard } from 'src/auth/guards/access_token.guard';
 import { GetCurrentUserId } from 'src/common/decorator/get_current_user_id.decorator';
 import { Roles } from 'src/common/decorator/roles.decorator';
 import { ContentService } from './content.service';
-import { ContentCreateDto, ContentGetDto, ContentUpdateDto } from './dto';
+import {
+  ContentCreateDto,
+  ContentGetDto,
+  ContentPaginateDto,
+  ContentUpdateDto,
+} from './dto';
 import { Response } from 'express';
 import { Public } from 'src/common/decorator/public.decorator';
 import { ValidContentIdPipe } from 'src/common/pipes/valid_content_id.pipes';
 import { FormDataRequest } from 'nestjs-form-data';
+import { ValidPaginatePipe } from 'src/common/pipes/valid_paginate.pipes';
 
 @UseGuards(AccessTokenGuard)
 @Controller('content')
@@ -57,6 +64,19 @@ export class ContentController {
   @Roles('ADMIN')
   async getAllContent(): Promise<ContentGetDto[]> {
     const result = await this.contentService.findAll();
+    return result;
+  }
+
+  @Get('paginate')
+  @Roles('ADMIN')
+  async getAllContentPaginate(
+    @Query('skip', ValidPaginatePipe) skip: string,
+    @Query('take', ValidPaginatePipe) take: string,
+  ): Promise<ContentPaginateDto> {
+    const result = await this.contentService.findAllPaginate({
+      skip: Number(skip),
+      take: Number(take),
+    });
     return result;
   }
 

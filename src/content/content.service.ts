@@ -1,6 +1,11 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { ContentCreateDto, ContentGetDto, ContentUpdateDto } from './dto';
+import {
+  ContentCreateDto,
+  ContentGetDto,
+  ContentPaginateDto,
+  ContentUpdateDto,
+} from './dto';
 import * as fs from 'fs/promises';
 import { fileName } from 'src/common/hooks/fileName.hooks';
 
@@ -98,6 +103,31 @@ export class ContentService {
         },
       },
     });
+  }
+
+  async findAllPaginate(params: {
+    skip?: number;
+    take?: number;
+  }): Promise<ContentPaginateDto> {
+    const { skip, take } = params;
+    const data = await this.prisma.content.findMany({
+      skip: skip ? skip : 0,
+      take: take ? take : 10,
+      include: {
+        uploadBy: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+      },
+    });
+    const count = await this.prisma.content.count({});
+    return {
+      data,
+      count,
+    };
   }
 
   // eslint-disable-next-line @typescript-eslint/ban-types

@@ -1,12 +1,19 @@
 import {
   IsBoolean,
+  IsBooleanString,
   IsEnum,
   IsNotEmpty,
   IsOptional,
   IsString,
 } from 'class-validator';
 import { ContentType } from './content_type.enum';
-import { MemoryStoredFile, IsFile, MaxFileSize, HasMimeType } from 'nestjs-form-data';
+import {
+  MemoryStoredFile,
+  IsFile,
+  MaxFileSize,
+  HasMimeType,
+  HasExtension,
+} from 'nestjs-form-data';
 
 export class ContentCreateDto {
   @IsNotEmpty()
@@ -25,16 +32,16 @@ export class ContentCreateDto {
   description: string;
 
   @IsOptional()
-  @IsBoolean()
+  @IsBooleanString()
   draft: boolean;
 
   @IsOptional()
-  @IsBoolean()
+  @IsBooleanString()
   restricted: boolean;
 
   @IsOptional()
   @IsFile()
-  @MaxFileSize(1e6)
-  @HasMimeType(['image/jpeg', 'image/png'])
+  @MaxFileSize(5e6)
+  @HasExtension(['pdf'])
   file: MemoryStoredFile;
 }

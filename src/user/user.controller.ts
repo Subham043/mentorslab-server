@@ -81,7 +81,7 @@ export class UserController {
   @Delete(':id')
   @Roles('ADMIN')
   async deleteUser(@Param('id', ValidUserIdPipe) id: number): Promise<string> {
-    const res = await this.userService.remove(id);
+    await this.userService.remove(id);
     return 'User deleted successfully';
   }
 }

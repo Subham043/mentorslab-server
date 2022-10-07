@@ -1,4 +1,4 @@
 export enum ContentType {
-    PDF = 'PDF',
-    VIDEO = 'VIDEO'
+  PDF = 'PDF',
+  VIDEO = 'VIDEO',
 }

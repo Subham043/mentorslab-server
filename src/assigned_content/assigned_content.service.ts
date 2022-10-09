@@ -3,9 +3,11 @@ import { ContentService } from 'src/content/content.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UserService } from 'src/user/user.service';
 import {
-  AssignedContentCreateDto,
-  AssignedContentCreateArrayDto,
+  AssignedContentToUserCreateDto,
+  AssignedContentToUserCreateArrayDto,
   AssignedContentGetDto,
+  AssignedUserToContentCreateDto,
+  AssignedUserToContentCreateArrayDto,
 } from './dto';
 
 @Injectable()
@@ -16,17 +18,21 @@ export class AssignedContentService {
     private contentService: ContentService,
   ) {}
 
-  async create(
-    dto: AssignedContentCreateDto,
+  async createViaContent(
+    dto: AssignedContentToUserCreateDto,
+    contentId: number,
     userId: number,
   ): Promise<AssignedContentGetDto | undefined> {
-    const checkAssignedContent = await this.find({ ...dto });
+    const checkAssignedContent = await this.find({
+      ...dto,
+      assignedContentId: contentId,
+    });
     if (checkAssignedContent) return checkAssignedContent;
     const user = await this.userService.findOne(dto.assignedToId);
-    const content = await this.contentService.findOne(dto.assignedContentId);
+    const content = await this.contentService.findOne(contentId);
     if (!user || !content) return undefined;
     const content_assigned = await this.prisma.contentAssigned.create({
-      data: { ...dto, assignedById: userId },
+      data: { ...dto, assignedContentId: contentId, assignedById: userId },
       include: {
         assignedBy: {
           select: {
@@ -55,14 +61,87 @@ export class AssignedContentService {
     return content_assigned;
   }
 
-  async createMultiple(
-    dto: AssignedContentCreateArrayDto,
+  async createViaContentMultiple(
+    dto: AssignedContentToUserCreateArrayDto,
+    contentId: number,
     userId: number,
   ): Promise<AssignedContentGetDto[]> {
     const arr: AssignedContentGetDto[] = [];
 
+    await this.removeByContentId(contentId);
+
     for (let index = 0; index < dto.assigned_content_array.length; index++) {
-      arr.push(await this.create(dto.assigned_content_array[index], userId));
+      arr.push(
+        await this.createViaContent(
+          dto.assigned_content_array[index],
+          contentId,
+          userId,
+        ),
+      );
+    }
+    const uniqueObjArray = [
+      ...new Map(arr.map((item) => [item?.id, item])).values(),
+    ];
+    return uniqueObjArray;
+  }
+
+  async createViaUser(
+    dto: AssignedUserToContentCreateDto,
+    assignedToId: number,
+    userId: number,
+  ): Promise<AssignedContentGetDto | undefined> {
+    const checkAssignedContent = await this.find({ ...dto, assignedToId });
+    if (checkAssignedContent) return checkAssignedContent;
+    const user = await this.userService.findOne(assignedToId);
+    const content = await this.contentService.findOne(dto.assignedContentId);
+    if (!user || !content) return undefined;
+    const content_assigned = await this.prisma.contentAssigned.create({
+      data: { ...dto, assignedToId: assignedToId, assignedById: userId },
+      include: {
+        assignedBy: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+        assignedTo: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+        assignedContent: {
+          select: {
+            id: true,
+            type: true,
+            heading: true,
+            description: true,
+          },
+        },
+      },
+    });
+    return content_assigned;
+  }
+
+  async createViaUserMultiple(
+    dto: AssignedUserToContentCreateArrayDto,
+    assignedToId: number,
+    userId: number,
+  ): Promise<AssignedContentGetDto[]> {
+    const arr: AssignedContentGetDto[] = [];
+
+    await this.removeByAssignToId(assignedToId);
+
+    for (let index = 0; index < dto.assigned_content_array.length; index++) {
+      arr.push(
+        await this.createViaUser(
+          dto.assigned_content_array[index],
+          assignedToId,
+          userId,
+        ),
+      );
     }
     const uniqueObjArray = [
       ...new Map(arr.map((item) => [item?.id, item])).values(),
@@ -140,6 +219,20 @@ export class AssignedContentService {
   async remove(id: number): Promise<string> {
     await this.prisma.contentAssigned.delete({
       where: { id: Number(id) },
+    });
+    return 'Access revoked successfully';
+  }
+
+  async removeByContentId(id: number): Promise<string> {
+    await this.prisma.contentAssigned.deleteMany({
+      where: { assignedContentId: Number(id) },
+    });
+    return 'Access revoked successfully';
+  }
+
+  async removeByAssignToId(id: number): Promise<string> {
+    await this.prisma.contentAssigned.deleteMany({
+      where: { assignedToId: Number(id) },
     });
     return 'Access revoked successfully';
   }

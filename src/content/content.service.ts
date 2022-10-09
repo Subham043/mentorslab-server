@@ -31,9 +31,17 @@ export class ContentService {
       throw new HttpException('Video link is required', HttpStatus.BAD_REQUEST);
     }
 
-    const { type, file_path, heading, description } = dto;
+    const { type, file_path, heading, description, draft, restricted } = dto;
     const content = await this.prisma.content.create({
-      data: { type, file_path, heading, description, uploadedBy: userId },
+      data: {
+        type,
+        file_path,
+        heading,
+        description,
+        draft,
+        restricted,
+        uploadedBy: userId,
+      },
       include: {
         uploadBy: {
           select: {
@@ -74,10 +82,17 @@ export class ContentService {
       throw new HttpException('Video link is required', HttpStatus.BAD_REQUEST);
     }
 
-    const { type, file_path, heading, description } = dto;
+    const { type, file_path, heading, description, draft, restricted } = dto;
     const content = await this.prisma.content.update({
       where: { id: Number(id) },
-      data: { type, file_path, heading, description },
+      data: {
+        type,
+        file_path,
+        heading,
+        description,
+        draft,
+        restricted,
+      },
       include: {
         uploadBy: {
           select: {
@@ -142,6 +157,17 @@ export class ContentService {
             id: true,
             name: true,
             email: true,
+          },
+        },
+        AssignedContent: {
+          include: {
+            assignedTo: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+              },
+            },
           },
         },
       },

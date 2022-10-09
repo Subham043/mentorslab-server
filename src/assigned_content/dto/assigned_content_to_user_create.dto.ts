@@ -1,12 +1,7 @@
 import { IsNotEmpty, IsNumber } from 'class-validator';
 
-export class AssignedContentCreateDto {
-
+export class AssignedContentToUserCreateDto {
   @IsNotEmpty()
   @IsNumber()
   assignedToId: number;
-  
-  @IsNotEmpty()
-  @IsNumber()
-  assignedContentId: number;
 }

@@ -13,38 +13,83 @@ import {
 import { AccessTokenGuard } from 'src/auth/guards/access_token.guard';
 import { GetCurrentUserId } from 'src/common/decorator/get_current_user_id.decorator';
 import { Roles } from 'src/common/decorator/roles.decorator';
+import { ValidContentIdPipe } from 'src/common/pipes/valid_content_id.pipes';
+import { ValidUserIdPipe } from 'src/common/pipes/valid_user_id.pipes';
 import { AssignedContentService } from './assigned_content.service';
 import {
-  AssignedContentCreateDto,
-  AssignedContentCreateArrayDto,
   AssignedContentGetDto,
+  AssignedContentToUserCreateArrayDto,
+  AssignedContentToUserCreateDto,
+  AssignedUserToContentCreateArrayDto,
+  AssignedUserToContentCreateDto,
 } from './dto';
 
 @UseGuards(AccessTokenGuard)
-@Controller('assigned-content')
+@Controller('assign')
 export class AssignedContentController {
   constructor(private assignedContentService: AssignedContentService) {}
 
-  @Post()
+  @Post('content-to-user/:contentId')
   @Roles('ADMIN')
-  async createAssignedContent(
-    @Body() dto: AssignedContentCreateDto,
+  async createAssignedContentToUser(
+    @Body() dto: AssignedContentToUserCreateDto,
+    @Param('contentId', ValidContentIdPipe) contentId: number,
     @GetCurrentUserId() userId: number,
   ): Promise<AssignedContentGetDto> {
-    const result = await this.assignedContentService.create(dto, userId);
+    const result = await this.assignedContentService.createViaContent(
+      dto,
+      contentId,
+      userId,
+    );
     if (!result)
       throw new HttpException('Data not found', HttpStatus.NOT_FOUND);
     return result;
   }
 
-  @Post('multiple')
+  @Post('content-to-user-multiple/:contentId')
   @Roles('ADMIN')
-  async createAssignedContentMultiple(
-    @Body() dto: AssignedContentCreateArrayDto,
+  async createAssignedContentToUserMultiple(
+    @Body() dto: AssignedContentToUserCreateArrayDto,
+    @Param('contentId', ValidContentIdPipe) contentId: number,
     @GetCurrentUserId() userId: number,
   ): Promise<AssignedContentGetDto[]> {
-    const result = await this.assignedContentService.createMultiple(
+    const result = await this.assignedContentService.createViaContentMultiple(
       dto,
+      contentId,
+      userId,
+    );
+    if (!result)
+      throw new HttpException('Data not found', HttpStatus.NOT_FOUND);
+    return result;
+  }
+
+  @Post('user-to-content/:assignedToId')
+  @Roles('ADMIN')
+  async createAssignedUserToContent(
+    @Body() dto: AssignedUserToContentCreateDto,
+    @Param('assignedToId', ValidUserIdPipe) assignedToId: number,
+    @GetCurrentUserId() userId: number,
+  ): Promise<AssignedContentGetDto> {
+    const result = await this.assignedContentService.createViaUser(
+      dto,
+      assignedToId,
+      userId,
+    );
+    if (!result)
+      throw new HttpException('Data not found', HttpStatus.NOT_FOUND);
+    return result;
+  }
+
+  @Post('user-to-content-multiple/:assignedToId')
+  @Roles('ADMIN')
+  async createAssignedUserToContentMultiple(
+    @Body() dto: AssignedUserToContentCreateArrayDto,
+    @Param('assignedToId', ValidUserIdPipe) assignedToId: number,
+    @GetCurrentUserId() userId: number,
+  ): Promise<AssignedContentGetDto[]> {
+    const result = await this.assignedContentService.createViaUserMultiple(
+      dto,
+      assignedToId,
       userId,
     );
     if (!result)

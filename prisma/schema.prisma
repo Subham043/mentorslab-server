@@ -41,7 +41,7 @@ model Content {
   file_path String    @db.Text
   heading     String  @db.Text
   description     String?   @db.Text
-  uploadBy   User? @relation(fields: [uploadedBy], references: [id])
+  uploadBy   User? @relation(fields: [uploadedBy], references: [id], onDelete: SetNull, onUpdate: SetNull)
   uploadedBy Int?
   draft  Boolean    @default(false)
   restricted  Boolean    @default(false)
@@ -55,11 +55,11 @@ enum MEDIA_TYPE {
 
 model ContentAssigned {
   id        Int      @id @default(autoincrement())
-  assignedBy       User     @relation("assignedBy", fields: [assignedById], references: [id])
-  assignedById     Int
-  assignedTo   User     @relation("assignedTo", fields: [assignedToId], references: [id])
-  assignedToId Int
-  assignedContent   Content     @relation("assignedContent", fields: [assignedContentId], references: [id])
-  assignedContentId Int
+  assignedBy       User?     @relation("assignedBy", fields: [assignedById], references: [id], onDelete: SetNull, onUpdate: SetNull)
+  assignedById     Int?
+  assignedTo   User?     @relation("assignedTo", fields: [assignedToId], references: [id], onDelete: SetNull, onUpdate: SetNull)
+  assignedToId Int?
+  assignedContent   Content?     @relation("assignedContent", fields: [assignedContentId], references: [id], onDelete: SetNull, onUpdate: SetNull)
+  assignedContentId Int?
   assignedAt DateTime @default(now())
 }

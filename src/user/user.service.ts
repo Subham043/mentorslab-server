@@ -105,6 +105,9 @@ export class UserService {
 
   async findAll(): Promise<UserGetDto[]> {
     return await this.prisma.user.findMany({
+      where: {
+        role: 'USER',
+      },
       select: {
         id: true,
         name: true,

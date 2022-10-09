@@ -1,6 +1,5 @@
 import {
   IsBoolean,
-  IsBooleanString,
   IsEnum,
   IsNotEmpty,
   IsOptional,
@@ -14,6 +13,7 @@ import {
   HasMimeType,
   HasExtension,
 } from 'nestjs-form-data';
+import { Transform } from 'class-transformer';
 
 export class ContentCreateDto {
   @IsNotEmpty()
@@ -32,11 +32,13 @@ export class ContentCreateDto {
   description: string;
 
   @IsOptional()
-  @IsBooleanString()
+  @Transform(({ value }) => value === 'true' || value === true || value === 1)
+  @IsBoolean()
   draft: boolean;
 
   @IsOptional()
-  @IsBooleanString()
+  @Transform(({ value }) => value === 'true' || value === true || value === 1)
+  @IsBoolean()
   restricted: boolean;
 
   @IsOptional()

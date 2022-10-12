@@ -160,24 +160,34 @@ export class UserService {
       where: {
         ...value,
       },
+      include: {
+        ContentAssignedTo: {
+          include: {
+            assignedTo: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+              },
+            },
+            assignedContent: {
+              select: {
+                id: true,
+                heading: true,
+                type: true,
+              },
+            },
+          },
+        },
+      },
     });
     return user;
   }
 
-  async findOne(id: number): Promise<UserGetDto | undefined> {
+  async findOne(id: number): Promise<any | undefined> {
     const user = await this.find({ id });
     if (!user) return undefined;
-    return {
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      phone: user.phone,
-      role: user.role,
-      verified: user.verified,
-      blocked: user.blocked,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
-    };
+    return user;
   }
 
   async findByEmail(email: string): Promise<UserGetDto | undefined> {

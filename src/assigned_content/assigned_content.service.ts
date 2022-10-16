@@ -1,7 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { ContentService } from 'src/content/content.service';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { UserService } from 'src/user/user.service';
 import {
   AssignedContentToUserCreateDto,
   AssignedContentToUserCreateArrayDto,
@@ -12,11 +10,18 @@ import {
 
 @Injectable()
 export class AssignedContentService {
-  constructor(
-    private prisma: PrismaService,
-    private userService: UserService,
-    private contentService: ContentService,
-  ) {}
+  private readonly User = {
+    id: true,
+    name: true,
+    email: true,
+  };
+  private readonly Content = {
+    id: true,
+    type: true,
+    heading: true,
+    description: true,
+  };
+  constructor(private prisma: PrismaService) {}
 
   async createViaContent(
     dto: AssignedContentToUserCreateDto,
@@ -28,33 +33,28 @@ export class AssignedContentService {
       assignedContentId: contentId,
     });
     if (checkAssignedContent) return checkAssignedContent;
-    const user = await this.userService.findOne(dto.assignedToId);
-    const content = await this.contentService.findOne(contentId);
+    const user = await this.prisma.user.findFirst({
+      where: {
+        id: Number(dto.assignedToId),
+      },
+    });
+    const content = await this.prisma.content.findFirst({
+      where: {
+        id: Number(contentId),
+      },
+    });
     if (!user || !content) return undefined;
     const content_assigned = await this.prisma.contentAssigned.create({
       data: { ...dto, assignedContentId: contentId, assignedById: userId },
       include: {
         assignedBy: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
+          select: this.User,
         },
         assignedTo: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
+          select: this.User,
         },
         assignedContent: {
-          select: {
-            id: true,
-            type: true,
-            heading: true,
-            description: true,
-          },
+          select: this.Content,
         },
       },
     });
@@ -92,33 +92,28 @@ export class AssignedContentService {
   ): Promise<AssignedContentGetDto | undefined> {
     const checkAssignedContent = await this.find({ ...dto, assignedToId });
     if (checkAssignedContent) return checkAssignedContent;
-    const user = await this.userService.findOne(assignedToId);
-    const content = await this.contentService.findOne(dto.assignedContentId);
+    const user = await this.prisma.user.findFirst({
+      where: {
+        id: Number(assignedToId),
+      },
+    });
+    const content = await this.prisma.content.findFirst({
+      where: {
+        id: Number(dto.assignedContentId),
+      },
+    });
     if (!user || !content) return undefined;
     const content_assigned = await this.prisma.contentAssigned.create({
       data: { ...dto, assignedToId: assignedToId, assignedById: userId },
       include: {
         assignedBy: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
+          select: this.User,
         },
         assignedTo: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
+          select: this.User,
         },
         assignedContent: {
-          select: {
-            id: true,
-            type: true,
-            heading: true,
-            description: true,
-          },
+          select: this.Content,
         },
       },
     });
@@ -153,26 +148,13 @@ export class AssignedContentService {
     return await this.prisma.contentAssigned.findMany({
       include: {
         assignedBy: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
+          select: this.User,
         },
         assignedTo: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
+          select: this.User,
         },
         assignedContent: {
-          select: {
-            id: true,
-            type: true,
-            heading: true,
-            description: true,
-          },
+          select: this.Content,
         },
       },
     });
@@ -186,26 +168,13 @@ export class AssignedContentService {
       },
       include: {
         assignedBy: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
+          select: this.User,
         },
         assignedTo: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
+          select: this.User,
         },
         assignedContent: {
-          select: {
-            id: true,
-            type: true,
-            heading: true,
-            description: true,
-          },
+          select: this.Content,
         },
       },
     });

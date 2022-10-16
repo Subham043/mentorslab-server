@@ -6,19 +6,21 @@ import {
   ValidatorConstraint,
   ValidatorConstraintInterface,
 } from 'class-validator';
-import { UserService } from 'src/user/user.service';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @ValidatorConstraint({ name: 'EmailExistsRule', async: true })
 @Injectable()
 export class EmailExistsRule implements ValidatorConstraintInterface {
-  constructor(private userService: UserService) {}
+  constructor(private prisma: PrismaService) {}
 
   async validate(value: string) {
     try {
-      const user = await this.userService.find({
-        email: value,
-        verified: true,
-        blocked: false,
+      const user = await this.prisma.user.findFirst({
+        where: {
+          email: value,
+          verified: true,
+          blocked: false,
+        },
       });
       if (!user) return false;
     } catch (e) {

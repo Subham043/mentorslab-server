@@ -8,14 +8,13 @@ import {
   HttpStatus,
   SetMetadata,
   Param,
-  Patch,
 } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import { GetCurrentUserId } from 'src/common/decorator/get_current_user_id.decorator';
 import { GetCurrentUserIdAndRefreshToken } from 'src/common/decorator/get_current_user_id_with_refresh_token.decorator';
 import { Public } from 'src/common/decorator/public.decorator';
-import { UserGetDto } from 'src/user/dto';
-import { UserService } from 'src/user/user.service';
+import { UserProfileAdminGetDto } from 'src/user/dto';
+import { UserProfileAdminService } from 'src/user/services/user.admin.service';
 import { AuthService } from './auth.service';
 import { AuthDto, ForgotPasswordDto, OtpDto, ResetPasswordDto } from './dto';
 import { RegisterDto } from './dto/register.dto';
@@ -27,7 +26,7 @@ import { RefreshTokenGuard } from './guards/refresh_token.guard';
 export class AuthController {
   constructor(
     private authService: AuthService,
-    private userService: UserService,
+    private userService: UserProfileAdminService,
   ) {}
 
   @Post('sign-in')
@@ -77,7 +76,7 @@ export class AuthController {
   @SetMetadata('roles', ['ADMIN', 'USER'])
   async getProfile(
     @GetCurrentUserId() id: number,
-  ): Promise<{ user: UserGetDto }> {
+  ): Promise<{ user: UserProfileAdminGetDto }> {
     const result = await this.userService.findOne(id);
     if (!result)
       throw new HttpException('User Not Found', HttpStatus.NOT_FOUND);

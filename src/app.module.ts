@@ -4,8 +4,6 @@ import { AppService } from './app.service';
 import { AuthController } from './auth/auth.controller';
 import { AuthService } from './auth/auth.service';
 import { AuthModule } from './auth/auth.module';
-import { UserController } from './user/user.controller';
-import { UserService } from './user/user.service';
 import { UserModule } from './user/user.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { JwtModule } from '@nestjs/jwt';
@@ -13,13 +11,17 @@ import { ConfigModule } from '@nestjs/config';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { RolesGuard } from './common/guards/roles.guard';
-import { ContentController } from './content/content.controller';
-import { ContentService } from './content/content.service';
 import { ContentModule } from './content/content.module';
 import { AssignedContentService } from './assigned_content/assigned_content.service';
 import { AssignedContentController } from './assigned_content/assigned_content.controller';
 import { AssignedContentModule } from './assigned_content/assigned_content.module';
 import { NestjsFormDataModule } from 'nestjs-form-data';
+import { UserProfileController } from './user/controller/user.user.controller';
+import { UserProfileAdminController } from './user/controller/user.admin.controller';
+import { UserProfileAdminService } from './user/services/user.admin.service';
+import { UserProfileService } from './user/services/user.user.service';
+import { ContentAdminController } from './content/controller/content.admin.controller';
+import { ContentAdminService } from './content/services/content.admin.service';
 
 @Module({
   imports: [
@@ -44,19 +46,21 @@ import { NestjsFormDataModule } from 'nestjs-form-data';
   controllers: [
     AppController,
     AuthController,
-    UserController,
-    ContentController,
+    UserProfileController,
+    UserProfileAdminController,
+    ContentAdminController,
     AssignedContentController,
   ],
   providers: [
     AppService,
     AuthService,
-    UserService,
+    UserProfileAdminService,
+    UserProfileService,
     {
       provide: APP_GUARD,
       useClass: RolesGuard,
     },
-    ContentService,
+    ContentAdminService,
     AssignedContentService,
   ],
 })

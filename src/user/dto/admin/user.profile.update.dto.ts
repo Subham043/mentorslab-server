@@ -6,14 +6,10 @@ import {
   IsString,
 } from 'class-validator';
 
-export class UserUpdateDto {
+export class UserProfileAdminUpdateDto {
   @IsOptional()
   @IsEmail()
   email: string;
-
-  @IsOptional()
-  @IsString()
-  password: string;
 
   @IsOptional()
   @IsString()
@@ -26,4 +22,8 @@ export class UserUpdateDto {
   @IsOptional()
   @IsBoolean()
   blocked: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  verified: boolean;
 }

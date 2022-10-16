@@ -1,15 +1,15 @@
 import {
+  IsBoolean,
   IsEmail,
   IsNotEmpty,
   IsOptional,
   IsPhoneNumber,
   IsString,
-  Validate,
 } from 'class-validator';
 import { UniqueEmail } from 'src/common/validator/unique_email.validator';
 import { UniquePhone } from 'src/common/validator/unique_phone.validator';
 
-export class UserCreateDto {
+export class UserProfileAdminCreateDto {
   @IsNotEmpty()
   @IsEmail()
   @UniqueEmail()
@@ -27,4 +27,12 @@ export class UserCreateDto {
   @IsPhoneNumber()
   @UniquePhone()
   phone: string;
+
+  @IsOptional()
+  @IsBoolean()
+  blocked: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  verified: boolean;
 }

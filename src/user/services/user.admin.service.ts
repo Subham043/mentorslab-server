@@ -1,31 +1,41 @@
-import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { PrismaService } from '../../prisma/prisma.service';
 import { User } from '@prisma/client';
 import {
-  UserCreateDto,
-  UserGetDto,
-  UserPaginateDto,
-  UserUpdateDto,
-} from './dto';
+  UserProfileAdminCreateDto,
+  UserProfileAdminGetDto,
+  UserProfileAdminPaginateDto,
+  UserProfileAdminUpdateDto,
+} from '../dto';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
-export class UserService {
-  private readonly logger = new Logger();
+export class UserProfileAdminService {
+  private readonly UserSelect = {
+    id: true,
+    name: true,
+    email: true,
+    phone: true,
+    role: true,
+    createdAt: true,
+    updatedAt: true,
+  };
   constructor(private prisma: PrismaService) {}
 
-  async createUser(dto: UserCreateDto): Promise<UserGetDto | undefined> {
+  async createUser(
+    dto: UserProfileAdminCreateDto,
+  ): Promise<UserProfileAdminGetDto | undefined> {
     try {
-      const { password } = dto;
-      const hash = await bcrypt.hash(
-        password,
+      const hashedPassword = await bcrypt.hash(
+        dto.password,
         Number(process.env.saltOrRounds),
       );
-      dto.password = hash;
-      const user = await this.create({
-        ...dto,
-        otp: Math.floor(1111 + Math.random() * 9999),
-        verified: true,
+      dto.password = hashedPassword;
+      const user = await this.prisma.user.create({
+        data: {
+          ...dto,
+          otp: Math.floor(1111 + Math.random() * 9999),
+        },
       });
       if (!user) return undefined;
       return {
@@ -53,44 +63,52 @@ export class UserService {
 
   async updateUser(
     id: number,
-    dto: UserUpdateDto,
-  ): Promise<UserGetDto | undefined> {
-    const checkUser = await this.findOne(id);
-    if (dto.email) {
-      const validateEmail = await this.validateUniqueEmail(dto.email);
-      if (validateEmail.status && validateEmail.email !== checkUser.email)
+    dto: UserProfileAdminUpdateDto,
+  ): Promise<UserProfileAdminGetDto | undefined> {
+    const user = await this.prisma.user.findFirst({
+      where: {
+        id,
+      },
+    });
+    if (dto.email && dto.email !== user.email) {
+      const validateEmail = await this.prisma.user.findFirst({
+        where: {
+          email: dto.email,
+        },
+      });
+      if (validateEmail)
         throw new HttpException(
           'Email is already taken',
           HttpStatus.BAD_REQUEST,
         );
     }
 
-    if (dto.phone) {
-      const validatePhone = await this.validateUniquePhone(dto.phone);
-      if (validatePhone.status && validatePhone.phone !== checkUser.phone)
+    if (dto.phone && dto.phone !== user.phone) {
+      const validatePhone = await this.prisma.user.findFirst({
+        where: {
+          phone: dto.phone,
+        },
+      });
+      if (validatePhone)
         throw new HttpException(
           'Phone is already taken',
           HttpStatus.BAD_REQUEST,
         );
     }
-    const { password } = dto;
-    if (password) {
-      const hash = await bcrypt.hash(
-        password,
-        Number(process.env.saltOrRounds),
-      );
-      dto.password = hash;
-    }
-    const user = await this.update({ id }, { ...dto });
-    if (!user) return undefined;
+
+    const userUpdate = await this.prisma.user.update({
+      where: { id },
+      data: { ...dto },
+    });
+    if (!userUpdate) return undefined;
     return {
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      phone: user.phone,
-      role: user.role,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
+      id: userUpdate.id,
+      name: userUpdate.name,
+      email: userUpdate.email,
+      phone: userUpdate.phone,
+      role: userUpdate.role,
+      createdAt: userUpdate.createdAt,
+      updatedAt: userUpdate.updatedAt,
     };
   }
 
@@ -103,27 +121,19 @@ export class UserService {
     return user;
   }
 
-  async findAll(): Promise<UserGetDto[]> {
+  async findAll(): Promise<UserProfileAdminGetDto[]> {
     return await this.prisma.user.findMany({
       where: {
         role: 'USER',
       },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        phone: true,
-        role: true,
-        createdAt: true,
-        updatedAt: true,
-      },
+      select: this.UserSelect,
     });
   }
 
   async findAllPaginate(params: {
     skip?: number;
     take?: number;
-  }): Promise<UserPaginateDto> {
+  }): Promise<UserProfileAdminPaginateDto> {
     const { skip, take } = params;
     const data = await this.prisma.user.findMany({
       skip: skip ? skip : 0,
@@ -131,17 +141,7 @@ export class UserService {
       where: {
         role: 'USER',
       },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        phone: true,
-        role: true,
-        verified: true,
-        blocked: true,
-        createdAt: true,
-        updatedAt: true,
-      },
+      select: this.UserSelect,
     });
     const count = await this.prisma.user.count({
       where: {
@@ -160,37 +160,19 @@ export class UserService {
       where: {
         ...value,
       },
-      include: {
-        ContentAssignedTo: {
-          include: {
-            assignedTo: {
-              select: {
-                id: true,
-                name: true,
-                email: true,
-              },
-            },
-            assignedContent: {
-              select: {
-                id: true,
-                heading: true,
-                type: true,
-              },
-            },
-          },
-        },
-      },
     });
     return user;
   }
 
-  async findOne(id: number): Promise<any | undefined> {
+  async findOne(id: number): Promise<UserProfileAdminGetDto | undefined> {
     const user = await this.find({ id });
     if (!user) return undefined;
     return user;
   }
 
-  async findByEmail(email: string): Promise<UserGetDto | undefined> {
+  async findByEmail(
+    email: string,
+  ): Promise<UserProfileAdminGetDto | undefined> {
     const user = await this.find({ email });
     if (!user) return undefined;
     return {
@@ -204,7 +186,9 @@ export class UserService {
     };
   }
 
-  async findByPhone(phone: string): Promise<UserGetDto | undefined> {
+  async findByPhone(
+    phone: string,
+  ): Promise<UserProfileAdminGetDto | undefined> {
     const user = await this.find({ phone });
     if (!user) return undefined;
 

@@ -1,4 +1,4 @@
-import { ExecutionContext, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import {
   registerDecorator,
   ValidationArguments,
@@ -6,16 +6,18 @@ import {
   ValidatorConstraint,
   ValidatorConstraintInterface,
 } from 'class-validator';
-import { UserService } from 'src/user/user.service';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @ValidatorConstraint({ name: 'UniqueEmailRule', async: true })
 @Injectable()
 export class UniqueEmailRule implements ValidatorConstraintInterface {
-  constructor(private userService: UserService) {}
+  constructor(private prisma: PrismaService) {}
 
   async validate(value: string) {
     try {
-      const user = await this.userService.findByEmail(value);
+      const user = await this.prisma.user.findFirst({
+        where: { email: value },
+      });
       if (user) return false;
     } catch (e) {
       return false;

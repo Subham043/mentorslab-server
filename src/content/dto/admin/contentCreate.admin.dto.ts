@@ -1,23 +1,30 @@
-import { IsBoolean, IsEnum, IsOptional, IsString } from 'class-validator';
-import { ContentType } from './content_type.enum';
+import {
+  IsBoolean,
+  IsEnum,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+} from 'class-validator';
+import { ContentTypeAdmin } from './content_type.admin.enum';
 import {
   MemoryStoredFile,
   IsFile,
   MaxFileSize,
+  HasMimeType,
   HasExtension,
 } from 'nestjs-form-data';
 import { Transform } from 'class-transformer';
 
-export class ContentUpdateDto {
-  @IsOptional()
-  @IsEnum(ContentType)
-  type: ContentType;
+export class ContentAdminCreateDto {
+  @IsNotEmpty()
+  @IsEnum(ContentTypeAdmin)
+  type: ContentTypeAdmin;
 
   @IsString()
   @IsOptional()
   file_path: string;
 
-  @IsOptional()
+  @IsNotEmpty()
   heading: string;
 
   @IsOptional()

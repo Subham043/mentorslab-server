@@ -1,5 +1,5 @@
-import { ContentGetDto } from 'src/content/dto';
-import { UserGetDto } from 'src/user/dto';
+import { ContentAdminGetDto } from 'src/content/dto';
+import { UserProfileGetDto } from 'src/user/dto';
 
 export interface AssignedContentGetDto {
   id?: number;
@@ -7,7 +7,7 @@ export interface AssignedContentGetDto {
   assignedById?: number;
   assignedToId?: number;
   assignedContentId?: number;
-  assignedBy?: UserGetDto;
-  assignedTo?: UserGetDto;
-  assignedContent?: ContentGetDto;
+  assignedBy?: UserProfileGetDto;
+  assignedTo?: UserProfileGetDto;
+  assignedContent?: ContentAdminGetDto;
 }

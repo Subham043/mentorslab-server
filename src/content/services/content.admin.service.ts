@@ -1,22 +1,27 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import {
-  ContentCreateDto,
-  ContentGetDto,
-  ContentPaginateDto,
-  ContentUpdateDto,
-} from './dto';
+  ContentAdminCreateDto,
+  ContentAdminGetDto,
+  ContentAdminPaginateDto,
+  ContentAdminUpdateDto,
+} from '../dto';
 import * as fs from 'fs/promises';
 import { fileName } from 'src/common/hooks/fileName.hooks';
 
 @Injectable()
-export class ContentService {
+export class ContentAdminService {
+  private readonly User = {
+    id: true,
+    name: true,
+    email: true,
+  };
   constructor(private prisma: PrismaService) {}
 
   async create(
-    dto: ContentCreateDto,
+    dto: ContentAdminCreateDto,
     userId: number,
-  ): Promise<ContentGetDto | undefined> {
+  ): Promise<ContentAdminGetDto | undefined> {
     if (dto.type === 'PDF' && !dto.file) {
       throw new HttpException('PDF File is required', HttpStatus.BAD_REQUEST);
     } else if (dto.type === 'PDF' && dto.file) {
@@ -44,11 +49,7 @@ export class ContentService {
       },
       include: {
         uploadBy: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
+          select: this.User,
         },
       },
     });
@@ -57,8 +58,8 @@ export class ContentService {
 
   async update(
     id: number,
-    dto: ContentUpdateDto,
-  ): Promise<ContentGetDto | undefined> {
+    dto: ContentAdminUpdateDto,
+  ): Promise<ContentAdminGetDto | undefined> {
     const res = await this.findOne(id);
 
     if (dto.type === 'PDF' && res.type !== 'PDF' && !dto.file) {
@@ -95,26 +96,18 @@ export class ContentService {
       },
       include: {
         uploadBy: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
+          select: this.User,
         },
       },
     });
     return content;
   }
 
-  async findAll(): Promise<ContentGetDto[]> {
+  async findAll(): Promise<ContentAdminGetDto[]> {
     return await this.prisma.content.findMany({
       include: {
         uploadBy: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
+          select: this.User,
         },
       },
     });
@@ -123,18 +116,14 @@ export class ContentService {
   async findAllPaginate(params: {
     skip?: number;
     take?: number;
-  }): Promise<ContentPaginateDto> {
+  }): Promise<ContentAdminPaginateDto> {
     const { skip, take } = params;
     const data = await this.prisma.content.findMany({
       skip: skip ? skip : 0,
       take: take ? take : 10,
       include: {
         uploadBy: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
+          select: this.User,
         },
       },
     });
@@ -146,7 +135,7 @@ export class ContentService {
   }
 
   // eslint-disable-next-line @typescript-eslint/ban-types
-  async find(value: {}): Promise<ContentGetDto | undefined> {
+  async find(value: {}): Promise<ContentAdminGetDto | undefined> {
     const content = await this.prisma.content.findFirst({
       where: {
         ...value,
@@ -175,7 +164,7 @@ export class ContentService {
     return content;
   }
 
-  async findOne(id: number): Promise<ContentGetDto | undefined> {
+  async findOne(id: number): Promise<ContentAdminGetDto | undefined> {
     return await this.find({ id });
   }
 

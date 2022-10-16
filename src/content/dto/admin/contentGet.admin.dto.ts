@@ -1,5 +1,5 @@
-import { UserGetDto } from 'src/user/dto';
-export interface ContentGetDto {
+import { UserProfileGetDto } from 'src/user/dto';
+export interface ContentAdminGetDto {
   id?: number;
   createdAt?: Date;
   updatedAt?: Date;
@@ -9,5 +9,5 @@ export interface ContentGetDto {
   description?: string;
   draft?: boolean;
   restricted?: boolean;
-  User?: UserGetDto;
+  User?: UserProfileGetDto;
 }

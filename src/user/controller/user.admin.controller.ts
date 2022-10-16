@@ -16,21 +16,23 @@ import { Roles } from 'src/common/decorator/roles.decorator';
 import { ValidPaginatePipe } from 'src/common/pipes/valid_paginate.pipes';
 import { ValidUserIdPipe } from 'src/common/pipes/valid_user_id.pipes';
 import {
-  UserCreateDto,
-  UserGetDto,
-  UserPaginateDto,
-  UserUpdateDto,
-} from './dto';
-import { UserService } from './user.service';
+  UserProfileAdminCreateDto,
+  UserProfileAdminGetDto,
+  UserProfileAdminPaginateDto,
+  UserProfileAdminUpdateDto,
+} from '../dto';
+import { UserProfileAdminService } from '../services/user.admin.service';
 
 @UseGuards(AccessTokenGuard)
 @Controller('user')
-export class UserController {
-  constructor(private userService: UserService) {}
+export class UserProfileAdminController {
+  constructor(private userService: UserProfileAdminService) {}
 
   @Post()
   @Roles('ADMIN')
-  async createUser(@Body() userCreateDto: UserCreateDto): Promise<UserGetDto> {
+  async createUser(
+    @Body() userCreateDto: UserProfileAdminCreateDto,
+  ): Promise<UserProfileAdminGetDto> {
     const result = await this.userService.create(userCreateDto);
     if (!result)
       throw new HttpException('Data not found', HttpStatus.NOT_FOUND);
@@ -41,8 +43,8 @@ export class UserController {
   @Roles('ADMIN')
   async updateUser(
     @Param('id', ValidUserIdPipe) id: number,
-    @Body() userUpdateDto: UserUpdateDto,
-  ): Promise<UserGetDto> {
+    @Body() userUpdateDto: UserProfileAdminUpdateDto,
+  ): Promise<UserProfileAdminGetDto> {
     const result = await this.userService.updateUser(id, userUpdateDto);
     if (!result)
       throw new HttpException('Data not found', HttpStatus.NOT_FOUND);
@@ -51,7 +53,7 @@ export class UserController {
 
   @Get()
   @Roles('ADMIN')
-  async getAllUser(): Promise<UserGetDto[]> {
+  async getAllUser(): Promise<UserProfileAdminGetDto[]> {
     const result = await this.userService.findAll();
     return result;
   }
@@ -61,7 +63,7 @@ export class UserController {
   async getAllUserPaginate(
     @Query('skip', ValidPaginatePipe) skip: string,
     @Query('take', ValidPaginatePipe) take: string,
-  ): Promise<UserPaginateDto> {
+  ): Promise<UserProfileAdminPaginateDto> {
     const result = await this.userService.findAllPaginate({
       skip: Number(skip),
       take: Number(take),
@@ -71,7 +73,9 @@ export class UserController {
 
   @Get(':id')
   @Roles('ADMIN')
-  async getUser(@Param('id', ValidUserIdPipe) id: number): Promise<UserGetDto> {
+  async getUser(
+    @Param('id', ValidUserIdPipe) id: number,
+  ): Promise<UserProfileAdminGetDto> {
     const result = await this.userService.findOne(id);
     if (!result)
       throw new HttpException('Data not found', HttpStatus.NOT_FOUND);

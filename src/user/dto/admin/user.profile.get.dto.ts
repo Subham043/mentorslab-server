@@ -1,4 +1,4 @@
-export interface UserGetDto {
+export interface UserProfileAdminGetDto {
   id?: number;
   name?: string;
   email?: string;

@@ -6,16 +6,20 @@ import {
   ValidatorConstraint,
   ValidatorConstraintInterface,
 } from 'class-validator';
-import { UserService } from 'src/user/user.service';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @ValidatorConstraint({ name: 'UniquePhoneRule', async: true })
 @Injectable()
 export class UniquePhoneRule implements ValidatorConstraintInterface {
-  constructor(private userService: UserService) {}
+  constructor(private prisma: PrismaService) {}
 
   async validate(value: string) {
     try {
-      const user = await this.userService.findByPhone(value);
+      const user = await this.prisma.user.findFirst({
+        where: {
+          phone: value,
+        },
+      });
       if (user) return false;
     } catch (e) {
       console.log(e);

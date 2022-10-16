@@ -12,19 +12,15 @@ import {
   ResetPasswordDto,
 } from './dto';
 import { JwtService } from '@nestjs/jwt';
-import { UserService } from 'src/user/user.service';
 import { Token } from './dto/token.dto';
 import * as bcrypt from 'bcrypt';
 import { decrypt, encrypt } from 'src/common/hooks/encryption.hooks';
 import { RegisterDto } from './dto/register.dto';
-import { UserGetDto } from 'src/user/dto';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class AuthService {
-  constructor(
-    private jwtService: JwtService,
-    private usersService: UserService,
-  ) {}
+  constructor(private jwtService: JwtService, private prisma: PrismaService) {}
 
   async generateTokens(user: any): Promise<Token> {
     const jwtPayload: JwtPayload = {
@@ -52,8 +48,10 @@ export class AuthService {
   }
 
   async validateUserLogin(dto: AuthDto): Promise<Token> {
-    const user = await this.usersService.find({
-      email: dto.email,
+    const user = await this.prisma.user.findFirst({
+      where: {
+        email: dto.email,
+      },
     });
 
     const isMatch = await bcrypt.compare(dto.password, user.password);
@@ -69,23 +67,22 @@ export class AuthService {
     const { password } = dto;
     const hash = await bcrypt.hash(password, Number(process.env.saltOrRounds));
     dto.password = hash;
-    const user = await this.usersService.create({
-      ...dto,
-      otp: Math.floor(1111 + Math.random() * 9999),
+
+    const user = await this.prisma.user.create({
+      data: {
+        ...dto,
+        otp: Math.floor(1111 + Math.random() * 9999),
+      },
     });
     const result = await encrypt(String(user.id));
     return result;
   }
 
   async forgotPassword(dto: ForgotPasswordDto): Promise<any> {
-    const user = await this.usersService.update(
-      {
-        email: dto.email,
-      },
-      {
-        otp: Math.floor(1111 + Math.random() * 9999),
-      },
-    );
+    const user = await this.prisma.user.update({
+      where: { email: dto.email },
+      data: { otp: Math.floor(1111 + Math.random() * 9999) },
+    });
     const result = await encrypt(String(user.id));
     return result;
   }
@@ -95,50 +92,47 @@ export class AuthService {
     encryptedId: string,
   ): Promise<string> {
     const id = await decrypt(encryptedId);
-    const user = await this.usersService.find({
-      id: Number(id),
-      otp: Number(resetDto.otp),
-      verified: true,
-      blocked: false,
+    const user = await this.prisma.user.findFirst({
+      where: {
+        id: Number(id),
+        otp: Number(resetDto.otp),
+        verified: true,
+        blocked: false,
+      },
     });
 
     if (!user) throw new HttpException('Invalid otp', HttpStatus.BAD_REQUEST);
     const { password } = resetDto;
     const hash = await bcrypt.hash(password, Number(process.env.saltOrRounds));
 
-    await this.usersService.update(
-      {
-        id: Number(id),
-      },
-      {
-        password: hash,
-        otp: Math.floor(1111 + Math.random() * 9999),
-      },
-    );
+    await this.prisma.user.update({
+      where: { id: Number(id) },
+      data: { password: hash, otp: Math.floor(1111 + Math.random() * 9999) },
+    });
 
     return 'Password reset successful';
   }
 
   async verifyUser(otpDto: OtpDto, encryptedId: string): Promise<Token> {
     const id = await decrypt(encryptedId);
-    const user = await this.usersService.find({
-      id: Number(id),
-      otp: Number(otpDto.otp),
-      verified: false,
-      blocked: false,
+    const user = await this.prisma.user.findFirst({
+      where: {
+        id: Number(id),
+        otp: Number(otpDto.otp),
+        verified: false,
+        blocked: false,
+      },
     });
 
     if (!user) throw new HttpException('Invalid otp', HttpStatus.BAD_REQUEST);
 
-    await this.usersService.update(
-      {
-        id: Number(id),
-      },
-      {
+    await this.prisma.user.update({
+      where: { id: Number(id) },
+      data: {
         verified: true,
         otp: Math.floor(1111 + Math.random() * 9999),
       },
-    );
+    });
     const token = await this.generateTokens(user);
     await this.storeRefreshToken({ id: Number(id) }, token.refresh_token);
     return token;
@@ -152,18 +146,21 @@ export class AuthService {
       refresh_token,
       Number(process.env.saltOrRounds),
     );
-    await this.usersService.update(
-      {
-        ...data,
-      },
-      {
+    await this.prisma.user.update({
+      where: { ...data },
+      data: {
+        verified: true,
         hashed_refresh_token: hash,
       },
-    );
+    });
   }
 
   async refreshTokens(userId: number, refreshToken: string): Promise<Token> {
-    const user = await this.usersService.find({ id: userId });
+    const user = await this.prisma.user.findFirst({
+      where: {
+        id: Number(userId),
+      },
+    });
     if (!user) throw new ForbiddenException('Access Denied');
 
     if (!user.hashed_refresh_token)

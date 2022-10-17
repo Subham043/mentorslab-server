@@ -15,27 +15,27 @@ import { GetCurrentUserId } from 'src/common/decorator/get_current_user_id.decor
 import { Roles } from 'src/common/decorator/roles.decorator';
 import { ValidContentIdPipe } from 'src/common/pipes/valid_content_id.pipes';
 import { ValidUserIdPipe } from 'src/common/pipes/valid_user_id.pipes';
-import { AssignedContentService } from './assigned_content.service';
+import { AssignedContentAdminService } from '../services/assigned_content.admin.service';
 import {
-  AssignedContentGetDto,
-  AssignedContentToUserCreateArrayDto,
-  AssignedContentToUserCreateDto,
-  AssignedUserToContentCreateArrayDto,
-  AssignedUserToContentCreateDto,
-} from './dto';
+  AssignedContentGetAdminDto,
+  AssignedContentToUserCreateArrayAdminDto,
+  AssignedContentToUserCreateAdminDto,
+  AssignedUserToContentCreateArrayAdminDto,
+  AssignedUserToContentCreateAdminDto,
+} from '../dto';
 
 @UseGuards(AccessTokenGuard)
 @Controller('assign')
-export class AssignedContentController {
-  constructor(private assignedContentService: AssignedContentService) {}
+export class AssignedContentAdminController {
+  constructor(private assignedContentService: AssignedContentAdminService) {}
 
   @Post('content-to-user/:contentId')
   @Roles('ADMIN')
   async createAssignedContentToUser(
-    @Body() dto: AssignedContentToUserCreateDto,
+    @Body() dto: AssignedContentToUserCreateAdminDto,
     @Param('contentId', ValidContentIdPipe) contentId: number,
     @GetCurrentUserId() userId: number,
-  ): Promise<AssignedContentGetDto> {
+  ): Promise<AssignedContentGetAdminDto> {
     const result = await this.assignedContentService.createViaContent(
       dto,
       contentId,
@@ -49,10 +49,10 @@ export class AssignedContentController {
   @Post('content-to-user-multiple/:contentId')
   @Roles('ADMIN')
   async createAssignedContentToUserMultiple(
-    @Body() dto: AssignedContentToUserCreateArrayDto,
+    @Body() dto: AssignedContentToUserCreateArrayAdminDto,
     @Param('contentId', ValidContentIdPipe) contentId: number,
     @GetCurrentUserId() userId: number,
-  ): Promise<AssignedContentGetDto[]> {
+  ): Promise<AssignedContentGetAdminDto[]> {
     const result = await this.assignedContentService.createViaContentMultiple(
       dto,
       contentId,
@@ -66,10 +66,10 @@ export class AssignedContentController {
   @Post('user-to-content/:assignedToId')
   @Roles('ADMIN')
   async createAssignedUserToContent(
-    @Body() dto: AssignedUserToContentCreateDto,
+    @Body() dto: AssignedUserToContentCreateAdminDto,
     @Param('assignedToId', ValidUserIdPipe) assignedToId: number,
     @GetCurrentUserId() userId: number,
-  ): Promise<AssignedContentGetDto> {
+  ): Promise<AssignedContentGetAdminDto> {
     const result = await this.assignedContentService.createViaUser(
       dto,
       assignedToId,
@@ -83,10 +83,10 @@ export class AssignedContentController {
   @Post('user-to-content-multiple/:assignedToId')
   @Roles('ADMIN')
   async createAssignedUserToContentMultiple(
-    @Body() dto: AssignedUserToContentCreateArrayDto,
+    @Body() dto: AssignedUserToContentCreateArrayAdminDto,
     @Param('assignedToId', ValidUserIdPipe) assignedToId: number,
     @GetCurrentUserId() userId: number,
-  ): Promise<AssignedContentGetDto[]> {
+  ): Promise<AssignedContentGetAdminDto[]> {
     const result = await this.assignedContentService.createViaUserMultiple(
       dto,
       assignedToId,
@@ -99,7 +99,7 @@ export class AssignedContentController {
 
   @Get()
   @Roles('ADMIN')
-  async getAllContent(): Promise<AssignedContentGetDto[]> {
+  async getAllContent(): Promise<AssignedContentGetAdminDto[]> {
     const result = await this.assignedContentService.findAll();
     return result;
   }
@@ -108,7 +108,7 @@ export class AssignedContentController {
   @Roles('ADMIN')
   async getContent(
     @Param('id', ParseIntPipe) id: number,
-  ): Promise<AssignedContentGetDto> {
+  ): Promise<AssignedContentGetAdminDto> {
     const result = await this.assignedContentService.findOne(id);
     if (!result)
       throw new HttpException('Data not found', HttpStatus.NOT_FOUND);

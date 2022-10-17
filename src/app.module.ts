@@ -12,8 +12,8 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { RolesGuard } from './common/guards/roles.guard';
 import { ContentModule } from './content/content.module';
-import { AssignedContentService } from './assigned_content/assigned_content.service';
-import { AssignedContentController } from './assigned_content/assigned_content.controller';
+import { AssignedContentAdminService } from './assigned_content/services/assigned_content.admin.service';
+import { AssignedContentAdminController } from './assigned_content/controller/assigned_content.admin.controller';
 import { AssignedContentModule } from './assigned_content/assigned_content.module';
 import { NestjsFormDataModule } from 'nestjs-form-data';
 import { UserProfileController } from './user/controller/user.user.controller';
@@ -49,7 +49,7 @@ import { ContentAdminService } from './content/services/content.admin.service';
     UserProfileController,
     UserProfileAdminController,
     ContentAdminController,
-    AssignedContentController,
+    AssignedContentAdminController,
   ],
   providers: [
     AppService,
@@ -61,7 +61,7 @@ import { ContentAdminService } from './content/services/content.admin.service';
       useClass: RolesGuard,
     },
     ContentAdminService,
-    AssignedContentService,
+    AssignedContentAdminService,
   ],
 })
 export class AppModule {}

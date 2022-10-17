@@ -36,11 +36,13 @@ export class ContentAdminService {
       throw new HttpException('Video link is required', HttpStatus.BAD_REQUEST);
     }
 
-    const { type, file_path, heading, description, draft, restricted } = dto;
+    const { type, file_path, heading, name, description, draft, restricted } =
+      dto;
     const content = await this.prisma.content.create({
       data: {
         type,
         file_path,
+        name,
         heading,
         description,
         draft,
@@ -83,12 +85,14 @@ export class ContentAdminService {
       throw new HttpException('Video link is required', HttpStatus.BAD_REQUEST);
     }
 
-    const { type, file_path, heading, description, draft, restricted } = dto;
+    const { type, file_path, heading, name, description, draft, restricted } =
+      dto;
     const content = await this.prisma.content.update({
       where: { id: Number(id) },
       data: {
         type,
         file_path,
+        name,
         heading,
         description,
         draft,

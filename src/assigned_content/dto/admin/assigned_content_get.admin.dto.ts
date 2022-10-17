@@ -1,7 +1,7 @@
 import { ContentAdminGetDto } from 'src/content/dto';
 import { UserProfileGetDto } from 'src/user/dto';
 
-export interface AssignedContentGetDto {
+export interface AssignedContentGetAdminDto {
   id?: number;
   assignedAt?: Date;
   assignedById?: number;

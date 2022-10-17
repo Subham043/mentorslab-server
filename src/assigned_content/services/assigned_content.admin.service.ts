@@ -1,15 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import {
-  AssignedContentToUserCreateDto,
-  AssignedContentToUserCreateArrayDto,
-  AssignedContentGetDto,
-  AssignedUserToContentCreateDto,
-  AssignedUserToContentCreateArrayDto,
-} from './dto';
+  AssignedContentToUserCreateAdminDto,
+  AssignedContentToUserCreateArrayAdminDto,
+  AssignedContentGetAdminDto,
+  AssignedUserToContentCreateAdminDto,
+  AssignedUserToContentCreateArrayAdminDto,
+} from '../dto';
 
 @Injectable()
-export class AssignedContentService {
+export class AssignedContentAdminService {
   private readonly User = {
     id: true,
     name: true,
@@ -24,10 +24,10 @@ export class AssignedContentService {
   constructor(private prisma: PrismaService) {}
 
   async createViaContent(
-    dto: AssignedContentToUserCreateDto,
+    dto: AssignedContentToUserCreateAdminDto,
     contentId: number,
     userId: number,
-  ): Promise<AssignedContentGetDto | undefined> {
+  ): Promise<AssignedContentGetAdminDto | undefined> {
     const checkAssignedContent = await this.find({
       ...dto,
       assignedContentId: contentId,
@@ -62,11 +62,11 @@ export class AssignedContentService {
   }
 
   async createViaContentMultiple(
-    dto: AssignedContentToUserCreateArrayDto,
+    dto: AssignedContentToUserCreateArrayAdminDto,
     contentId: number,
     userId: number,
-  ): Promise<AssignedContentGetDto[]> {
-    const arr: AssignedContentGetDto[] = [];
+  ): Promise<AssignedContentGetAdminDto[]> {
+    const arr: AssignedContentGetAdminDto[] = [];
 
     await this.removeByContentId(contentId);
 
@@ -86,10 +86,10 @@ export class AssignedContentService {
   }
 
   async createViaUser(
-    dto: AssignedUserToContentCreateDto,
+    dto: AssignedUserToContentCreateAdminDto,
     assignedToId: number,
     userId: number,
-  ): Promise<AssignedContentGetDto | undefined> {
+  ): Promise<AssignedContentGetAdminDto | undefined> {
     const checkAssignedContent = await this.find({ ...dto, assignedToId });
     if (checkAssignedContent) return checkAssignedContent;
     const user = await this.prisma.user.findFirst({
@@ -121,11 +121,11 @@ export class AssignedContentService {
   }
 
   async createViaUserMultiple(
-    dto: AssignedUserToContentCreateArrayDto,
+    dto: AssignedUserToContentCreateArrayAdminDto,
     assignedToId: number,
     userId: number,
-  ): Promise<AssignedContentGetDto[]> {
-    const arr: AssignedContentGetDto[] = [];
+  ): Promise<AssignedContentGetAdminDto[]> {
+    const arr: AssignedContentGetAdminDto[] = [];
 
     await this.removeByAssignToId(assignedToId);
 
@@ -144,7 +144,7 @@ export class AssignedContentService {
     return uniqueObjArray;
   }
 
-  async findAll(): Promise<AssignedContentGetDto[]> {
+  async findAll(): Promise<AssignedContentGetAdminDto[]> {
     return await this.prisma.contentAssigned.findMany({
       include: {
         assignedBy: {
@@ -161,7 +161,7 @@ export class AssignedContentService {
   }
 
   // eslint-disable-next-line @typescript-eslint/ban-types
-  async find(value: {}): Promise<AssignedContentGetDto | undefined> {
+  async find(value: {}): Promise<AssignedContentGetAdminDto | undefined> {
     const content_assigned = await this.prisma.contentAssigned.findFirst({
       where: {
         ...value,
@@ -181,7 +181,7 @@ export class AssignedContentService {
     return content_assigned;
   }
 
-  async findOne(id: number): Promise<AssignedContentGetDto | undefined> {
+  async findOne(id: number): Promise<AssignedContentGetAdminDto | undefined> {
     return await this.find({ id });
   }
 

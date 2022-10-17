@@ -5,6 +5,7 @@ export interface ContentAdminGetDto {
   updatedAt?: Date;
   type?: string;
   file_path?: string;
+  name?: string;
   heading?: string;
   description?: string;
   draft?: boolean;

@@ -18,6 +18,9 @@ export class ContentAdminUpdateDto {
   file_path: string;
 
   @IsOptional()
+  name: string;
+
+  @IsOptional()
   heading: string;
 
   @IsOptional()

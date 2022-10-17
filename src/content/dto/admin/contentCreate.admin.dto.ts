@@ -25,6 +25,9 @@ export class ContentAdminCreateDto {
   file_path: string;
 
   @IsNotEmpty()
+  name: string;
+
+  @IsNotEmpty()
   heading: string;
 
   @IsOptional()

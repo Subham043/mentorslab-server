@@ -24,8 +24,12 @@ model User {
   hashed_refresh_token     String?   @db.Text
   role      Role     @default(USER)
   Content   Content[]
+  Payment   Payment[]
+  PaymentLiveSession   PaymentLiveSession[]
+  LiveSessionContent   LiveSessionContent[]
   ContentAssignedBy ContentAssigned[] @relation("assignedBy")
   ContentAssignedTo ContentAssigned[] @relation("assignedTo")
+  LiveSessionContentRequestedBy LiveSessionContentAssigned[] @relation("requestedBy")
 }
 
 enum Role {
@@ -39,12 +43,15 @@ model Content {
   updatedAt DateTime @updatedAt
   type      MEDIA_TYPE     @default(VIDEO)
   file_path String    @db.Text
+  name     String  @db.Text
   heading     String  @db.Text
   description     String?   @db.Text
+  amount     String?
   uploadBy   User? @relation(fields: [uploadedBy], references: [id], onDelete: SetNull, onUpdate: SetNull)
   uploadedBy Int?
   draft  Boolean    @default(false)
   restricted  Boolean    @default(false)
+  paid  Boolean    @default(false)
   AssignedContent ContentAssigned[] @relation("assignedContent")
 }
 
@@ -62,4 +69,77 @@ model ContentAssigned {
   assignedContent   Content?     @relation("assignedContent", fields: [assignedContentId], references: [id], onDelete: SetNull, onUpdate: SetNull)
   assignedContentId Int?
   assignedAt DateTime @default(now())
+  assignedRole      AssignedRole     @default(ASSIGNED)
+  PaymentInformation   Payment[]
+}
+
+enum AssignedRole {
+  ASSIGNED
+  PURCHASED
+}
+
+model Payment {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  status      PaymentStatus     @default(PENDING)
+  amount     String  @db.Text
+  paymentReferenceId     String?   @db.Text
+  paymentDoneBy   User? @relation(fields: [paymentBy], references: [id], onDelete: SetNull, onUpdate: SetNull)
+  paymentBy Int?
+  forContentAssigned   ContentAssigned? @relation(fields: [forContentAssignedId], references: [id], onDelete: SetNull, onUpdate: SetNull)
+  forContentAssignedId Int?
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID_PARTIAL
+  PAID_FULL
+}
+
+model LiveSessionContent {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  image String?    @db.Text
+  name     String  @db.Text
+  heading     String  @db.Text
+  description     String?   @db.Text
+  amount     String?
+  uploadBy   User? @relation(fields: [uploadedBy], references: [id], onDelete: SetNull, onUpdate: SetNull)
+  uploadedBy Int?
+  draft  Boolean    @default(false)
+  paid  Boolean    @default(false)
+  LiveSessionContentAssigned LiveSessionContentAssigned[] @relation("liveSessionContent")
+}
+
+model LiveSessionContentAssigned {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  requestedBy       User?     @relation("requestedBy", fields: [requestedById], references: [id], onDelete: SetNull, onUpdate: SetNull)
+  requestedById     Int?
+  liveSessionContent   LiveSessionContent?     @relation("liveSessionContent", fields: [liveSessionContentId], references: [id], onDelete: SetNull, onUpdate: SetNull)
+  liveSessionContentId Int?
+  scheduledAt DateTime @default(now())
+  status      LiveSessionContentStatus     @default(PENDING)
+  PaymentInformation   PaymentLiveSession[]
+}
+
+enum LiveSessionContentStatus {
+  PENDING
+  COMPLETED
+}
+
+model PaymentLiveSession {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  status      PaymentStatus     @default(PENDING)
+  amount     String  @db.Text
+  paymentReferenceId     String?   @db.Text
+  paymentDoneBy   User? @relation(fields: [paymentBy], references: [id], onDelete: SetNull, onUpdate: SetNull)
+  paymentBy Int?
+  forLiveSessionContentAssigned   LiveSessionContentAssigned? @relation(fields: [forLiveSessionContentAssignedId], references: [id], onDelete: SetNull, onUpdate: SetNull)
+  forLiveSessionContentAssignedId Int?
 }

@@ -12,14 +12,8 @@ import {
   HasExtension,
 } from 'nestjs-form-data';
 import { Transform } from 'class-transformer';
-import { ContentTypeAdmin } from './content_type.admin.enum';
 
-export class ContentAdminUpdateDto {
-  @IsNotEmpty()
-  @IsEnum(ContentTypeAdmin)
-  type: ContentTypeAdmin;
-
-  @IsString()
+export class LiveSessionContentAdminUpdateDto {
   @IsOptional()
   file_path: string;
 
@@ -45,16 +39,11 @@ export class ContentAdminUpdateDto {
   @IsOptional()
   @Transform(({ value }) => value === 'true' || value === true || value === 1)
   @IsBoolean()
-  restricted: boolean;
-
-  @IsOptional()
-  @Transform(({ value }) => value === 'true' || value === true || value === 1)
-  @IsBoolean()
   paid: boolean;
 
   @IsOptional()
   @IsFile()
   @MaxFileSize(5e6)
-  @HasExtension(['pdf'])
-  file: MemoryStoredFile;
+  @HasExtension(['jpg', 'jpeg', 'webp', 'png'])
+  image: MemoryStoredFile;
 }

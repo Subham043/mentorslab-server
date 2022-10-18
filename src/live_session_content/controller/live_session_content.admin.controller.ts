@@ -16,31 +16,36 @@ import { AccessTokenGuard } from 'src/auth/guards/access_token.guard';
 import { GetCurrentUserId } from 'src/common/decorator/get_current_user_id.decorator';
 import { Roles } from 'src/common/decorator/roles.decorator';
 import {
-  ContentAdminCreateDto,
-  ContentAdminGetDto,
-  ContentAdminPaginateDto,
-  ContentAdminUpdateDto,
+  LiveSessionContentAdminCreateDto,
+  LiveSessionContentAdminGetDto,
+  LiveSessionContentAdminPaginateDto,
+  LiveSessionContentAdminUpdateDto,
 } from '../dto';
 import { Response } from 'express';
 import { Public } from 'src/common/decorator/public.decorator';
-import { ValidContentIdPipe } from 'src/common/pipes/valid_content_id.pipes';
+import { ValidLiveSessionContentIdPipe } from 'src/common/pipes/valid_live_session_content_id.pipes';
 import { FormDataRequest } from 'nestjs-form-data';
 import { ValidPaginatePipe } from 'src/common/pipes/valid_paginate.pipes';
-import { ContentAdminService } from '../services/content.admin.service';
+import { LiveSessionContentAdminService } from '../services/live_session_content.admin.service';
 
 @UseGuards(AccessTokenGuard)
-@Controller('content')
-export class ContentAdminController {
-  constructor(private contentService: ContentAdminService) {}
+@Controller('live-session-content')
+export class LiveSessionContentAdminController {
+  constructor(
+    private liveSessionContentService: LiveSessionContentAdminService,
+  ) {}
 
   @Post()
   @Roles('ADMIN')
   @FormDataRequest()
   async createContent(
-    @Body() contentCreateDto: ContentAdminCreateDto,
+    @Body() contentCreateDto: LiveSessionContentAdminCreateDto,
     @GetCurrentUserId() userId: number,
-  ): Promise<ContentAdminGetDto> {
-    const result = await this.contentService.create(contentCreateDto, userId);
+  ): Promise<LiveSessionContentAdminGetDto> {
+    const result = await this.liveSessionContentService.create(
+      contentCreateDto,
+      userId,
+    );
     if (!result)
       throw new HttpException('Data not found', HttpStatus.NOT_FOUND);
     return result;
@@ -50,10 +55,13 @@ export class ContentAdminController {
   @Roles('ADMIN')
   @FormDataRequest()
   async updateContent(
-    @Param('id', ValidContentIdPipe) id: number,
-    @Body() contentUpdateDto: ContentAdminUpdateDto,
-  ): Promise<ContentAdminGetDto> {
-    const result = await this.contentService.update(id, contentUpdateDto);
+    @Param('id', ValidLiveSessionContentIdPipe) id: number,
+    @Body() contentUpdateDto: LiveSessionContentAdminUpdateDto,
+  ): Promise<LiveSessionContentAdminGetDto> {
+    const result = await this.liveSessionContentService.update(
+      id,
+      contentUpdateDto,
+    );
     if (!result)
       throw new HttpException('Data not found', HttpStatus.NOT_FOUND);
     return result;
@@ -61,8 +69,8 @@ export class ContentAdminController {
 
   @Get()
   @Roles('ADMIN')
-  async getAllContent(): Promise<ContentAdminGetDto[]> {
-    const result = await this.contentService.findAll();
+  async getAllContent(): Promise<LiveSessionContentAdminGetDto[]> {
+    const result = await this.liveSessionContentService.findAll();
     return result;
   }
 
@@ -71,8 +79,8 @@ export class ContentAdminController {
   async getAllContentPaginate(
     @Query('skip', ValidPaginatePipe) skip: string,
     @Query('take', ValidPaginatePipe) take: string,
-  ): Promise<ContentAdminPaginateDto> {
-    const result = await this.contentService.findAllPaginate({
+  ): Promise<LiveSessionContentAdminPaginateDto> {
+    const result = await this.liveSessionContentService.findAllPaginate({
       skip: Number(skip),
       take: Number(take),
     });
@@ -82,20 +90,9 @@ export class ContentAdminController {
   @Get(':id')
   @Roles('ADMIN')
   async getContent(
-    @Param('id', ValidContentIdPipe) id: number,
-  ): Promise<ContentAdminGetDto> {
-    const result = await this.contentService.findOne(id);
-    if (!result)
-      throw new HttpException('Data not found', HttpStatus.NOT_FOUND);
-    return result;
-  }
-
-  @Get(':id/assigned-content')
-  @Roles('ADMIN')
-  async getContentWithAssignedContent(
-    @Param('id', ValidContentIdPipe) id: number,
-  ): Promise<ContentAdminGetDto> {
-    const result = await this.contentService.findOneWithAssignedContent(id);
+    @Param('id', ValidLiveSessionContentIdPipe) id: number,
+  ): Promise<LiveSessionContentAdminGetDto> {
+    const result = await this.liveSessionContentService.findOne(id);
     if (!result)
       throw new HttpException('Data not found', HttpStatus.NOT_FOUND);
     return result;
@@ -104,9 +101,9 @@ export class ContentAdminController {
   @Delete(':id')
   @Roles('ADMIN')
   async deleteContent(
-    @Param('id', ValidContentIdPipe) id: number,
+    @Param('id', ValidLiveSessionContentIdPipe) id: number,
   ): Promise<string> {
-    const res = await this.contentService.remove(id);
+    const res = await this.liveSessionContentService.remove(id);
     return res;
   }
 

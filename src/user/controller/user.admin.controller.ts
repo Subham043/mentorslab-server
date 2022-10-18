@@ -33,7 +33,7 @@ export class UserProfileAdminController {
   async createUser(
     @Body() userCreateDto: UserProfileAdminCreateDto,
   ): Promise<UserProfileAdminGetDto> {
-    const result = await this.userService.create(userCreateDto);
+    const result = await this.userService.createUser(userCreateDto);
     if (!result)
       throw new HttpException('Data not found', HttpStatus.NOT_FOUND);
     return result;

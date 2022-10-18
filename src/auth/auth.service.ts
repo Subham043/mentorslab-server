@@ -71,7 +71,7 @@ export class AuthService {
     const user = await this.prisma.user.create({
       data: {
         ...dto,
-        otp: Math.floor(1111 + Math.random() * 9999),
+        otp: this.generateOtpNumber(),
       },
     });
     const result = await encrypt(String(user.id));
@@ -81,7 +81,7 @@ export class AuthService {
   async forgotPassword(dto: ForgotPasswordDto): Promise<any> {
     const user = await this.prisma.user.update({
       where: { email: dto.email },
-      data: { otp: Math.floor(1111 + Math.random() * 9999) },
+      data: { otp: this.generateOtpNumber() },
     });
     const result = await encrypt(String(user.id));
     return result;
@@ -107,7 +107,7 @@ export class AuthService {
 
     await this.prisma.user.update({
       where: { id: Number(id) },
-      data: { password: hash, otp: Math.floor(1111 + Math.random() * 9999) },
+      data: { password: hash, otp: this.generateOtpNumber() },
     });
 
     return 'Password reset successful';
@@ -130,7 +130,7 @@ export class AuthService {
       where: { id: Number(id) },
       data: {
         verified: true,
-        otp: Math.floor(1111 + Math.random() * 9999),
+        otp: this.generateOtpNumber(),
       },
     });
     const token = await this.generateTokens(user);
@@ -174,5 +174,9 @@ export class AuthService {
     const token = await this.generateTokens(user);
     await this.storeRefreshToken({ id: Number(userId) }, token.refresh_token);
     return token;
+  }
+
+  generateOtpNumber(): number {
+    return Math.floor(1000 + Math.random() * 9000);
   }
 }

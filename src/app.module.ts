@@ -22,6 +22,8 @@ import { UserProfileAdminService } from './user/services/user.admin.service';
 import { UserProfileService } from './user/services/user.user.service';
 import { ContentAdminController } from './content/controller/content.admin.controller';
 import { ContentAdminService } from './content/services/content.admin.service';
+import { LiveSessionContentAdminController } from './live_session_content/controller/live_session_content.admin.controller';
+import { LiveSessionContentAdminService } from './live_session_content/services/live_session_content.admin.service';
 
 @Module({
   imports: [
@@ -49,6 +51,7 @@ import { ContentAdminService } from './content/services/content.admin.service';
     UserProfileController,
     UserProfileAdminController,
     ContentAdminController,
+    LiveSessionContentAdminController,
     AssignedContentAdminController,
   ],
   providers: [
@@ -61,6 +64,7 @@ import { ContentAdminService } from './content/services/content.admin.service';
       useClass: RolesGuard,
     },
     ContentAdminService,
+    LiveSessionContentAdminService,
     AssignedContentAdminService,
   ],
 })

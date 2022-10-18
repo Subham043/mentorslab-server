@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { User } from '@prisma/client';
 import {
@@ -17,6 +17,8 @@ export class UserProfileAdminService {
     email: true,
     phone: true,
     role: true,
+    blocked: true,
+    verified: true,
     createdAt: true,
     updatedAt: true,
   };
@@ -26,15 +28,18 @@ export class UserProfileAdminService {
     dto: UserProfileAdminCreateDto,
   ): Promise<UserProfileAdminGetDto | undefined> {
     try {
-      const hashedPassword = await bcrypt.hash(
-        dto.password,
+      const { password } = dto;
+      const hashed = await bcrypt.hash(
+        password,
         Number(process.env.saltOrRounds),
       );
-      dto.password = hashedPassword;
+      console.log(hashed);
+      dto.password = hashed;
+
       const user = await this.prisma.user.create({
         data: {
           ...dto,
-          otp: Math.floor(1111 + Math.random() * 9999),
+          otp: Math.floor(1000 + Math.random() * 9000),
         },
       });
       if (!user) return undefined;
@@ -44,10 +49,13 @@ export class UserProfileAdminService {
         email: user.email,
         phone: user.phone,
         role: user.role,
+        blocked: user.blocked,
+        verified: user.verified,
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
       };
     } catch (error) {
+      console.log(error);
       return undefined;
     }
   }
@@ -107,6 +115,8 @@ export class UserProfileAdminService {
       email: userUpdate.email,
       phone: userUpdate.phone,
       role: userUpdate.role,
+      blocked: userUpdate.blocked,
+      verified: userUpdate.verified,
       createdAt: userUpdate.createdAt,
       updatedAt: userUpdate.updatedAt,
     };
@@ -167,7 +177,17 @@ export class UserProfileAdminService {
   async findOne(id: number): Promise<UserProfileAdminGetDto | undefined> {
     const user = await this.find({ id });
     if (!user) return undefined;
-    return user;
+    return {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      phone: user.phone,
+      role: user.role,
+      blocked: user.blocked,
+      verified: user.verified,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+    };
   }
 
   async findByEmail(
@@ -181,6 +201,8 @@ export class UserProfileAdminService {
       email: user.email,
       phone: user.phone,
       role: user.role,
+      blocked: user.blocked,
+      verified: user.verified,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     };
@@ -198,6 +220,8 @@ export class UserProfileAdminService {
       email: user.email,
       phone: user.phone,
       role: user.role,
+      blocked: user.blocked,
+      verified: user.verified,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     };

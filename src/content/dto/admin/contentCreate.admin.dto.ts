@@ -35,6 +35,10 @@ export class ContentAdminCreateDto {
   description: string;
 
   @IsOptional()
+  @IsString()
+  amount: string;
+
+  @IsOptional()
   @Transform(({ value }) => value === 'true' || value === true || value === 1)
   @IsBoolean()
   draft: boolean;
@@ -43,6 +47,11 @@ export class ContentAdminCreateDto {
   @Transform(({ value }) => value === 'true' || value === true || value === 1)
   @IsBoolean()
   restricted: boolean;
+
+  @IsOptional()
+  @Transform(({ value }) => value === 'true' || value === true || value === 1)
+  @IsBoolean()
+  paid: boolean;
 
   @IsOptional()
   @IsFile()

@@ -36,8 +36,17 @@ export class ContentAdminService {
       throw new HttpException('Video link is required', HttpStatus.BAD_REQUEST);
     }
 
-    const { type, file_path, heading, name, description, draft, restricted } =
-      dto;
+    const {
+      type,
+      file_path,
+      heading,
+      name,
+      description,
+      draft,
+      restricted,
+      paid,
+      amount,
+    } = dto;
     const content = await this.prisma.content.create({
       data: {
         type,
@@ -47,6 +56,8 @@ export class ContentAdminService {
         description,
         draft,
         restricted,
+        paid,
+        amount,
         uploadedBy: userId,
       },
       include: {
@@ -85,8 +96,17 @@ export class ContentAdminService {
       throw new HttpException('Video link is required', HttpStatus.BAD_REQUEST);
     }
 
-    const { type, file_path, heading, name, description, draft, restricted } =
-      dto;
+    const {
+      type,
+      file_path,
+      heading,
+      name,
+      description,
+      draft,
+      restricted,
+      paid,
+      amount,
+    } = dto;
     const content = await this.prisma.content.update({
       where: { id: Number(id) },
       data: {
@@ -97,6 +117,8 @@ export class ContentAdminService {
         description,
         draft,
         restricted,
+        paid,
+        amount,
       },
       include: {
         uploadBy: {
@@ -169,13 +191,53 @@ export class ContentAdminService {
   }
 
   async findOne(id: number): Promise<ContentAdminGetDto | undefined> {
-    return await this.find({ id });
+    const content = await this.prisma.content.findFirst({
+      where: {
+        id,
+      },
+      include: {
+        uploadBy: {
+          select: this.User,
+        },
+      },
+    });
+    return content;
+  }
+
+  async findOneWithAssignedContent(
+    id: number,
+  ): Promise<ContentAdminGetDto | undefined> {
+    const content = await this.prisma.content.findFirst({
+      where: {
+        id,
+      },
+      include: {
+        uploadBy: {
+          select: this.User,
+        },
+        AssignedContent: {
+          where: {
+            assignedRole: 'ASSIGNED',
+          },
+          include: {
+            assignedTo: {
+              select: this.User,
+            },
+          },
+        },
+      },
+    });
+    return content;
   }
 
   async remove(id: number): Promise<string> {
+    const result = await this.findOne(id);
     await this.prisma.content.delete({
       where: { id: Number(id) },
     });
+    if (result.type === 'PDF') {
+      await this.removeFile('./uploads/pdf/' + result.file_path);
+    }
     return 'Content deleted successfully';
   }
 

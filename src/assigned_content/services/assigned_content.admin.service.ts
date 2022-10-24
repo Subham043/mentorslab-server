@@ -194,14 +194,14 @@ export class AssignedContentAdminService {
 
   async removeByContentId(id: number): Promise<string> {
     await this.prisma.contentAssigned.deleteMany({
-      where: { assignedContentId: Number(id) },
+      where: { assignedContentId: Number(id), assignedRole: 'ASSIGNED' },
     });
     return 'Access revoked successfully';
   }
 
   async removeByAssignToId(id: number): Promise<string> {
     await this.prisma.contentAssigned.deleteMany({
-      where: { assignedToId: Number(id) },
+      where: { assignedToId: Number(id), assignedRole: 'ASSIGNED' },
     });
     return 'Access revoked successfully';
   }

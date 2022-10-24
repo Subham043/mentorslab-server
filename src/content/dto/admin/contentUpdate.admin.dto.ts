@@ -4,6 +4,8 @@ import {
   IsNotEmpty,
   IsOptional,
   IsString,
+  Matches,
+  ValidateIf,
 } from 'class-validator';
 import {
   MemoryStoredFile,
@@ -33,8 +35,10 @@ export class ContentAdminUpdateDto {
   @IsString()
   description: string;
 
-  @IsOptional()
+  @IsNotEmpty()
   @IsString()
+  @Matches(/^\d+$/, { message: 'amount must be a number' })
+  @ValidateIf((o) => o.paid)
   amount: string;
 
   @IsOptional()

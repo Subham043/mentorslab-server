@@ -4,6 +4,8 @@ import {
   IsNotEmpty,
   IsOptional,
   IsString,
+  Matches,
+  ValidateIf,
 } from 'class-validator';
 import { ContentTypeAdmin } from './content_type.admin.enum';
 import {
@@ -21,7 +23,8 @@ export class ContentAdminCreateDto {
   type: ContentTypeAdmin;
 
   @IsString()
-  @IsOptional()
+  @IsNotEmpty()
+  @ValidateIf((o) => o.type === ContentTypeAdmin.VIDEO)
   file_path: string;
 
   @IsNotEmpty()
@@ -34,8 +37,10 @@ export class ContentAdminCreateDto {
   @IsString()
   description: string;
 
-  @IsOptional()
+  @IsNotEmpty()
   @IsString()
+  @Matches(/^\d+$/, { message: 'amount must be a number' })
+  @ValidateIf((o) => o.paid)
   amount: string;
 
   @IsOptional()
@@ -53,9 +58,10 @@ export class ContentAdminCreateDto {
   @IsBoolean()
   paid: boolean;
 
-  @IsOptional()
+  @IsNotEmpty()
   @IsFile()
   @MaxFileSize(5e6)
   @HasExtension(['pdf'])
+  @ValidateIf((o) => o.type === ContentTypeAdmin.PDF)
   file: MemoryStoredFile;
 }

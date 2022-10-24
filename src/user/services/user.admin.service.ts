@@ -140,6 +140,29 @@ export class UserProfileAdminService {
     });
   }
 
+  async getAllUserWithoutContentAssigned(
+    id: number,
+  ): Promise<UserProfileAdminGetDto[]> {
+    return await this.prisma.user.findMany({
+      where: {
+        role: 'USER',
+      },
+      select: {
+        ...this.UserSelect,
+        ContentAssignedTo: {
+          where: {
+            assignedContentId: id,
+            NOT: [
+              {
+                assignedRole: 'PURCHASED',
+              },
+            ],
+          },
+        },
+      },
+    });
+  }
+
   async findAllPaginate(params: {
     skip?: number;
     take?: number;

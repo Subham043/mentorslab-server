@@ -1,3 +1,5 @@
+import { AssignedContentGetAdminDto } from 'src/assigned_content/dto';
+
 export interface UserProfileAdminGetDto {
   id?: number;
   name?: string;
@@ -8,4 +10,5 @@ export interface UserProfileAdminGetDto {
   blocked?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
+  ContentAssignedTo?: AssignedContentGetAdminDto[];
 }

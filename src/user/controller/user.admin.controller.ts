@@ -13,6 +13,7 @@ import {
 } from '@nestjs/common';
 import { AccessTokenGuard } from 'src/auth/guards/access_token.guard';
 import { Roles } from 'src/common/decorator/roles.decorator';
+import { ValidContentIdPipe } from 'src/common/pipes/valid_content_id.pipes';
 import { ValidPaginatePipe } from 'src/common/pipes/valid_paginate.pipes';
 import { ValidUserIdPipe } from 'src/common/pipes/valid_user_id.pipes';
 import {
@@ -55,6 +56,15 @@ export class UserProfileAdminController {
   @Roles('ADMIN')
   async getAllUser(): Promise<UserProfileAdminGetDto[]> {
     const result = await this.userService.findAll();
+    return result;
+  }
+
+  @Get('without-content-assigned/:id')
+  @Roles('ADMIN')
+  async getAllUserWithoutContentAssigned(
+    @Param('id', ValidContentIdPipe) id: number,
+  ): Promise<UserProfileAdminGetDto[]> {
+    const result = await this.userService.getAllUserWithoutContentAssigned(id);
     return result;
   }
 

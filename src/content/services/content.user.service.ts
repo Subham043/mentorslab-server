@@ -11,10 +11,13 @@ export class ContentUserService {
   };
   constructor(private prisma: PrismaService) {}
 
-  async findAllPaginate(params: {
-    skip?: number;
-    take?: number;
-  }): Promise<ContentUserPaginateDto> {
+  async findAllPaginate(
+    params: {
+      skip?: number;
+      take?: number;
+    },
+    userId: number,
+  ): Promise<ContentUserPaginateDto> {
     const { skip, take } = params;
     const data = await this.prisma.content.findMany({
       skip: skip ? skip : 0,
@@ -30,9 +33,25 @@ export class ContentUserService {
           },
         ],
       },
-      include: {
-        uploadBy: {
-          select: this.User,
+      select: {
+        id: true,
+        createdAt: true,
+        updatedAt: true,
+        type: true,
+        name: true,
+        heading: true,
+        description: true,
+        draft: true,
+        restricted: true,
+        paid: true,
+        AssignedContent: {
+          where: {
+            assignedToId: userId,
+          },
+          select: {
+            assignedToId: true,
+            assignedRole: true,
+          },
         },
       },
     });
@@ -55,10 +74,13 @@ export class ContentUserService {
     };
   }
 
-  async findFreePaginate(params: {
-    skip?: number;
-    take?: number;
-  }): Promise<ContentUserPaginateDto> {
+  async findFreePaginate(
+    params: {
+      skip?: number;
+      take?: number;
+    },
+    userId: number,
+  ): Promise<ContentUserPaginateDto> {
     const { skip, take } = params;
     const data = await this.prisma.content.findMany({
       skip: skip ? skip : 0,
@@ -68,9 +90,25 @@ export class ContentUserService {
         paid: false,
         restricted: false,
       },
-      include: {
-        uploadBy: {
-          select: this.User,
+      select: {
+        id: true,
+        createdAt: true,
+        updatedAt: true,
+        type: true,
+        name: true,
+        heading: true,
+        description: true,
+        draft: true,
+        restricted: true,
+        paid: true,
+        AssignedContent: {
+          where: {
+            assignedToId: userId,
+          },
+          select: {
+            assignedToId: true,
+            assignedRole: true,
+          },
         },
       },
     });
@@ -87,10 +125,13 @@ export class ContentUserService {
     };
   }
 
-  async findPaidPaginate(params: {
-    skip?: number;
-    take?: number;
-  }): Promise<ContentUserPaginateDto> {
+  async findPaidPaginate(
+    params: {
+      skip?: number;
+      take?: number;
+    },
+    userId: number,
+  ): Promise<ContentUserPaginateDto> {
     const { skip, take } = params;
     const data = await this.prisma.content.findMany({
       skip: skip ? skip : 0,
@@ -99,9 +140,25 @@ export class ContentUserService {
         draft: false,
         paid: true,
       },
-      include: {
-        uploadBy: {
-          select: this.User,
+      select: {
+        id: true,
+        createdAt: true,
+        updatedAt: true,
+        type: true,
+        name: true,
+        heading: true,
+        description: true,
+        draft: true,
+        restricted: true,
+        paid: true,
+        AssignedContent: {
+          where: {
+            assignedToId: userId,
+          },
+          select: {
+            assignedToId: true,
+            assignedRole: true,
+          },
         },
       },
     });
@@ -117,15 +174,70 @@ export class ContentUserService {
     };
   }
 
-  async findOne(id: number): Promise<ContentUserGetDto | undefined> {
+  async findOne(
+    id: number,
+    userId: number,
+  ): Promise<ContentUserGetDto | undefined> {
     const content = await this.prisma.content.findFirst({
       where: {
         id,
+        draft: false,
       },
-      include: {
-        uploadBy: {
-          select: this.User,
+      select: {
+        id: true,
+        createdAt: true,
+        updatedAt: true,
+        type: true,
+        name: true,
+        heading: true,
+        description: true,
+        draft: true,
+        restricted: true,
+        paid: true,
+        amount: true,
+        AssignedContent: {
+          where: {
+            assignedToId: userId,
+          },
+          select: {
+            assignedToId: true,
+            assignedRole: true,
+          },
         },
+      },
+    });
+    return content;
+  }
+
+  async findVideoLink(id: number): Promise<ContentUserGetDto | undefined> {
+    const content = await this.prisma.content.findFirst({
+      where: {
+        id,
+        draft: false,
+      },
+      select: {
+        id: true,
+        createdAt: true,
+        updatedAt: true,
+        type: true,
+        name: true,
+        heading: true,
+        description: true,
+        draft: true,
+        restricted: true,
+        paid: true,
+        amount: true,
+        file_path: true,
+      },
+    });
+    return { file_path: content.file_path, type: content.type };
+  }
+
+  async findFile(id: number): Promise<ContentUserGetDto | undefined> {
+    const content = await this.prisma.content.findFirst({
+      where: {
+        id,
+        draft: false,
       },
     });
     return content;

@@ -12,7 +12,13 @@ async function bootstrap() {
   });
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
   app.useGlobalInterceptors(new TransformInterceptor());
-  app.use(helmet());
+  app.use(
+    helmet({
+      contentSecurityPolicy: false,
+      crossOriginResourcePolicy: false,
+      frameguard: false,
+    }),
+  );
   app.use(cookieParser());
   app.useGlobalPipes(
     new ValidationPipe({

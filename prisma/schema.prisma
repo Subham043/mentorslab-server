@@ -39,6 +39,7 @@ enum Role {
 
 model Content {
   id        Int      @id @default(autoincrement())
+  uuid     String?  @unique
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   type      MEDIA_TYPE     @default(VIDEO)
@@ -80,10 +81,12 @@ enum AssignedRole {
 
 model Payment {
   id        Int      @id @default(autoincrement())
+  orderId     String?  @unique
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   status      PaymentStatus     @default(PENDING)
   amount     String  @db.Text
+  receipt     String?   @db.Text
   paymentReferenceId     String?   @db.Text
   paymentDoneBy   User? @relation(fields: [paymentBy], references: [id], onDelete: SetNull, onUpdate: SetNull)
   paymentBy Int?
@@ -99,6 +102,7 @@ enum PaymentStatus {
 
 model LiveSessionContent {
   id        Int      @id @default(autoincrement())
+  uuid     String?  @unique
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   image String?    @db.Text
@@ -133,6 +137,7 @@ enum LiveSessionContentStatus {
 
 model PaymentLiveSession {
   id        Int      @id @default(autoincrement())
+  orderId     String?  @unique
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   status      PaymentStatus     @default(PENDING)

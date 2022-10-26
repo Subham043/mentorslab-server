@@ -1,6 +1,15 @@
 import { Injectable } from '@nestjs/common';
+import {
+  createRazorpayOrder,
+  verifyPayment,
+} from 'src/common/hooks/razorpay.hooks';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { ContentUserGetDto, ContentUserPaginateDto } from '../dto';
+import {
+  ContentUserGetDto,
+  ContentUserPaginateDto,
+  PaymentVerifyUserDto,
+} from '../dto';
+import { v4 as uuidV4 } from 'uuid';
 
 @Injectable()
 export class ContentUserService {
@@ -35,6 +44,7 @@ export class ContentUserService {
       },
       select: {
         id: true,
+        uuid: true,
         createdAt: true,
         updatedAt: true,
         type: true,
@@ -44,13 +54,28 @@ export class ContentUserService {
         draft: true,
         restricted: true,
         paid: true,
+        amount: true,
         AssignedContent: {
           where: {
             assignedToId: userId,
+            OR: [
+              {
+                assignedRole: 'ASSIGNED',
+              },
+              {
+                assignedRole: 'PURCHASED',
+                PaymentInformation: {
+                  some: {
+                    status: 'PAID_FULL',
+                  },
+                },
+              },
+            ],
           },
           select: {
             assignedToId: true,
             assignedRole: true,
+            PaymentInformation: true,
           },
         },
       },
@@ -92,6 +117,7 @@ export class ContentUserService {
       },
       select: {
         id: true,
+        uuid: true,
         createdAt: true,
         updatedAt: true,
         type: true,
@@ -101,13 +127,28 @@ export class ContentUserService {
         draft: true,
         restricted: true,
         paid: true,
+        amount: true,
         AssignedContent: {
           where: {
             assignedToId: userId,
+            OR: [
+              {
+                assignedRole: 'ASSIGNED',
+              },
+              {
+                assignedRole: 'PURCHASED',
+                PaymentInformation: {
+                  some: {
+                    status: 'PAID_FULL',
+                  },
+                },
+              },
+            ],
           },
           select: {
             assignedToId: true,
             assignedRole: true,
+            PaymentInformation: true,
           },
         },
       },
@@ -142,6 +183,7 @@ export class ContentUserService {
       },
       select: {
         id: true,
+        uuid: true,
         createdAt: true,
         updatedAt: true,
         type: true,
@@ -151,13 +193,28 @@ export class ContentUserService {
         draft: true,
         restricted: true,
         paid: true,
+        amount: true,
         AssignedContent: {
           where: {
             assignedToId: userId,
+            OR: [
+              {
+                assignedRole: 'ASSIGNED',
+              },
+              {
+                assignedRole: 'PURCHASED',
+                PaymentInformation: {
+                  some: {
+                    status: 'PAID_FULL',
+                  },
+                },
+              },
+            ],
           },
           select: {
             assignedToId: true,
             assignedRole: true,
+            PaymentInformation: true,
           },
         },
       },
@@ -175,16 +232,17 @@ export class ContentUserService {
   }
 
   async findOne(
-    id: number,
+    id: string,
     userId: number,
   ): Promise<ContentUserGetDto | undefined> {
     const content = await this.prisma.content.findFirst({
       where: {
-        id,
+        uuid: id,
         draft: false,
       },
       select: {
         id: true,
+        uuid: true,
         createdAt: true,
         updatedAt: true,
         type: true,
@@ -198,10 +256,24 @@ export class ContentUserService {
         AssignedContent: {
           where: {
             assignedToId: userId,
+            OR: [
+              {
+                assignedRole: 'ASSIGNED',
+              },
+              {
+                assignedRole: 'PURCHASED',
+                PaymentInformation: {
+                  some: {
+                    status: 'PAID_FULL',
+                  },
+                },
+              },
+            ],
           },
           select: {
             assignedToId: true,
             assignedRole: true,
+            PaymentInformation: true,
           },
         },
       },
@@ -209,14 +281,15 @@ export class ContentUserService {
     return content;
   }
 
-  async findVideoLink(id: number): Promise<ContentUserGetDto | undefined> {
+  async findVideoLink(id: string): Promise<ContentUserGetDto | undefined> {
     const content = await this.prisma.content.findFirst({
       where: {
-        id,
+        uuid: id,
         draft: false,
       },
       select: {
         id: true,
+        uuid: true,
         createdAt: true,
         updatedAt: true,
         type: true,
@@ -233,11 +306,180 @@ export class ContentUserService {
     return { file_path: content.file_path, type: content.type };
   }
 
-  async findFile(id: number): Promise<ContentUserGetDto | undefined> {
+  async findFile(id: string): Promise<ContentUserGetDto | undefined> {
     const content = await this.prisma.content.findFirst({
       where: {
-        id,
+        uuid: id,
         draft: false,
+      },
+    });
+    return content;
+  }
+
+  async findOneWithPaymentOrder(
+    id: string,
+    userId: number,
+  ): Promise<any | undefined> {
+    const contentCheckFirst = await this.prisma.content.findFirst({
+      where: {
+        uuid: id,
+        draft: false,
+      },
+      select: {
+        id: true,
+        uuid: true,
+        createdAt: true,
+        updatedAt: true,
+        type: true,
+        name: true,
+        heading: true,
+        description: true,
+        draft: true,
+        restricted: true,
+        paid: true,
+        amount: true,
+        AssignedContent: {
+          where: {
+            assignedToId: userId,
+            assignedRole: 'ASSIGNED',
+          },
+          select: {
+            assignedToId: true,
+            assignedRole: true,
+          },
+        },
+      },
+    });
+    if (contentCheckFirst.paid === false) return undefined;
+    if (
+      contentCheckFirst.AssignedContent &&
+      contentCheckFirst.AssignedContent.length !== 0
+    )
+      return undefined;
+    const contentCheckSecond = await this.prisma.content.findFirst({
+      where: {
+        uuid: id,
+        draft: false,
+      },
+      select: {
+        id: true,
+        uuid: true,
+        createdAt: true,
+        updatedAt: true,
+        type: true,
+        name: true,
+        heading: true,
+        description: true,
+        draft: true,
+        restricted: true,
+        paid: true,
+        amount: true,
+        AssignedContent: {
+          where: {
+            assignedToId: userId,
+            assignedRole: 'PURCHASED',
+          },
+          select: {
+            assignedToId: true,
+            assignedRole: true,
+            PaymentInformation: {
+              where: {
+                paymentBy: userId,
+              },
+            },
+          },
+        },
+      },
+    });
+    if (contentCheckSecond.paid === false) return undefined;
+    if (
+      contentCheckSecond.AssignedContent &&
+      contentCheckSecond.AssignedContent.length === 0
+    ) {
+      const uuid = uuidV4();
+      const order = await createRazorpayOrder(contentCheckSecond.amount, uuid);
+      const content = await this.prisma.content.findFirst({
+        where: {
+          uuid: id,
+          draft: false,
+        },
+        select: {
+          id: true,
+          uuid: true,
+          createdAt: true,
+          updatedAt: true,
+          type: true,
+          name: true,
+          heading: true,
+          description: true,
+          draft: true,
+          restricted: true,
+          paid: true,
+          amount: true,
+          AssignedContent: {
+            where: {
+              assignedToId: userId,
+              assignedRole: 'ASSIGNED',
+            },
+            select: {
+              assignedToId: true,
+              assignedRole: true,
+            },
+          },
+        },
+      });
+      const content_assigned = await this.prisma.contentAssigned.create({
+        data: {
+          assignedContentId: content.id,
+          assignedToId: userId,
+          assignedRole: 'PURCHASED',
+        },
+      });
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const payment = await this.prisma.payment.create({
+        data: {
+          orderId: order.id,
+          amount: content.amount,
+          receipt: order.receipt,
+          paymentBy: userId,
+          forContentAssignedId: content_assigned.id,
+        },
+      });
+
+      return order;
+    } else if (
+      contentCheckSecond.AssignedContent &&
+      contentCheckSecond.AssignedContent.length !== 0 &&
+      contentCheckSecond.AssignedContent[0].PaymentInformation[0].status !==
+        'PENDING'
+    ) {
+      return undefined;
+    } else {
+      return {
+        id: contentCheckSecond.AssignedContent[0].PaymentInformation[0].orderId,
+        amount:
+          contentCheckSecond.AssignedContent[0].PaymentInformation[0].amount,
+        currency: 'INR',
+      };
+    }
+  }
+
+  async verifyPaymentRecieved(
+    dto: PaymentVerifyUserDto,
+    userId: number,
+  ): Promise<any | undefined> {
+    const { razorpayOrderId, razorpayPaymentId, signature } = dto;
+    const checkPayment = verifyPayment(
+      razorpayOrderId,
+      razorpayPaymentId,
+      signature,
+    );
+    if (!checkPayment) return undefined;
+    const content = await this.prisma.payment.update({
+      where: { orderId: razorpayOrderId },
+      data: {
+        paymentReferenceId: razorpayPaymentId,
+        status: 'PAID_FULL',
       },
     });
     return content;

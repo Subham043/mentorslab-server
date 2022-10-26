@@ -8,6 +8,7 @@ import {
 } from '../dto';
 import * as fs from 'fs/promises';
 import { fileName } from 'src/common/hooks/fileName.hooks';
+import { v4 as uuidV4 } from 'uuid';
 
 @Injectable()
 export class ContentAdminService {
@@ -47,6 +48,7 @@ export class ContentAdminService {
       paid,
       amount,
     } = dto;
+    const uuid = uuidV4();
     const content = await this.prisma.content.create({
       data: {
         type,
@@ -59,6 +61,7 @@ export class ContentAdminService {
         paid,
         amount,
         uploadedBy: userId,
+        uuid,
       },
       include: {
         uploadBy: {

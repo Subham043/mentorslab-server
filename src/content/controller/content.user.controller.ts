@@ -7,16 +7,23 @@ import {
   Param,
   Res,
   Query,
+  Post,
+  Body,
 } from '@nestjs/common';
 import { AccessTokenGuard } from 'src/auth/guards/access_token.guard';
 import { GetCurrentUserId } from 'src/common/decorator/get_current_user_id.decorator';
 import { Roles } from 'src/common/decorator/roles.decorator';
-import { ContentUserGetDto, ContentUserPaginateDto } from '../dto';
+import {
+  ContentUserGetDto,
+  ContentUserPaginateDto,
+  PaymentVerifyUserDto,
+} from '../dto';
 import { Response } from 'express';
 import { Public } from 'src/common/decorator/public.decorator';
 import { ValidContentIdPipe } from 'src/common/pipes/valid_content_id.pipes';
 import { ValidPaginatePipe } from 'src/common/pipes/valid_paginate.pipes';
 import { ContentUserService } from '../services/content.user.service';
+import { ValidContentUuidPipe } from 'src/common/pipes/valid_content_uuid.pipes';
 
 @UseGuards(AccessTokenGuard)
 @Controller('content-user')
@@ -73,7 +80,7 @@ export class ContentUserController {
 
   @Get(':id')
   async getContent(
-    @Param('id', ValidContentIdPipe) id: number,
+    @Param('id', ValidContentUuidPipe) id: string,
     @GetCurrentUserId() userId: number,
   ): Promise<ContentUserGetDto> {
     const result = await this.contentService.findOne(id, userId);
@@ -82,10 +89,35 @@ export class ContentUserController {
     return result;
   }
 
+  @Get('generate-payment-order/:id')
+  async getContentPaymentOrder(
+    @Param('id', ValidContentUuidPipe) id: string,
+    @GetCurrentUserId() userId: number,
+  ): Promise<any> {
+    const result = await this.contentService.findOneWithPaymentOrder(
+      id,
+      userId,
+    );
+    if (!result)
+      throw new HttpException('Data not found', HttpStatus.NOT_FOUND);
+    return result;
+  }
+
+  @Post('verify-payment')
+  async verifyPayment(
+    @Body() dto: PaymentVerifyUserDto,
+    @GetCurrentUserId() userId: number,
+  ): Promise<any> {
+    const result = await this.contentService.verifyPaymentRecieved(dto, userId);
+    if (!result)
+      throw new HttpException('Payment Unsuccessful', HttpStatus.NOT_FOUND);
+    return { status: true, message: 'Payment Successful' };
+  }
+
   @Public()
   @Get('pdf-file/:id')
   async seeUploadedFile(
-    @Param('id', ValidContentIdPipe) file,
+    @Param('id', ValidContentUuidPipe) file,
     @Res() res: Response,
   ) {
     const result = await this.contentService.findFile(file);
@@ -99,7 +131,7 @@ export class ContentUserController {
 
   @Get('video-link/:id')
   async getVideoLink(
-    @Param('id', ValidContentIdPipe) id: number,
+    @Param('id', ValidContentUuidPipe) id: string,
     @GetCurrentUserId() userId: number,
   ): Promise<ContentUserGetDto> {
     const result = await this.contentService.findVideoLink(id);

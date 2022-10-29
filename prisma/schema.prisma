@@ -142,6 +142,7 @@ model PaymentLiveSession {
   updatedAt DateTime @updatedAt
   status      PaymentStatus     @default(PENDING)
   amount     String  @db.Text
+  receipt     String?   @db.Text
   paymentReferenceId     String?   @db.Text
   paymentDoneBy   User? @relation(fields: [paymentBy], references: [id], onDelete: SetNull, onUpdate: SetNull)
   paymentBy Int?

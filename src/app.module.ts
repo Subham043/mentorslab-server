@@ -26,6 +26,8 @@ import { LiveSessionContentAdminController } from './live_session_content/contro
 import { LiveSessionContentAdminService } from './live_session_content/services/live_session_content.admin.service';
 import { ContentUserService } from './content/services/content.user.service';
 import { ContentUserController } from './content/controller/content.user.controller';
+import { LiveSessionContentUserController } from './live_session_content/controller/live_session_content.user.controller';
+import { LiveSessionContentUserService } from './live_session_content/services/live_session_content.user.service';
 
 @Module({
   imports: [
@@ -55,6 +57,7 @@ import { ContentUserController } from './content/controller/content.user.control
     ContentAdminController,
     ContentUserController,
     LiveSessionContentAdminController,
+    LiveSessionContentUserController,
     AssignedContentAdminController,
   ],
   providers: [
@@ -69,6 +72,7 @@ import { ContentUserController } from './content/controller/content.user.control
     ContentAdminService,
     ContentUserService,
     LiveSessionContentAdminService,
+    LiveSessionContentUserService,
     AssignedContentAdminService,
   ],
 })

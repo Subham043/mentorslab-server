@@ -21,6 +21,7 @@ CREATE TABLE `User` (
 -- CreateTable
 CREATE TABLE `Content` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `uuid` VARCHAR(191) NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
     `type` ENUM('PDF', 'VIDEO') NOT NULL DEFAULT 'VIDEO',
@@ -34,6 +35,7 @@ CREATE TABLE `Content` (
     `restricted` BOOLEAN NOT NULL DEFAULT false,
     `paid` BOOLEAN NOT NULL DEFAULT false,
 
+    UNIQUE INDEX `Content_uuid_key`(`uuid`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -52,20 +54,24 @@ CREATE TABLE `ContentAssigned` (
 -- CreateTable
 CREATE TABLE `Payment` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `orderId` VARCHAR(191) NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
     `status` ENUM('PENDING', 'PAID_PARTIAL', 'PAID_FULL') NOT NULL DEFAULT 'PENDING',
     `amount` TEXT NOT NULL,
+    `receipt` TEXT NULL,
     `paymentReferenceId` TEXT NULL,
     `paymentBy` INTEGER NULL,
     `forContentAssignedId` INTEGER NULL,
 
+    UNIQUE INDEX `Payment_orderId_key`(`orderId`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
 CREATE TABLE `LiveSessionContent` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `uuid` VARCHAR(191) NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
     `image` TEXT NULL,
@@ -77,6 +83,7 @@ CREATE TABLE `LiveSessionContent` (
     `draft` BOOLEAN NOT NULL DEFAULT false,
     `paid` BOOLEAN NOT NULL DEFAULT false,
 
+    UNIQUE INDEX `LiveSessionContent_uuid_key`(`uuid`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -96,14 +103,17 @@ CREATE TABLE `LiveSessionContentAssigned` (
 -- CreateTable
 CREATE TABLE `PaymentLiveSession` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `orderId` VARCHAR(191) NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
     `status` ENUM('PENDING', 'PAID_PARTIAL', 'PAID_FULL') NOT NULL DEFAULT 'PENDING',
     `amount` TEXT NOT NULL,
+    `receipt` TEXT NULL,
     `paymentReferenceId` TEXT NULL,
     `paymentBy` INTEGER NULL,
     `forLiveSessionContentAssignedId` INTEGER NULL,
 
+    UNIQUE INDEX `PaymentLiveSession_orderId_key`(`orderId`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 

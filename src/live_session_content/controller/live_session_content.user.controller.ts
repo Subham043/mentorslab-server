@@ -36,10 +36,13 @@ export class LiveSessionContentUserController {
     @Query('take', ValidPaginatePipe) take: string,
     @GetCurrentUserId() userId: number,
   ): Promise<LiveSessionContentUserPaginateDto> {
-    const result = await this.liveSessionContentService.findAllPaginate({
-      skip: Number(skip),
-      take: Number(take),
-    }, userId);
+    const result = await this.liveSessionContentService.findAllPaginate(
+      {
+        skip: Number(skip),
+        take: Number(take),
+      },
+      userId,
+    );
     return result;
   }
 
@@ -49,30 +52,36 @@ export class LiveSessionContentUserController {
     @Query('take', ValidPaginatePipe) take: string,
     @GetCurrentUserId() userId: number,
   ): Promise<LiveSessionContentUserPaginateDto> {
-    const result = await this.liveSessionContentService.findFreePaginate({
-      skip: Number(skip),
-      take: Number(take),
-    }, userId);
+    const result = await this.liveSessionContentService.findFreePaginate(
+      {
+        skip: Number(skip),
+        take: Number(take),
+      },
+      userId,
+    );
     return result;
   }
-  
+
   @Get('paginate-paid')
   async getPaidContentPaginate(
     @Query('skip', ValidPaginatePipe) skip: string,
     @Query('take', ValidPaginatePipe) take: string,
     @GetCurrentUserId() userId: number,
   ): Promise<LiveSessionContentUserPaginateDto> {
-    const result = await this.liveSessionContentService.findPaidPaginate({
-      skip: Number(skip),
-      take: Number(take),
-    }, userId);
+    const result = await this.liveSessionContentService.findPaidPaginate(
+      {
+        skip: Number(skip),
+        take: Number(take),
+      },
+      userId,
+    );
     return result;
   }
 
   @Get(':id')
   async getContent(
     @Param('id', ValidLiveSessionContentUuidPipe) id: string,
-    @GetCurrentUserId() userId: number
+    @GetCurrentUserId() userId: number,
   ): Promise<LiveSessionContentUserGetDto> {
     const result = await this.liveSessionContentService.findOne(id, userId);
     if (!result)
@@ -99,7 +108,10 @@ export class LiveSessionContentUserController {
     @Body() dto: PaymentVerifyUserDto,
     @GetCurrentUserId() userId: number,
   ): Promise<any> {
-    const result = await this.liveSessionContentService.verifyPaymentRecieved(dto, userId);
+    const result = await this.liveSessionContentService.verifyPaymentRecieved(
+      dto,
+      userId,
+    );
     if (!result)
       throw new HttpException('Payment Unsuccessful', HttpStatus.NOT_FOUND);
     return { status: true, message: 'Payment Successful' };
@@ -114,6 +126,8 @@ export class LiveSessionContentUserController {
     const result = await this.liveSessionContentService.findFile(file);
     if (!result)
       throw new HttpException('Data not found', HttpStatus.NOT_FOUND);
-    return res.sendFile(result.image, { root: './uploads/live_session_content_images' });
+    return res.sendFile(result.image, {
+      root: './uploads/live_session_content_images',
+    });
   }
 }

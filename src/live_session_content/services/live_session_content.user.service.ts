@@ -20,10 +20,13 @@ export class LiveSessionContentUserService {
   };
   constructor(private prisma: PrismaService) {}
 
-  async findAllPaginate(params: {
-    skip?: number;
-    take?: number;
-  }, userId: number): Promise<LiveSessionContentUserPaginateDto> {
+  async findAllPaginate(
+    params: {
+      skip?: number;
+      take?: number;
+    },
+    userId: number,
+  ): Promise<LiveSessionContentUserPaginateDto> {
     const { skip, take } = params;
     const data = await this.prisma.liveSessionContent.findMany({
       skip: skip ? skip : 0,
@@ -47,10 +50,12 @@ export class LiveSessionContentUserService {
             requestedById: userId,
             OR: [
               {
-                status: 'PENDING'
+                status: 'PENDING',
+                assignedRole: 'ASSIGNED',
               },
               {
                 status: 'PENDING',
+                assignedRole: 'PURCHASED',
                 PaymentInformation: {
                   some: {
                     status: 'PAID_FULL',
@@ -61,6 +66,7 @@ export class LiveSessionContentUserService {
           },
           select: {
             requestedById: true,
+            assignedRole: true,
             PaymentInformation: true,
           },
         },
@@ -76,11 +82,14 @@ export class LiveSessionContentUserService {
       count,
     };
   }
-  
-  async findFreePaginate(params: {
-    skip?: number;
-    take?: number;
-  }, userId: number): Promise<LiveSessionContentUserPaginateDto> {
+
+  async findFreePaginate(
+    params: {
+      skip?: number;
+      take?: number;
+    },
+    userId: number,
+  ): Promise<LiveSessionContentUserPaginateDto> {
     const { skip, take } = params;
     const data = await this.prisma.liveSessionContent.findMany({
       skip: skip ? skip : 0,
@@ -105,10 +114,12 @@ export class LiveSessionContentUserService {
             requestedById: userId,
             OR: [
               {
-                status: 'PENDING'
+                status: 'PENDING',
+                assignedRole: 'ASSIGNED',
               },
               {
                 status: 'PENDING',
+                assignedRole: 'PURCHASED',
                 PaymentInformation: {
                   some: {
                     status: 'PAID_FULL',
@@ -135,11 +146,14 @@ export class LiveSessionContentUserService {
       count,
     };
   }
-  
-  async findPaidPaginate(params: {
-    skip?: number;
-    take?: number;
-  }, userId: number): Promise<LiveSessionContentUserPaginateDto> {
+
+  async findPaidPaginate(
+    params: {
+      skip?: number;
+      take?: number;
+    },
+    userId: number,
+  ): Promise<LiveSessionContentUserPaginateDto> {
     const { skip, take } = params;
     const data = await this.prisma.liveSessionContent.findMany({
       skip: skip ? skip : 0,
@@ -164,7 +178,7 @@ export class LiveSessionContentUserService {
             requestedById: userId,
             OR: [
               {
-                status: 'PENDING'
+                status: 'PENDING',
               },
               {
                 status: 'PENDING',
@@ -178,6 +192,7 @@ export class LiveSessionContentUserService {
           },
           select: {
             requestedById: true,
+            assignedRole: true,
             PaymentInformation: true,
           },
         },
@@ -197,7 +212,7 @@ export class LiveSessionContentUserService {
 
   async findOne(
     id: string,
-    userId: number
+    userId: number,
   ): Promise<LiveSessionContentUserGetDto | undefined> {
     const content = await this.prisma.liveSessionContent.findFirst({
       where: {
@@ -220,10 +235,12 @@ export class LiveSessionContentUserService {
             requestedById: userId,
             OR: [
               {
-                status: 'PENDING'
+                status: 'PENDING',
+                assignedRole: 'ASSIGNED',
               },
               {
                 status: 'PENDING',
+                assignedRole: 'PURCHASED',
                 PaymentInformation: {
                   some: {
                     status: 'PAID_FULL',
@@ -241,7 +258,7 @@ export class LiveSessionContentUserService {
     });
     return content;
   }
-  
+
   async findFile(
     id: string,
   ): Promise<LiveSessionContentUserGetDto | undefined> {
@@ -277,9 +294,12 @@ export class LiveSessionContentUserService {
         LiveSessionContentAssigned: {
           where: {
             requestedById: userId,
+            assignedRole: 'PURCHASED',
+            status: 'PENDING',
           },
           select: {
             requestedById: true,
+            assignedRole: true,
             PaymentInformation: {
               where: {
                 paymentBy: userId,
@@ -321,12 +341,14 @@ export class LiveSessionContentUserService {
           },
         },
       });
-      const content_assigned = await this.prisma.liveSessionContentAssigned.create({
-        data: {
-          liveSessionContentId: content.id,
-          requestedById: userId,
-        },
-      });
+      const content_assigned =
+        await this.prisma.liveSessionContentAssigned.create({
+          data: {
+            liveSessionContentId: content.id,
+            requestedById: userId,
+            assignedRole: 'PURCHASED',
+          },
+        });
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const payment = await this.prisma.paymentLiveSession.create({
         data: {
@@ -342,15 +364,17 @@ export class LiveSessionContentUserService {
     } else if (
       contentCheckSecond.LiveSessionContentAssigned &&
       contentCheckSecond.LiveSessionContentAssigned.length !== 0 &&
-      contentCheckSecond.LiveSessionContentAssigned[0].PaymentInformation[0].status !==
-        'PENDING'
+      contentCheckSecond.LiveSessionContentAssigned[0].PaymentInformation[0]
+        .status !== 'PENDING'
     ) {
       return undefined;
     } else {
       return {
-        id: contentCheckSecond.LiveSessionContentAssigned[0].PaymentInformation[0].orderId,
+        id: contentCheckSecond.LiveSessionContentAssigned[0]
+          .PaymentInformation[0].orderId,
         amount:
-          contentCheckSecond.LiveSessionContentAssigned[0].PaymentInformation[0].amount,
+          contentCheckSecond.LiveSessionContentAssigned[0].PaymentInformation[0]
+            .amount,
         currency: 'INR',
       };
     }

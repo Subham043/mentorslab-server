@@ -8,6 +8,7 @@ import {
 } from '../dto';
 import * as fs from 'fs/promises';
 import { fileName } from 'src/common/hooks/fileName.hooks';
+import { v4 as uuidV4 } from 'uuid';
 
 @Injectable()
 export class LiveSessionContentAdminService {
@@ -26,6 +27,7 @@ export class LiveSessionContentAdminService {
     dto.file_path = savedFileName;
 
     const { file_path, heading, name, description, amount, draft, paid } = dto;
+    const uuid = uuidV4();
     const content = await this.prisma.liveSessionContent.create({
       data: {
         image: file_path,
@@ -36,6 +38,7 @@ export class LiveSessionContentAdminService {
         amount,
         paid,
         uploadedBy: userId,
+        uuid,
       },
       include: {
         uploadBy: {

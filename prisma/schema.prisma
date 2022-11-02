@@ -126,7 +126,7 @@ model LiveSessionContentAssigned {
   liveSessionContent   LiveSessionContent?     @relation("liveSessionContent", fields: [liveSessionContentId], references: [id], onDelete: SetNull, onUpdate: SetNull)
   liveSessionContentId Int?
   scheduledAt DateTime @default(now())
-  scheduledOn DateTime @default(now())
+  scheduledOn DateTime? 
   assignedRole      AssignedRole     @default(ASSIGNED)
   status      LiveSessionContentStatus     @default(PENDING)
   PaymentInformation   PaymentLiveSession[]

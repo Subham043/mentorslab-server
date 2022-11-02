@@ -27,6 +27,10 @@ import { ValidLiveSessionContentIdPipe } from 'src/common/pipes/valid_live_sessi
 import { FormDataRequest } from 'nestjs-form-data';
 import { ValidPaginatePipe } from 'src/common/pipes/valid_paginate.pipes';
 import { LiveSessionContentAdminService } from '../services/live_session_content.admin.service';
+import {
+  getZoomSignature,
+  scheduleZoomMeeting,
+} from 'src/common/hooks/zoom.hooks';
 
 @UseGuards(AccessTokenGuard)
 @Controller('live-session-content')
@@ -111,5 +115,13 @@ export class LiveSessionContentAdminController {
   @Get('file/:imgpath')
   seeUploadedFile(@Param('imgpath') image, @Res() res: Response) {
     return res.sendFile(image, { root: './uploads/pdf' });
+  }
+
+  @Public()
+  @Get('zoom/schedule')
+  async test() {
+    const res = await scheduleZoomMeeting();
+    const sign = await getZoomSignature(res.id);
+    return sign;
   }
 }

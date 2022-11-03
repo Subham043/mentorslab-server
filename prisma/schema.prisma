@@ -134,6 +134,8 @@ model LiveSessionContentAssigned {
 
 enum LiveSessionContentStatus {
   PENDING
+  USER_REQUESTED
+  SCHEDULED
   COMPLETED
 }
 

@@ -17,10 +17,15 @@ import * as bcrypt from 'bcrypt';
 import { decrypt, encrypt } from 'src/common/hooks/encryption.hooks';
 import { RegisterDto } from './dto/register.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { MailService } from 'src/mail/mail.service';
 
 @Injectable()
 export class AuthService {
-  constructor(private jwtService: JwtService, private prisma: PrismaService) {}
+  constructor(
+    private jwtService: JwtService,
+    private prisma: PrismaService,
+    private mailService: MailService,
+  ) {}
 
   async generateTokens(user: any): Promise<Token> {
     const jwtPayload: JwtPayload = {
@@ -75,6 +80,12 @@ export class AuthService {
       },
     });
     const result = await encrypt(String(user.id));
+    this.mailService.sendEmailVerification(
+      result,
+      user.name,
+      user.email,
+      user.otp,
+    );
     return result;
   }
 
@@ -178,5 +189,18 @@ export class AuthService {
 
   generateOtpNumber(): number {
     return Math.floor(1000 + Math.random() * 9000);
+  }
+
+  async resendOtp(encryptedId: string): Promise<string> {
+    const id = await decrypt(encryptedId);
+    const user = await this.prisma.user.findFirst({
+      where: {
+        id: Number(id),
+      },
+    });
+
+    if (!user) throw new HttpException('Invalid ID', HttpStatus.BAD_REQUEST);
+    this.mailService.sendOTP(user.name, user.email, user.otp);
+    return 'Re-send OTP successful';
   }
 }

@@ -31,6 +31,7 @@ import { LiveSessionContentUserService } from './live_session_content/services/l
 import { PaymentModule } from './payment/payment.module';
 import { PaymentAdminController } from './payment/controller/payment.admin.controller';
 import { PaymentAdminService } from './payment/services/payment.admin.service';
+import { MailModule } from './mail/mail.module';
 
 @Module({
   imports: [
@@ -52,6 +53,7 @@ import { PaymentAdminService } from './payment/services/payment.admin.service';
     PaymentModule,
     AssignedContentModule,
     NestjsFormDataModule,
+    MailModule,
   ],
   controllers: [
     AppController,

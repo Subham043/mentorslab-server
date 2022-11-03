@@ -11,10 +11,12 @@ import { APP_GUARD } from '@nestjs/core';
 import { EmailExistsRule } from 'src/common/validator/email_exists.validator';
 import { UniqueEmailRule } from 'src/common/validator/unique_email.validator';
 import { UniquePhoneRule } from 'src/common/validator/unique_phone.validator';
+import { MailModule } from 'src/mail/mail.module';
 
 @Module({
   imports: [
     UserModule,
+    MailModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
       secret: process.env.JWT_SECRET_KEY || 'secretKey',

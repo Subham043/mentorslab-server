@@ -31,12 +31,14 @@ import {
   getZoomSignature,
   scheduleZoomMeeting,
 } from 'src/common/hooks/zoom.hooks';
+import { MailService } from 'src/mail/mail.service';
 
 @UseGuards(AccessTokenGuard)
 @Controller('live-session-content')
 export class LiveSessionContentAdminController {
   constructor(
     private liveSessionContentService: LiveSessionContentAdminService,
+    private mailservice: MailService,
   ) {}
 
   @Post()
@@ -123,5 +125,12 @@ export class LiveSessionContentAdminController {
     const res = await scheduleZoomMeeting();
     const sign = await getZoomSignature(res.id);
     return sign;
+  }
+
+  @Public()
+  @Get('mail/send')
+  async mail() {
+    const res = this.mailservice.sendUserConfirmation();
+    return res;
   }
 }

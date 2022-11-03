@@ -91,4 +91,12 @@ export class AuthController {
   ): Promise<Token> {
     return await this.authService.refreshTokens(data.id, data.refreshToken);
   }
+
+  @Get('resend-otp/:encryptedId')
+  @Public()
+  @Throttle(1, 60)
+  async resendOtp(@Param('encryptedId') encryptedId: string): Promise<string> {
+    const result = await this.authService.resendOtp(encryptedId);
+    return result;
+  }
 }

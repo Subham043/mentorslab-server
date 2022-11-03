@@ -50,11 +50,9 @@ export class LiveSessionContentUserService {
             requestedById: userId,
             OR: [
               {
-                status: 'PENDING',
                 assignedRole: 'ASSIGNED',
               },
               {
-                status: 'PENDING',
                 assignedRole: 'PURCHASED',
                 PaymentInformation: {
                   some: {
@@ -63,10 +61,14 @@ export class LiveSessionContentUserService {
                 },
               },
             ],
+            NOT: {
+              status: 'COMPLETED',
+            },
           },
           select: {
             requestedById: true,
             assignedRole: true,
+            status: true,
             PaymentInformation: true,
           },
         },
@@ -114,11 +116,9 @@ export class LiveSessionContentUserService {
             requestedById: userId,
             OR: [
               {
-                status: 'PENDING',
                 assignedRole: 'ASSIGNED',
               },
               {
-                status: 'PENDING',
                 assignedRole: 'PURCHASED',
                 PaymentInformation: {
                   some: {
@@ -127,9 +127,14 @@ export class LiveSessionContentUserService {
                 },
               },
             ],
+            NOT: {
+              status: 'COMPLETED',
+            },
           },
           select: {
             requestedById: true,
+            status: true,
+            assignedRole: true,
             PaymentInformation: true,
           },
         },
@@ -176,23 +181,19 @@ export class LiveSessionContentUserService {
         LiveSessionContentAssigned: {
           where: {
             requestedById: userId,
-            OR: [
-              {
-                status: 'PENDING',
+            PaymentInformation: {
+              some: {
+                status: 'PAID_FULL',
               },
-              {
-                status: 'PENDING',
-                PaymentInformation: {
-                  some: {
-                    status: 'PAID_FULL',
-                  },
-                },
-              },
-            ],
+            },
+            NOT: {
+              status: 'COMPLETED',
+            },
           },
           select: {
             requestedById: true,
             assignedRole: true,
+            status: true,
             PaymentInformation: true,
           },
         },
@@ -235,11 +236,9 @@ export class LiveSessionContentUserService {
             requestedById: userId,
             OR: [
               {
-                status: 'PENDING',
                 assignedRole: 'ASSIGNED',
               },
               {
-                status: 'PENDING',
                 assignedRole: 'PURCHASED',
                 PaymentInformation: {
                   some: {
@@ -248,9 +247,14 @@ export class LiveSessionContentUserService {
                 },
               },
             ],
+            NOT: {
+              status: 'COMPLETED',
+            },
           },
           select: {
             requestedById: true,
+            status: true,
+            assignedRole: true,
             PaymentInformation: true,
           },
         },
@@ -295,11 +299,19 @@ export class LiveSessionContentUserService {
           where: {
             requestedById: userId,
             assignedRole: 'PURCHASED',
-            status: 'PENDING',
+            PaymentInformation: {
+              some: {
+                status: 'PAID_FULL',
+              },
+            },
+            NOT: {
+              status: 'COMPLETED',
+            },
           },
           select: {
             requestedById: true,
             assignedRole: true,
+            status: true,
             PaymentInformation: {
               where: {
                 paymentBy: userId,

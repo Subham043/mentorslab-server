@@ -119,13 +119,13 @@ export class LiveSessionContentAdminController {
     return res.sendFile(image, { root: './uploads/pdf' });
   }
 
-  @Public()
-  @Get('zoom/schedule')
-  async test() {
-    const res = await scheduleZoomMeeting();
-    const sign = await getZoomSignature(res.id);
-    return sign;
-  }
+  // @Public()
+  // @Get('zoom/schedule')
+  // async test() {
+  //   const res = await scheduleZoomMeeting();
+  //   const sign = await getZoomSignature(res.id);
+  //   return sign;
+  // }
 
   @Public()
   @Get('mail/send')

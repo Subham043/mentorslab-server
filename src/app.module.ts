@@ -32,6 +32,9 @@ import { PaymentModule } from './payment/payment.module';
 import { PaymentAdminController } from './payment/controller/payment.admin.controller';
 import { PaymentAdminService } from './payment/services/payment.admin.service';
 import { MailModule } from './mail/mail.module';
+import { LiveSessionAssignedContentModule } from './live_session_assigned_content/live_session_assigned_content.module';
+import { LiveSessionAssignedContentAdminService } from './live_session_assigned_content/services/live_session_assigned_content.admin.service';
+import { LiveSessionAssignedContentAdminController } from './live_session_assigned_content/controller/live_session_assigned_content.admin.controller';
 
 @Module({
   imports: [
@@ -54,6 +57,8 @@ import { MailModule } from './mail/mail.module';
     AssignedContentModule,
     NestjsFormDataModule,
     MailModule,
+    LiveSessionAssignedContentModule,
+    LiveSessionAssignedContentModule,
   ],
   controllers: [
     AppController,
@@ -66,6 +71,7 @@ import { MailModule } from './mail/mail.module';
     LiveSessionContentUserController,
     AssignedContentAdminController,
     PaymentAdminController,
+    LiveSessionAssignedContentAdminController,
   ],
   providers: [
     AppService,
@@ -82,6 +88,7 @@ import { MailModule } from './mail/mail.module';
     LiveSessionContentUserService,
     AssignedContentAdminService,
     PaymentAdminService,
+    LiveSessionAssignedContentAdminService,
   ],
 })
 export class AppModule {}

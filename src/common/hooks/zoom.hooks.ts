@@ -10,14 +10,17 @@ const payload = {
 
 const token = jwt.sign(payload, process.env.ZOOM_API_SECRET);
 
-export const scheduleZoomMeeting = async () => {
+export const scheduleZoomMeeting = async (
+  topic: string,
+  start_time: string,
+) => {
   const options = {
     method: 'POST',
     uri: 'https://api.zoom.us/v2/users/me/meetings',
     body: {
-      topic: 'Zoom Meeting Using Node JS', //meeting title
+      topic, //meeting title
       type: 2,
-      start_time: '2022-11-03 06:45:02.044',
+      start_time,
       pre_schedule: true,
       duration: 30,
       settings: {
@@ -37,7 +40,7 @@ export const scheduleZoomMeeting = async () => {
 
   try {
     const req = await requestPromise(options);
-    console.log(req);
+    // console.log(req);
     return req;
   } catch (error) {
     return error;

@@ -130,12 +130,14 @@ model LiveSessionContentAssigned {
   assignedRole      AssignedRole     @default(ASSIGNED)
   status      LiveSessionContentStatus     @default(PENDING)
   PaymentInformation   PaymentLiveSession[]
+  zoom Json?
 }
 
 enum LiveSessionContentStatus {
   PENDING
   USER_REQUESTED
   SCHEDULED
+  RESCHEDULED
   COMPLETED
 }
 

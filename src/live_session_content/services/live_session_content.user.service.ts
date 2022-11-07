@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import {
   LiveSessionContentUserGetDto,
@@ -411,5 +411,81 @@ export class LiveSessionContentUserService {
       },
     });
     return content;
+  }
+
+  async requestSession(id: string, userId: number): Promise<string> {
+    const liveSessionContent = await this.prisma.liveSessionContent.findFirst({
+      where: {
+        uuid: id,
+        draft: false,
+      },
+    });
+    if (!liveSessionContent)
+      throw new HttpException('Invalid ID', HttpStatus.BAD_REQUEST);
+    if (liveSessionContent.paid === false) {
+      const liveSessionContentAssigned =
+        await this.prisma.liveSessionContentAssigned.findFirst({
+          where: {
+            liveSessionContentId: liveSessionContent.id,
+            requestedById: userId,
+            assignedRole: 'ASSIGNED',
+            status: 'USER_REQUESTED',
+          },
+        });
+      if (liveSessionContentAssigned) {
+        return 'Live session already requested. Kindly wait for admin to approve it';
+      } else {
+        await this.prisma.liveSessionContentAssigned.create({
+          data: {
+            liveSessionContentId: liveSessionContent.id,
+            requestedById: userId,
+            assignedRole: 'ASSIGNED',
+            status: 'PENDING',
+            scheduledAt: new Date(),
+          },
+        });
+        return 'Live session requested.';
+      }
+    } else {
+      const liveSessionContentAssigned =
+        await this.prisma.liveSessionContentAssigned.findFirst({
+          where: {
+            OR: [
+              {
+                liveSessionContentId: liveSessionContent.id,
+                requestedById: userId,
+                assignedRole: 'PURCHASED',
+                status: 'PENDING',
+              },
+              {
+                liveSessionContentId: liveSessionContent.id,
+                requestedById: userId,
+                assignedRole: 'PURCHASED',
+                status: 'USER_REQUESTED',
+              },
+            ],
+          },
+        });
+      if (!liveSessionContentAssigned)
+        throw new HttpException(
+          'Please make the payment first, then you request for a session',
+          HttpStatus.BAD_REQUEST,
+        );
+      if (liveSessionContentAssigned.status === 'USER_REQUESTED')
+        return 'Live session already requested. Kindly wait for admin to approve it';
+      await this.prisma.liveSessionContentAssigned.updateMany({
+        where: {
+          liveSessionContentId: liveSessionContent.id,
+          requestedById: userId,
+          assignedRole: 'PURCHASED',
+          status: 'PENDING',
+        },
+        data: {
+          status: 'USER_REQUESTED',
+          scheduledAt: new Date(),
+        },
+      });
+      return 'Live session requested.';
+    }
   }
 }

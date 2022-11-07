@@ -89,6 +89,20 @@ export class LiveSessionContentUserController {
     return result;
   }
 
+  @Get('request-session/:id')
+  async requestSession(
+    @Param('id', ValidLiveSessionContentUuidPipe) id: string,
+    @GetCurrentUserId() userId: number,
+  ): Promise<string> {
+    const result = await this.liveSessionContentService.requestSession(
+      id,
+      userId,
+    );
+    if (!result)
+      throw new HttpException('Data not found', HttpStatus.NOT_FOUND);
+    return result;
+  }
+
   @Get('generate-payment-order/:id')
   async getContentPaymentOrder(
     @Param('id', ValidLiveSessionContentUuidPipe) id: string,

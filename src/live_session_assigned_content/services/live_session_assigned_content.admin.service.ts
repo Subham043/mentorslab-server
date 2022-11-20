@@ -3,6 +3,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { ScheduleDto } from '../dto';
 import {
   getZoomSignature,
+  getZoomSignatureAdmin,
   scheduleZoomMeeting,
 } from 'src/common/hooks/zoom.hooks';
 
@@ -121,5 +122,35 @@ export class LiveSessionAssignedContentAdminService {
       },
     });
     return result;
+  }
+
+  async zoomSignature(id: number): Promise<any> {
+    const data = await this.prisma.liveSessionContentAssigned.findFirst({
+      where: {
+        id,
+        OR: [
+          {
+            status: 'SCHEDULED',
+          },
+          {
+            status: 'RESCHEDULED',
+          },
+        ],
+      },
+      select: {
+        zoom: true,
+        liveSessionContent: {
+          select: {
+            name: true,
+          },
+        },
+      },
+    });
+    if (!data) throw new HttpException('No data found', HttpStatus.BAD_REQUEST);
+    if (data.zoom['id']) {
+      const sign = await getZoomSignatureAdmin(data.zoom['id']);
+      return sign;
+    }
+    throw new HttpException('No signature available', HttpStatus.BAD_REQUEST);
   }
 }

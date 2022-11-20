@@ -35,6 +35,11 @@ import { MailModule } from './mail/mail.module';
 import { LiveSessionAssignedContentModule } from './live_session_assigned_content/live_session_assigned_content.module';
 import { LiveSessionAssignedContentAdminService } from './live_session_assigned_content/services/live_session_assigned_content.admin.service';
 import { LiveSessionAssignedContentAdminController } from './live_session_assigned_content/controller/live_session_assigned_content.admin.controller';
+import { LiveSessionAssignedContentUserController } from './live_session_assigned_content/controller/live_session_assigned_content.user.controller';
+import { LiveSessionAssignedContentUserService } from './live_session_assigned_content/services/live_session_assigned_content.user.service';
+import { DashboardModule } from './dashboard/dashboard.module';
+import { DashboardController } from './dashboard/dashboard.controller';
+import { DashboardService } from './dashboard/dashboard.service';
 
 @Module({
   imports: [
@@ -57,12 +62,14 @@ import { LiveSessionAssignedContentAdminController } from './live_session_assign
     AssignedContentModule,
     NestjsFormDataModule,
     MailModule,
+    DashboardModule,
     LiveSessionAssignedContentModule,
     LiveSessionAssignedContentModule,
   ],
   controllers: [
     AppController,
     AuthController,
+    DashboardController,
     UserProfileController,
     UserProfileAdminController,
     ContentAdminController,
@@ -72,10 +79,12 @@ import { LiveSessionAssignedContentAdminController } from './live_session_assign
     AssignedContentAdminController,
     PaymentAdminController,
     LiveSessionAssignedContentAdminController,
+    LiveSessionAssignedContentUserController,
   ],
   providers: [
     AppService,
     AuthService,
+    DashboardService,
     UserProfileAdminService,
     UserProfileService,
     {
@@ -89,6 +98,7 @@ import { LiveSessionAssignedContentAdminController } from './live_session_assign
     AssignedContentAdminService,
     PaymentAdminService,
     LiveSessionAssignedContentAdminService,
+    LiveSessionAssignedContentUserService,
   ],
 })
 export class AppModule {}

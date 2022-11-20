@@ -44,6 +44,18 @@ export class LiveSessionAssignedContentAdminController {
     return result;
   }
 
+  @Get('zoom-signature/:id')
+  async zoomSignature(
+    @Param('id', ValidLiveSessionAssignedContentIdPipe) id: number,
+  ): Promise<any> {
+    const result = await this.liveSessionAssignedContentService.zoomSignature(
+      id,
+    );
+    if (!result)
+      throw new HttpException('Data not found', HttpStatus.NOT_FOUND);
+    return result;
+  }
+
   @Post('re-schedule/:id')
   @Roles('ADMIN')
   async rescheduleSession(

@@ -124,7 +124,7 @@ export class AuthService {
     return 'Password reset successful';
   }
 
-  async verifyUser(otpDto: OtpDto, encryptedId: string): Promise<Token> {
+  async verifyUser(otpDto: OtpDto, encryptedId: string): Promise<any> {
     const id = await decrypt(encryptedId);
     const user = await this.prisma.user.findFirst({
       where: {
@@ -137,16 +137,29 @@ export class AuthService {
 
     if (!user) throw new HttpException('Invalid otp', HttpStatus.BAD_REQUEST);
 
-    await this.prisma.user.update({
+    const updatedUser = await this.prisma.user.update({
       where: { id: Number(id) },
       data: {
         verified: true,
         otp: this.generateOtpNumber(),
       },
     });
-    const token = await this.generateTokens(user);
+    const token = await this.generateTokens(updatedUser);
     await this.storeRefreshToken({ id: Number(id) }, token.refresh_token);
-    return token;
+    return {
+      ...token,
+      user: {
+        blocked: updatedUser.blocked,
+        createdAt: updatedUser.createdAt,
+        email: updatedUser.email,
+        id: updatedUser.id,
+        name: updatedUser.name,
+        phone: updatedUser.phone,
+        role: updatedUser.role,
+        updatedAt: updatedUser.updatedAt,
+        verified: updatedUser.verified,
+      },
+    };
   }
 
   async storeRefreshToken(
@@ -162,6 +175,19 @@ export class AuthService {
       data: {
         verified: true,
         hashed_refresh_token: hash,
+      },
+    });
+  }
+
+  async removeRefreshToken(data: {
+    id?: number;
+    email?: string;
+  }): Promise<void> {
+    await this.prisma.user.update({
+      where: { ...data },
+      data: {
+        verified: true,
+        hashed_refresh_token: null,
       },
     });
   }
@@ -185,6 +211,26 @@ export class AuthService {
     const token = await this.generateTokens(user);
     await this.storeRefreshToken({ id: Number(userId) }, token.refresh_token);
     return token;
+  }
+
+  async logout(userId: number, refreshToken: string): Promise<string> {
+    const user = await this.prisma.user.findFirst({
+      where: {
+        id: Number(userId),
+      },
+    });
+    if (!user) throw new ForbiddenException('Access Denied');
+
+    if (!user.hashed_refresh_token)
+      throw new ForbiddenException('Access Denied');
+    const refreshTokenMatches = await bcrypt.compare(
+      refreshToken,
+      user.hashed_refresh_token,
+    );
+
+    if (!refreshTokenMatches) throw new ForbiddenException('Access Denied');
+    await this.removeRefreshToken({ id: Number(userId) });
+    return 'Logged Out Successfully';
   }
 
   generateOtpNumber(): number {

@@ -5,6 +5,7 @@ import {
   LiveSessionContentAdminGetDto,
   LiveSessionContentAdminPaginateDto,
   LiveSessionContentAdminUpdateDto,
+  LiveSessionContentUserGetDto,
 } from '../dto';
 import * as fs from 'fs/promises';
 import { fileName } from 'src/common/hooks/fileName.hooks';
@@ -178,5 +179,59 @@ export class LiveSessionContentAdminService {
       // console.log(error);
       return undefined;
     }
+  }
+
+  async joinContent(
+    id: number,
+  ): Promise<LiveSessionContentUserGetDto | undefined> {
+    const content = await this.prisma.liveSessionContent.findFirst({
+      where: {
+        id: id,
+        draft: false,
+      },
+      select: {
+        id: true,
+        uuid: true,
+        createdAt: true,
+        updatedAt: true,
+        name: true,
+        heading: true,
+        description: true,
+        draft: true,
+        paid: true,
+        amount: true,
+        LiveSessionContentAssigned: {
+          where: {
+            OR: [
+              {
+                assignedRole: 'ASSIGNED',
+              },
+              {
+                assignedRole: 'PURCHASED',
+                PaymentInformation: {
+                  some: {
+                    status: 'PAID_FULL',
+                  },
+                },
+              },
+            ],
+            NOT: {
+              status: 'COMPLETED',
+            },
+          },
+          select: {
+            requestedById: true,
+            status: true,
+            assignedRole: true,
+            scheduledAt: true,
+            scheduledOn: true,
+            zoom: true,
+            id: true,
+            PaymentInformation: true,
+          },
+        },
+      },
+    });
+    return content;
   }
 }

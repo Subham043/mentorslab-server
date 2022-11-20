@@ -19,9 +19,9 @@ export const scheduleZoomMeeting = async (
     uri: 'https://api.zoom.us/v2/users/me/meetings',
     body: {
       topic, //meeting title
-      type: 2,
+      //   type: 2,
       start_time,
-      pre_schedule: true,
+      //   pre_schedule: true,
       duration: 30,
       settings: {
         host_video: 'true',
@@ -47,7 +47,7 @@ export const scheduleZoomMeeting = async (
   }
 };
 
-export const getZoomSignature = async (meetingNumber: string) => {
+export const getZoomSignature = async (meetingNumber: any) => {
   const iat = Math.round(new Date().getTime() / 1000) - 30;
   const exp = iat + 60 * 60 * 2;
 
@@ -62,6 +62,37 @@ export const getZoomSignature = async (meetingNumber: string) => {
     appKey: process.env.ZOOM_SDK_KEY,
     tokenExp: iat + 60 * 60 * 2,
   };
+
+  console.log(meetingNumber);
+
+  const sHeader = JSON.stringify(oHeader);
+  const sPayload = JSON.stringify(oPayload);
+  const signature = KJUR.jws.JWS.sign(
+    'HS256',
+    sHeader,
+    sPayload,
+    process.env.ZOOM_SDK_SECRET,
+  );
+  return signature;
+};
+
+export const getZoomSignatureAdmin = async (meetingNumber: any) => {
+  const iat = Math.round(new Date().getTime() / 1000) - 30;
+  const exp = iat + 60 * 60 * 2;
+
+  const oHeader = { alg: 'HS256', typ: 'JWT' };
+
+  const oPayload = {
+    sdkKey: process.env.ZOOM_SDK_KEY,
+    mn: meetingNumber,
+    role: 1,
+    iat: iat,
+    exp: exp,
+    appKey: process.env.ZOOM_SDK_KEY,
+    tokenExp: iat + 60 * 60 * 2,
+  };
+
+  console.log(meetingNumber);
 
   const sHeader = JSON.stringify(oHeader);
   const sPayload = JSON.stringify(oPayload);

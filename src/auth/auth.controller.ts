@@ -49,7 +49,7 @@ export class AuthController {
   async verifyUser(
     @Param('encryptedId') encryptedId: string,
     @Body() otpDto: OtpDto,
-  ): Promise<Token> {
+  ): Promise<any> {
     const result = await this.authService.verifyUser(otpDto, encryptedId);
     return result;
   }
@@ -90,6 +90,15 @@ export class AuthController {
     @GetCurrentUserIdAndRefreshToken() data: any,
   ): Promise<Token> {
     return await this.authService.refreshTokens(data.id, data.refreshToken);
+  }
+
+  @UseGuards(RefreshTokenGuard)
+  @Get('logout')
+  async logout(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    @GetCurrentUserIdAndRefreshToken() data: any,
+  ): Promise<string> {
+    return await this.authService.logout(data.id, data.refreshToken);
   }
 
   @Get('resend-otp/:encryptedId')

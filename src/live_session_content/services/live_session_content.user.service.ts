@@ -263,6 +263,8 @@ export class LiveSessionContentUserService {
             assignedRole: true,
             scheduledAt: true,
             scheduledOn: true,
+            zoom: true,
+            id: true,
             PaymentInformation: true,
           },
         },

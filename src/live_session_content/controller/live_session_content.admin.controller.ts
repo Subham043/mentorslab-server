@@ -20,6 +20,7 @@ import {
   LiveSessionContentAdminGetDto,
   LiveSessionContentAdminPaginateDto,
   LiveSessionContentAdminUpdateDto,
+  LiveSessionContentUserGetDto,
 } from '../dto';
 import { Response } from 'express';
 import { Public } from 'src/common/decorator/public.decorator';
@@ -99,6 +100,17 @@ export class LiveSessionContentAdminController {
     @Param('id', ValidLiveSessionContentIdPipe) id: number,
   ): Promise<LiveSessionContentAdminGetDto> {
     const result = await this.liveSessionContentService.findOne(id);
+    if (!result)
+      throw new HttpException('Data not found', HttpStatus.NOT_FOUND);
+    return result;
+  }
+
+  @Get('join/:id')
+  @Roles('ADMIN')
+  async joinContent(
+    @Param('id', ValidLiveSessionContentIdPipe) id: number,
+  ): Promise<LiveSessionContentUserGetDto> {
+    const result = await this.liveSessionContentService.joinContent(id);
     if (!result)
       throw new HttpException('Data not found', HttpStatus.NOT_FOUND);
     return result;

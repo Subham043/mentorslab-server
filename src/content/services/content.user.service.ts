@@ -10,6 +10,7 @@ import {
   PaymentVerifyUserDto,
 } from '../dto';
 import { v4 as uuidV4 } from 'uuid';
+import { MailService } from 'src/mail/mail.service';
 
 @Injectable()
 export class ContentUserService {
@@ -18,7 +19,10 @@ export class ContentUserService {
     name: true,
     email: true,
   };
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private mailService: MailService,
+  ) {}
 
   async findAllPaginate(
     params: {
@@ -482,6 +486,40 @@ export class ContentUserService {
         status: 'PAID_FULL',
       },
     });
+    const payment = await this.prisma.payment.findFirst({
+      where: {
+        orderId: razorpayOrderId,
+        status: 'PAID_FULL',
+        id: content.id,
+      },
+      select: {
+        orderId: true,
+        amount: true,
+        paymentReferenceId: true,
+        updatedAt: true,
+        createdAt: true,
+        paymentDoneBy: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+        forContentAssigned: {
+          select: {
+            assignedContent: {
+              select: {
+                id: true,
+                uuid: true,
+                name: true,
+                heading: true,
+              },
+            },
+          },
+        },
+      },
+    });
+    this.mailService.paymentContent(payment);
     return content;
   }
 }

@@ -6,10 +6,14 @@ import {
   getZoomSignatureAdmin,
   scheduleZoomMeeting,
 } from 'src/common/hooks/zoom.hooks';
+import { MailService } from 'src/mail/mail.service';
 
 @Injectable()
 export class LiveSessionAssignedContentAdminService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private mailService: MailService,
+  ) {}
 
   async findAllPaginate(params: {
     skip?: number;
@@ -81,6 +85,32 @@ export class LiveSessionAssignedContentAdminService {
         zoom,
       },
     });
+    const liveSes = await this.prisma.liveSessionContentAssigned.findFirst({
+      where: {
+        id,
+        status: 'SCHEDULED',
+        scheduledOn: scheduleDto.datetime,
+      },
+      select: {
+        scheduledOn: true,
+        liveSessionContent: {
+          select: {
+            id: true,
+            uuid: true,
+            name: true,
+            heading: true,
+          },
+        },
+        requestedBy: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+      },
+    });
+    this.mailService.scheduleSession(liveSes);
     return result;
   }
 
@@ -121,6 +151,32 @@ export class LiveSessionAssignedContentAdminService {
         zoom,
       },
     });
+    const liveSes = await this.prisma.liveSessionContentAssigned.findFirst({
+      where: {
+        id,
+        status: 'RESCHEDULED',
+        scheduledOn: scheduleDto.datetime,
+      },
+      select: {
+        scheduledOn: true,
+        liveSessionContent: {
+          select: {
+            id: true,
+            uuid: true,
+            name: true,
+            heading: true,
+          },
+        },
+        requestedBy: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+      },
+    });
+    this.mailService.rescheduleSession(liveSes);
     return result;
   }
 

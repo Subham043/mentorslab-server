@@ -10,6 +10,7 @@ import {
   createRazorpayOrder,
   verifyPayment,
 } from 'src/common/hooks/razorpay.hooks';
+import { MailService } from 'src/mail/mail.service';
 
 @Injectable()
 export class LiveSessionContentUserService {
@@ -18,7 +19,10 @@ export class LiveSessionContentUserService {
     name: true,
     email: true,
   };
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private mailService: MailService,
+  ) {}
 
   async findAllPaginate(
     params: {
@@ -420,6 +424,41 @@ export class LiveSessionContentUserService {
         status: 'PAID_FULL',
       },
     });
+    const payment = await this.prisma.paymentLiveSession.findFirst({
+      where: {
+        orderId: razorpayOrderId,
+        id: content.id,
+        paymentReferenceId: razorpayPaymentId,
+        status: 'PAID_FULL',
+      },
+      select: {
+        orderId: true,
+        amount: true,
+        paymentReferenceId: true,
+        updatedAt: true,
+        createdAt: true,
+        paymentDoneBy: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+        forLiveSessionContentAssigned: {
+          select: {
+            liveSessionContent: {
+              select: {
+                id: true,
+                uuid: true,
+                name: true,
+                heading: true,
+              },
+            },
+          },
+        },
+      },
+    });
+    this.mailService.paymentLiveSessionContent(payment);
     return content;
   }
 
@@ -445,15 +484,47 @@ export class LiveSessionContentUserService {
       if (liveSessionContentAssigned) {
         return 'Live session already requested. Kindly wait for admin to approve it';
       } else {
-        await this.prisma.liveSessionContentAssigned.create({
+        const dta = await this.prisma.liveSessionContentAssigned.create({
           data: {
             liveSessionContentId: liveSessionContent.id,
             requestedById: userId,
             assignedRole: 'ASSIGNED',
-            status: 'PENDING',
+            status: 'USER_REQUESTED',
             scheduledAt: new Date(),
           },
         });
+        const liveSes1 = await this.prisma.liveSessionContentAssigned.findFirst(
+          {
+            where: {
+              liveSessionContentId: liveSessionContent.id,
+              requestedById: userId,
+              assignedRole: 'ASSIGNED',
+              status: 'USER_REQUESTED',
+              id: dta.id,
+            },
+            select: {
+              id: true,
+              requestedBy: {
+                select: {
+                  id: true,
+                  name: true,
+                  email: true,
+                  phone: true,
+                },
+              },
+              liveSessionContent: {
+                select: {
+                  id: true,
+                  uuid: true,
+                  name: true,
+                  heading: true,
+                },
+              },
+            },
+          },
+        );
+
+        this.mailService.sessionRequested(liveSes1);
         return 'Live session requested.';
       }
     } else {
@@ -495,6 +566,35 @@ export class LiveSessionContentUserService {
           scheduledAt: new Date(),
         },
       });
+      const liveSes2 = this.prisma.liveSessionContentAssigned.findFirst({
+        where: {
+          liveSessionContentId: liveSessionContent.id,
+          requestedById: userId,
+          assignedRole: 'PURCHASED',
+          status: 'USER_REQUESTED',
+        },
+        select: {
+          id: true,
+          requestedBy: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              phone: true,
+            },
+          },
+          liveSessionContent: {
+            select: {
+              id: true,
+              uuid: true,
+              name: true,
+              heading: true,
+            },
+          },
+        },
+      });
+
+      this.mailService.sessionRequested(liveSes2);
       return 'Live session requested.';
     }
   }

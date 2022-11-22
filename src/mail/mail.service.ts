@@ -53,4 +53,87 @@ export class MailService {
       },
     });
   }
+
+  async sessionRequested(data: any) {
+    await this.mailerService.sendMail({
+      to: process.env.ADMIN_EMAIL,
+      // from: '"Support Team" <support@example.com>', // override default from
+      subject:
+        'Mentorslab - Live Session Requested By ' + data.requestedBy.name,
+      template: './session_requested', // `.hbs` extension is appended automatically
+      context: {
+        data,
+      },
+    });
+  }
+
+  async scheduleSession(data: any) {
+    const url = `${process.env.CLIENT_URL}/live-session-content/join/${data.liveSessionContent.uuid}`;
+    await this.mailerService.sendMail({
+      to: data.requestedBy.email,
+      // from: '"Support Team" <support@example.com>', // override default from
+      subject: 'Mentorslab - Live Session Scheduled On ' + data.scheduledOn,
+      template: './scheduled_session', // `.hbs` extension is appended automatically
+      context: {
+        data,
+        url,
+      },
+    });
+  }
+
+  async rescheduleSession(data: any) {
+    const url = `${process.env.CLIENT_URL}/live-session-content/join/${data.liveSessionContent.uuid}`;
+    await this.mailerService.sendMail({
+      to: data.requestedBy.email,
+      // from: '"Support Team" <support@example.com>', // override default from
+      subject: 'Mentorslab - Live Session Rescheduled On ' + data.scheduledOn,
+      template: './rescheduled_session', // `.hbs` extension is appended automatically
+      context: {
+        data,
+        url,
+      },
+    });
+  }
+
+  async paymentContent(data: any) {
+    await this.mailerService.sendMail({
+      to: data.paymentDoneBy.email,
+      // from: '"Support Team" <support@example.com>', // override default from
+      subject: 'Mentorslab - Purchase Successful',
+      template: './payment_content', // `.hbs` extension is appended automatically
+      context: {
+        data,
+      },
+    });
+    await this.mailerService.sendMail({
+      to: process.env.ADMIN_EMAIL,
+      // from: '"Support Team" <support@example.com>', // override default from
+      subject: 'Mentorslab - Purchase Successful By ' + data.paymentDoneBy.name,
+      template: './payment_content_admin', // `.hbs` extension is appended automatically
+      context: {
+        data,
+      },
+    });
+  }
+
+  async paymentLiveSessionContent(data: any) {
+    await this.mailerService.sendMail({
+      to: data.paymentDoneBy.email,
+      // from: '"Support Team" <support@example.com>', // override default from
+      subject: 'Mentorslab - Purchase Successful',
+      template: './payment_live_session_content', // `.hbs` extension is appended automatically
+      context: {
+        data,
+      },
+    });
+    await this.mailerService.sendMail({
+      to: process.env.ADMIN_EMAIL,
+      // from: '"Support Team" <support@example.com>', // override default from
+      subject: 'Mentorslab - Purchase Successful By ' + data.paymentDoneBy.name,
+      template: './payment_live_session_content_admin', // `.hbs` extension is appended automatically
+      context: {
+        data,
+      },
+    });
+  }
 }

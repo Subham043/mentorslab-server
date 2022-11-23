@@ -180,6 +180,40 @@ export class LiveSessionAssignedContentAdminService {
     return result;
   }
 
+  async endSession(id: number): Promise<any> {
+    const data = await this.prisma.liveSessionContentAssigned.findFirst({
+      where: {
+        OR: [
+          {
+            id,
+            status: 'SCHEDULED',
+          },
+          {
+            id,
+            status: 'RESCHEDULED',
+          },
+        ],
+      },
+      select: {
+        liveSessionContent: {
+          select: {
+            name: true,
+          },
+        },
+      },
+    });
+    if (!data) throw new HttpException('No data found', HttpStatus.BAD_REQUEST);
+    const result = await this.prisma.liveSessionContentAssigned.update({
+      where: {
+        id,
+      },
+      data: {
+        status: 'COMPLETED',
+      },
+    });
+    return result;
+  }
+
   async zoomSignature(id: number): Promise<any> {
     const data = await this.prisma.liveSessionContentAssigned.findFirst({
       where: {

@@ -72,6 +72,17 @@ export class LiveSessionAssignedContentAdminController {
     return result;
   }
 
+  @Get('end-session/:id')
+  @Roles('ADMIN')
+  async endSession(
+    @Param('id', ValidLiveSessionAssignedContentIdPipe) id: number,
+  ): Promise<any> {
+    const result = await this.liveSessionAssignedContentService.endSession(id);
+    if (!result)
+      throw new HttpException('Data not found', HttpStatus.NOT_FOUND);
+    return result;
+  }
+
   @Get('paginate')
   @Roles('ADMIN')
   async getAllContentPaginate(

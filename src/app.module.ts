@@ -40,6 +40,11 @@ import { LiveSessionAssignedContentUserService } from './live_session_assigned_c
 import { DashboardModule } from './dashboard/dashboard.module';
 import { DashboardController } from './dashboard/dashboard.controller';
 import { DashboardService } from './dashboard/dashboard.service';
+import { ExamModule } from './exam/exam.module';
+import { ExamUserController } from './exam/controller/exam.user.controller';
+import { ExamAdminController } from './exam/controller/exam.admin.controller';
+import { ExamAdminService } from './exam/services/exam.admin.service';
+import { ExamUserService } from './exam/services/exam.user.service';
 
 @Module({
   imports: [
@@ -65,6 +70,7 @@ import { DashboardService } from './dashboard/dashboard.service';
     DashboardModule,
     LiveSessionAssignedContentModule,
     LiveSessionAssignedContentModule,
+    ExamModule,
   ],
   controllers: [
     AppController,
@@ -80,6 +86,8 @@ import { DashboardService } from './dashboard/dashboard.service';
     PaymentAdminController,
     LiveSessionAssignedContentAdminController,
     LiveSessionAssignedContentUserController,
+    ExamAdminController,
+    ExamUserController,
   ],
   providers: [
     AppService,
@@ -99,6 +107,8 @@ import { DashboardService } from './dashboard/dashboard.service';
     PaymentAdminService,
     LiveSessionAssignedContentAdminService,
     LiveSessionAssignedContentUserService,
+    ExamAdminService,
+    ExamUserService,
   ],
 })
 export class AppModule {}

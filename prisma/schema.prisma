@@ -172,3 +172,21 @@ model Exam {
   draft  Boolean    @default(false)
   paid  Boolean    @default(false)
 }
+model Enquiries {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  name     String  @db.Text
+  email   String    @db.Text
+  phone     String  @db.Text
+  message     String?   @db.Text
+}
+model DemoSession {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  name     String  @db.Text
+  email   String    @db.Text
+  phone     String  @db.Text
+  message     String?   @db.Text
+}

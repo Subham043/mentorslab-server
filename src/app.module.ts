@@ -45,6 +45,16 @@ import { ExamUserController } from './exam/controller/exam.user.controller';
 import { ExamAdminController } from './exam/controller/exam.admin.controller';
 import { ExamAdminService } from './exam/services/exam.admin.service';
 import { ExamUserService } from './exam/services/exam.user.service';
+import { EnquiryModule } from './enquiry/enquiry.module';
+import { EnquiryAdminController } from './enquiry/controller/enquiry.admin.controller';
+import { EnquiryUserController } from './enquiry/controller/enquiry.user.controller';
+import { EnquiryUserService } from './enquiry/services/enquiry.user.service';
+import { EnquiryAdminService } from './enquiry/services/enquiry.admin.service';
+import { DemoSessionModule } from './demo_session/demo_session.module';
+import { DemoSessionUserController } from './demo_session/controller/demo_session.user.controller';
+import { DemoSessionAdminController } from './demo_session/controller/demo_session.admin.controller';
+import { DemoSessionAdminService } from './demo_session/services/demo_session.admin.service';
+import { DemoSessionUserService } from './demo_session/services/demo_session.user.service';
 
 @Module({
   imports: [
@@ -71,6 +81,8 @@ import { ExamUserService } from './exam/services/exam.user.service';
     LiveSessionAssignedContentModule,
     LiveSessionAssignedContentModule,
     ExamModule,
+    EnquiryModule,
+    DemoSessionModule,
   ],
   controllers: [
     AppController,
@@ -88,6 +100,10 @@ import { ExamUserService } from './exam/services/exam.user.service';
     LiveSessionAssignedContentUserController,
     ExamAdminController,
     ExamUserController,
+    EnquiryAdminController,
+    EnquiryUserController,
+    DemoSessionAdminController,
+    DemoSessionUserController,
   ],
   providers: [
     AppService,
@@ -109,6 +125,10 @@ import { ExamUserService } from './exam/services/exam.user.service';
     LiveSessionAssignedContentUserService,
     ExamAdminService,
     ExamUserService,
+    EnquiryAdminService,
+    EnquiryUserService,
+    DemoSessionAdminService,
+    DemoSessionUserService,
   ],
 })
 export class AppModule {}

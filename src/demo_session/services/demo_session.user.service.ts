@@ -20,6 +20,7 @@ export class DemoSessionUserService {
         message,
       },
     });
+    this.mailService.demoSession(dto);
     return 'Message sent successfully';
   }
 }

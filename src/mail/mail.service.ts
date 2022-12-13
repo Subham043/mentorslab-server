@@ -136,4 +136,26 @@ export class MailService {
       },
     });
   }
+
+  async enquiry(data: any) {
+    await this.mailerService.sendMail({
+      to: process.env.ADMIN_EMAIL,
+      subject: 'Mentorslab - Enquiry by ' + data.name,
+      template: './enquiry', // `.hbs` extension is appended automatically
+      context: {
+        data,
+      },
+    });
+  }
+
+  async demoSession(data: any) {
+    await this.mailerService.sendMail({
+      to: process.env.ADMIN_EMAIL,
+      subject: 'Mentorslab - Demo Session requested by ' + data.name,
+      template: './demo_session', // `.hbs` extension is appended automatically
+      context: {
+        data,
+      },
+    });
+  }
 }

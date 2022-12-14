@@ -60,6 +60,12 @@ import { EventAdminController } from './events/controller/event.admin.controller
 import { EventUserController } from './events/controller/event.user.controller';
 import { EventAdminService } from './events/services/event.admin.service';
 import { EventUserService } from './events/services/event.user.service';
+import { EventCallToActionModule } from './event_call_to_action/event.module';
+import { EventCallToActionAdminController } from './event_call_to_action/controller/event.admin.controller';
+import { EventCallToActionAdminService } from './event_call_to_action/services/event.admin.service';
+import { EventAboutAdminService } from './event_about/services/event.admin.service';
+import { EventAboutAdminController } from './event_about/controller/event.admin.controller';
+import { EventAboutModule } from './event_about/event.module';
 
 @Module({
   imports: [
@@ -89,6 +95,8 @@ import { EventUserService } from './events/services/event.user.service';
     EnquiryModule,
     DemoSessionModule,
     EventModule,
+    EventCallToActionModule,
+    EventAboutModule,
   ],
   controllers: [
     AppController,
@@ -112,6 +120,8 @@ import { EventUserService } from './events/services/event.user.service';
     DemoSessionUserController,
     EventAdminController,
     EventUserController,
+    EventCallToActionAdminController,
+    EventAboutAdminController,
   ],
   providers: [
     AppService,
@@ -139,6 +149,8 @@ import { EventUserService } from './events/services/event.user.service';
     DemoSessionUserService,
     EventAdminService,
     EventUserService,
+    EventCallToActionAdminService,
+    EventAboutAdminService,
   ],
 })
 export class AppModule {}

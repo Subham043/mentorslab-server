@@ -212,4 +212,30 @@ model Event {
   uploadedBy Int?
   draft  Boolean    @default(false)
   paid  Boolean    @default(false)
+  EventCallToAction   EventCallToAction?
+  EventAbout   EventAbout?
+}
+
+model EventCallToAction {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  heading String?    @db.Text
+  description String?    @db.Text
+  event   Event? @relation(fields: [eventId], references: [id], onDelete: SetNull, onUpdate: SetNull)
+  eventId Int? @unique
+  draft  Boolean    @default(false)
+  paid  Boolean    @default(false)
+}
+model EventAbout {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  heading String?    @db.Text
+  description String?    @db.Text
+  image String?    @db.Text
+  event   Event? @relation(fields: [eventId], references: [id], onDelete: SetNull, onUpdate: SetNull)
+  eventId Int? @unique
+  draft  Boolean    @default(false)
+  paid  Boolean    @default(false)
 }

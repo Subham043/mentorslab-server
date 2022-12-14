@@ -55,6 +55,11 @@ import { DemoSessionUserController } from './demo_session/controller/demo_sessio
 import { DemoSessionAdminController } from './demo_session/controller/demo_session.admin.controller';
 import { DemoSessionAdminService } from './demo_session/services/demo_session.admin.service';
 import { DemoSessionUserService } from './demo_session/services/demo_session.user.service';
+import { EventModule } from './events/event.module';
+import { EventAdminController } from './events/controller/event.admin.controller';
+import { EventUserController } from './events/controller/event.user.controller';
+import { EventAdminService } from './events/services/event.admin.service';
+import { EventUserService } from './events/services/event.user.service';
 
 @Module({
   imports: [
@@ -83,6 +88,7 @@ import { DemoSessionUserService } from './demo_session/services/demo_session.use
     ExamModule,
     EnquiryModule,
     DemoSessionModule,
+    EventModule,
   ],
   controllers: [
     AppController,
@@ -104,6 +110,8 @@ import { DemoSessionUserService } from './demo_session/services/demo_session.use
     EnquiryUserController,
     DemoSessionAdminController,
     DemoSessionUserController,
+    EventAdminController,
+    EventUserController,
   ],
   providers: [
     AppService,
@@ -129,6 +137,8 @@ import { DemoSessionUserService } from './demo_session/services/demo_session.use
     EnquiryUserService,
     DemoSessionAdminService,
     DemoSessionUserService,
+    EventAdminService,
+    EventUserService,
   ],
 })
 export class AppModule {}

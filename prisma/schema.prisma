@@ -31,6 +31,7 @@ model User {
   ContentAssignedBy ContentAssigned[] @relation("assignedBy")
   ContentAssignedTo ContentAssigned[] @relation("assignedTo")
   LiveSessionContentRequestedBy LiveSessionContentAssigned[] @relation("requestedBy")
+  Event   Event[]
 }
 
 enum Role {
@@ -189,4 +190,26 @@ model DemoSession {
   email   String    @db.Text
   phone     String  @db.Text
   message     String?   @db.Text
+}
+
+model Event {
+  id        Int      @id @default(autoincrement())
+  url     String?  @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  facebook String?    @db.Text
+  instagram String?    @db.Text
+  twitter String?    @db.Text
+  linkedin String?    @db.Text
+  banner String    @db.Text
+  video String    @db.Text
+  title     String  @db.Text
+  from_date     String
+  to_date     String?
+  time     String
+  amount     String?
+  uploadBy   User? @relation(fields: [uploadedBy], references: [id], onDelete: SetNull, onUpdate: SetNull)
+  uploadedBy Int?
+  draft  Boolean    @default(false)
+  paid  Boolean    @default(false)
 }

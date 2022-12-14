@@ -8,6 +8,7 @@ import {
 import { DemoSessionUserCreateDto } from '../dto';
 import { Public } from 'src/common/decorator/public.decorator';
 import { DemoSessionUserService } from '../services/demo_session.user.service';
+import { Throttle } from '@nestjs/throttler';
 
 @Controller('demo-session-user')
 export class DemoSessionUserController {
@@ -15,6 +16,7 @@ export class DemoSessionUserController {
 
   @Public()
   @Post()
+  @Throttle(3, 60)
   async createDemoSession(
     @Body() demoSessionCreateDto: DemoSessionUserCreateDto,
   ): Promise<string> {

@@ -137,7 +137,7 @@ export class MailService {
     });
   }
 
-  async enquiry(data: any) {
+  async sendEnquiryDetails(data: any) {
     await this.mailerService.sendMail({
       to: process.env.ADMIN_EMAIL,
       subject: 'Mentorslab - Enquiry by ' + data.name,

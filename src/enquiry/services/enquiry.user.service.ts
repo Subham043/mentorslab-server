@@ -20,6 +20,7 @@ export class EnquiryUserService {
         message,
       },
     });
+    this.mailService.sendEnquiryDetails(dto);
     return 'Message sent successfully';
   }
 }

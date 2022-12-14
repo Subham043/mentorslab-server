@@ -39,8 +39,6 @@ export class EventAboutAdminController {
     @Param('id', ValidEventIdPipe) id: number,
   ): Promise<EventAdminGetDto> {
     const result = await this.eventService.findOne(id);
-    if (!result)
-      throw new HttpException('Data not found', HttpStatus.NOT_FOUND);
     return result;
   }
 }

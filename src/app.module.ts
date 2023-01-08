@@ -66,6 +66,17 @@ import { EventCallToActionAdminService } from './event_call_to_action/services/e
 import { EventAboutAdminService } from './event_about/services/event.admin.service';
 import { EventAboutAdminController } from './event_about/controller/event.admin.controller';
 import { EventAboutModule } from './event_about/event.module';
+import { EventTestimonialModule } from './events_testimonial/event_testimonial.module';
+import { EventTestimonialAdminController } from './events_testimonial/controller/event_testimonial.admin.controller';
+import { EventTestimonialAdminService } from './events_testimonial/services/event_testimonial.admin.service';
+import { EventInstructorModule } from './events_instructor/event_instructor.module';
+import { EventInstructorAdminController } from './events_instructor/controller/event_instructor.admin.controller';
+import { EventInstructorAdminService } from './events_instructor/services/event_instructor.admin.service';
+import { EventScheduleAdminController } from './events_schedule/controller/event_schedule.admin.controller';
+import { EventScheduleAdminService } from './events_schedule/services/event_schedule.admin.service';
+import { EventGalleryModule } from './events_gallery/event_gallery.module';
+import { EventGalleryAdminController } from './events_gallery/controller/event_gallery.admin.controller';
+import { EventGalleryAdminService } from './events_gallery/services/event_gallery.admin.service';
 
 @Module({
   imports: [
@@ -97,6 +108,9 @@ import { EventAboutModule } from './event_about/event.module';
     EventModule,
     EventCallToActionModule,
     EventAboutModule,
+    EventTestimonialModule,
+    EventInstructorModule,
+    EventGalleryModule,
   ],
   controllers: [
     AppController,
@@ -122,6 +136,10 @@ import { EventAboutModule } from './event_about/event.module';
     EventUserController,
     EventCallToActionAdminController,
     EventAboutAdminController,
+    EventTestimonialAdminController,
+    EventInstructorAdminController,
+    EventScheduleAdminController,
+    EventGalleryAdminController,
   ],
   providers: [
     AppService,
@@ -151,6 +169,10 @@ import { EventAboutModule } from './event_about/event.module';
     EventUserService,
     EventCallToActionAdminService,
     EventAboutAdminService,
+    EventTestimonialAdminService,
+    EventInstructorAdminService,
+    EventScheduleAdminService,
+    EventGalleryAdminService,
   ],
 })
 export class AppModule {}

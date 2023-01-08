@@ -214,6 +214,10 @@ model Event {
   paid  Boolean    @default(false)
   EventCallToAction   EventCallToAction?
   EventAbout   EventAbout?
+  EventTestimonial EventTestimonial[]
+  EventInstructor EventInstructor[]
+  EventSchedule EventSchedule[]
+  EventGallery EventGallery[]
 }
 
 model EventCallToAction {
@@ -238,4 +242,53 @@ model EventAbout {
   eventId Int? @unique
   draft  Boolean    @default(false)
   paid  Boolean    @default(false)
+}
+
+model EventTestimonial {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  name String?    @db.Text
+  designation String?    @db.Text
+  message String?    @db.Text
+  image String?    @db.Text
+  event   Event? @relation(fields: [eventId], references: [id], onDelete: SetNull, onUpdate: SetNull)
+  eventId Int?
+}
+
+model EventInstructor {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  name String?    @db.Text
+  designation String?    @db.Text
+  description String?    @db.Text
+  image String?    @db.Text
+  facebook String?    @db.Text
+  instagram String?    @db.Text
+  twitter String?    @db.Text
+  linkedin String?    @db.Text
+  heading     String?  @db.Text
+  event   Event? @relation(fields: [eventId], references: [id], onDelete: SetNull, onUpdate: SetNull)
+  eventId Int?
+}
+
+model EventSchedule {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  title String?    @db.Text
+  description String?    @db.Text
+  heading     String?  @db.Text
+  event   Event? @relation(fields: [eventId], references: [id], onDelete: SetNull, onUpdate: SetNull)
+  eventId Int?
+}
+
+model EventGallery {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  image String?    @db.Text
+  event   Event? @relation(fields: [eventId], references: [id], onDelete: SetNull, onUpdate: SetNull)
+  eventId Int?
 }

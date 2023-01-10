@@ -14,6 +14,9 @@ export class EnquiryAdminService {
     const data = await this.prisma.enquiries.findMany({
       skip: skip ? skip : 0,
       take: take ? take : 10,
+      orderBy: {
+        id: 'desc',
+      },
     });
     const count = await this.prisma.enquiries.count({});
     return {

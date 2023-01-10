@@ -18,6 +18,9 @@ export class PaymentAdminService {
     const data = await this.prisma.payment.findMany({
       skip: skip ? skip : 0,
       take: take ? take : 10,
+      orderBy: {
+        id: 'desc',
+      },
       where: {
         status: 'PAID_FULL',
       },
@@ -69,6 +72,9 @@ export class PaymentAdminService {
     const data = await this.prisma.paymentLiveSession.findMany({
       skip: skip ? skip : 0,
       take: take ? take : 10,
+      orderBy: {
+        id: 'desc',
+      },
       where: {
         status: 'PAID_FULL',
       },

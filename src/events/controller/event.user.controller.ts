@@ -13,9 +13,10 @@ import {
 import { AccessTokenGuard } from 'src/auth/guards/access_token.guard';
 import { GetCurrentUserId } from 'src/common/decorator/get_current_user_id.decorator';
 import {
-  EventUserGetDto,
+  EventRegisterUserDto,
   EventUserPaginateDto,
   PaymentVerifyUserDto,
+  EventMainUserGetDto,
 } from '../dto';
 import { Response } from 'express';
 import { Public } from 'src/common/decorator/public.decorator';
@@ -28,6 +29,7 @@ import { ValidEventUrlPipe } from 'src/common/pipes/valid_event_url.pipes';
 export class EventUserController {
   constructor(private eventService: EventUserService) {}
 
+  @Public()
   @Get('paginate-all')
   async getAllContentPaginate(
     @Query('skip', ValidPaginatePipe) skip: string,
@@ -40,36 +42,70 @@ export class EventUserController {
     return result;
   }
 
-  @Get(':id')
+  @Public()
+  @Get('detail/:url')
   async getContent(
     @Param('url', ValidEventUrlPipe) url: string,
-  ): Promise<EventUserGetDto> {
+  ): Promise<EventMainUserGetDto> {
     const result = await this.eventService.findOne(url);
     if (!result)
       throw new HttpException('Data not found', HttpStatus.NOT_FOUND);
     return result;
   }
 
-  @Get('generate-payment-order/:id')
-  async getContentPaymentOrder(
-    @Param('url', ValidEventUrlPipe) url: string,
-    @GetCurrentUserId() userId: number,
-  ): Promise<any> {
-    const result = await this.eventService.findOneWithPaymentOrder(url, userId);
+  @Public()
+  @Get('latest')
+  async getLatestContent(): Promise<EventMainUserGetDto[]> {
+    const result = await this.eventService.getLatest();
     if (!result)
       throw new HttpException('Data not found', HttpStatus.NOT_FOUND);
     return result;
   }
 
-  @Post('verify-payment')
+  @Public()
+  @Get('generate-payment-order/:url')
+  async getContentPaymentOrder(
+    @Param('url', ValidEventUrlPipe) url: string,
+  ): Promise<any> {
+    const result = await this.eventService.findOneWithPaymentOrder(url);
+    if (!result)
+      throw new HttpException('Data not found', HttpStatus.NOT_FOUND);
+    return result;
+  }
+
+  @Public()
+  @Post('verify-payment/:url')
   async verifyPayment(
     @Body() dto: PaymentVerifyUserDto,
-    @GetCurrentUserId() userId: number,
+    @Param('url', ValidEventUrlPipe) url: string,
   ): Promise<any> {
-    const result = await this.eventService.verifyPaymentRecieved(dto, userId);
+    const result = await this.eventService.verifyPaymentRecieved(dto, url);
     if (!result)
       throw new HttpException('Payment Unsuccessful', HttpStatus.NOT_FOUND);
-    return { status: true, message: 'Payment Successful' };
+    return { status: true, message: 'Payment & Registration Successful' };
+  }
+
+  @Public()
+  @Post('register/:url')
+  async eventRegister(
+    @Body() dto: EventRegisterUserDto,
+    @Param('url', ValidEventUrlPipe) url: string,
+  ): Promise<any> {
+    const result = await this.eventService.eventRegister(dto, url);
+    if (!result)
+      throw new HttpException(
+        'Registration Unsuccessful',
+        HttpStatus.NOT_FOUND,
+      );
+    return { status: true, message: 'Registration Successful' };
+  }
+
+  @Public()
+  @Post('validate')
+  async eventRegisterValidation(
+    @Body() dto: EventRegisterUserDto,
+  ): Promise<any> {
+    return { status: true, message: 'Validation Successful' };
   }
 
   @Public()

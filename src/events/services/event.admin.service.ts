@@ -127,6 +127,9 @@ export class EventAdminService {
 
   async findAll(): Promise<EventAdminGetDto[]> {
     return await this.prisma.event.findMany({
+      orderBy: {
+        id: 'desc',
+      },
       include: {
         uploadBy: {
           select: this.User,
@@ -143,9 +146,52 @@ export class EventAdminService {
     const data = await this.prisma.event.findMany({
       skip: skip ? skip : 0,
       take: take ? take : 10,
+      orderBy: {
+        id: 'desc',
+      },
       include: {
         uploadBy: {
           select: this.User,
+        },
+      },
+    });
+    const count = await this.prisma.event.count({});
+    return {
+      data,
+      count,
+    };
+  }
+
+  async findAllRegistrationPaginate(params: {
+    skip?: number;
+    take?: number;
+  }): Promise<EventAdminPaginateDto> {
+    const { skip, take } = params;
+    const data = await this.prisma.eventRegistration.findMany({
+      skip: skip ? skip : 0,
+      take: take ? take : 10,
+      orderBy: {
+        id: 'desc',
+      },
+      select: {
+        id: true,
+        createdAt: true,
+        updatedAt: true,
+        name: true,
+        phone: true,
+        email: true,
+        message: true,
+        receipt: true,
+        orderId: true,
+        amount: true,
+        paymentReferenceId: true,
+        event: {
+          select: {
+            id: true,
+            title: true,
+            paid: true,
+            amount: true,
+          },
         },
       },
     });

@@ -8,6 +8,8 @@ import {
   EventUserGetDto,
   EventUserPaginateDto,
   PaymentVerifyUserDto,
+  EventMainUserGetDto,
+  EventRegisterUserDto,
 } from '../dto';
 import { v4 as uuidV4 } from 'uuid';
 import { MailService } from 'src/mail/mail.service';
@@ -32,6 +34,9 @@ export class EventUserService {
     const data = await this.prisma.event.findMany({
       skip: skip ? skip : 0,
       take: take ? take : 10,
+      orderBy: {
+        id: 'desc',
+      },
       where: {
         draft: false,
       },
@@ -63,7 +68,37 @@ export class EventUserService {
     };
   }
 
-  async findOne(url: string): Promise<EventUserGetDto | undefined> {
+  async getLatest(): Promise<EventUserGetDto[]> {
+    const data = await this.prisma.event.findMany({
+      skip: 0,
+      take: 3,
+      where: {
+        draft: false,
+      },
+      orderBy: {
+        id: 'desc',
+      },
+      select: {
+        title: true,
+        video: true,
+        from_date: true,
+        url: true,
+        to_date: true,
+        time: true,
+        draft: true,
+        paid: true,
+        amount: true,
+        facebook: true,
+        instagram: true,
+        twitter: true,
+        linkedin: true,
+        banner: true,
+      },
+    });
+    return data;
+  }
+
+  async findOne(url: string): Promise<EventMainUserGetDto | undefined> {
     const event = await this.prisma.event.findFirst({
       where: {
         url: url,
@@ -84,6 +119,52 @@ export class EventUserService {
         twitter: true,
         linkedin: true,
         banner: true,
+        EventCallToAction: {
+          select: {
+            heading: true,
+            description: true,
+          },
+        },
+        EventAbout: {
+          select: {
+            heading: true,
+            description: true,
+            image: true,
+          },
+        },
+        EventTestimonial: {
+          select: {
+            name: true,
+            designation: true,
+            message: true,
+            image: true,
+          },
+        },
+        EventInstructor: {
+          select: {
+            name: true,
+            designation: true,
+            description: true,
+            heading: true,
+            image: true,
+            facebook: true,
+            instagram: true,
+            twitter: true,
+            linkedin: true,
+          },
+        },
+        EventSchedule: {
+          select: {
+            title: true,
+            description: true,
+            heading: true,
+          },
+        },
+        EventGallery: {
+          select: {
+            image: true,
+          },
+        },
       },
     });
     return event;
@@ -99,206 +180,110 @@ export class EventUserService {
     return event;
   }
 
-  async findOneWithPaymentOrder(
-    id: string,
-    userId: number,
-  ): Promise<any | undefined> {
-    const contentCheckFirst = await this.prisma.content.findFirst({
+  async findOneWithPaymentOrder(id: string): Promise<any | undefined> {
+    const contentCheckFirst = await this.prisma.event.findFirst({
       where: {
-        uuid: id,
+        url: id,
         draft: false,
       },
       select: {
         id: true,
-        uuid: true,
-        createdAt: true,
-        updatedAt: true,
-        type: true,
-        name: true,
-        heading: true,
-        description: true,
+        title: true,
         draft: true,
-        restricted: true,
         paid: true,
         amount: true,
-        AssignedContent: {
-          where: {
-            assignedToId: userId,
-            assignedRole: 'ASSIGNED',
-          },
-          select: {
-            assignedToId: true,
-            assignedRole: true,
-          },
-        },
       },
     });
+    if (!contentCheckFirst) return undefined;
     if (contentCheckFirst.paid === false) return undefined;
-    if (
-      contentCheckFirst.AssignedContent &&
-      contentCheckFirst.AssignedContent.length !== 0
-    )
-      return undefined;
-    const contentCheckSecond = await this.prisma.content.findFirst({
-      where: {
-        uuid: id,
-        draft: false,
-      },
-      select: {
-        id: true,
-        uuid: true,
-        createdAt: true,
-        updatedAt: true,
-        type: true,
-        name: true,
-        heading: true,
-        description: true,
-        draft: true,
-        restricted: true,
-        paid: true,
-        amount: true,
-        AssignedContent: {
-          where: {
-            assignedToId: userId,
-            assignedRole: 'PURCHASED',
-          },
-          select: {
-            assignedToId: true,
-            assignedRole: true,
-            PaymentInformation: {
-              where: {
-                paymentBy: userId,
-              },
-            },
-          },
-        },
-      },
-    });
-    if (contentCheckSecond.paid === false) return undefined;
-    if (
-      contentCheckSecond.AssignedContent &&
-      contentCheckSecond.AssignedContent.length === 0
-    ) {
-      const uuid = uuidV4();
-      const order = await createRazorpayOrder(contentCheckSecond.amount, uuid);
-      const content = await this.prisma.content.findFirst({
-        where: {
-          uuid: id,
-          draft: false,
-        },
-        select: {
-          id: true,
-          uuid: true,
-          createdAt: true,
-          updatedAt: true,
-          type: true,
-          name: true,
-          heading: true,
-          description: true,
-          draft: true,
-          restricted: true,
-          paid: true,
-          amount: true,
-          AssignedContent: {
-            where: {
-              assignedToId: userId,
-              assignedRole: 'ASSIGNED',
-            },
-            select: {
-              assignedToId: true,
-              assignedRole: true,
-            },
-          },
-        },
-      });
-      const content_assigned = await this.prisma.contentAssigned.create({
-        data: {
-          assignedContentId: content.id,
-          assignedToId: userId,
-          assignedRole: 'PURCHASED',
-        },
-      });
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const payment = await this.prisma.payment.create({
-        data: {
-          orderId: order.id,
-          amount: content.amount,
-          receipt: order.receipt,
-          paymentBy: userId,
-          forContentAssignedId: content_assigned.id,
-        },
-      });
+    const uuid = uuidV4();
+    const order = await createRazorpayOrder(contentCheckFirst.amount, uuid);
 
-      return order;
-    } else if (
-      contentCheckSecond.AssignedContent &&
-      contentCheckSecond.AssignedContent.length !== 0 &&
-      contentCheckSecond.AssignedContent[0].PaymentInformation[0].status !==
-        'PENDING'
-    ) {
-      return undefined;
-    } else {
-      return {
-        id: contentCheckSecond.AssignedContent[0].PaymentInformation[0].orderId,
-        amount:
-          contentCheckSecond.AssignedContent[0].PaymentInformation[0].amount,
-        currency: 'INR',
-      };
-    }
+    return order;
   }
 
   async verifyPaymentRecieved(
     dto: PaymentVerifyUserDto,
-    userId: number,
+    url: string,
   ): Promise<any | undefined> {
-    const { razorpayOrderId, razorpayPaymentId, signature } = dto;
+    const contentCheckFirst = await this.prisma.event.findFirst({
+      where: {
+        url: url,
+        draft: false,
+      },
+      select: {
+        id: true,
+        title: true,
+        draft: true,
+        paid: true,
+        amount: true,
+      },
+    });
+    if (!contentCheckFirst) return undefined;
+    if (contentCheckFirst.paid === false) return undefined;
+    const {
+      razorpayOrderId,
+      razorpayPaymentId,
+      signature,
+      name,
+      email,
+      phone,
+      message,
+      receipt,
+    } = dto;
     const checkPayment = verifyPayment(
       razorpayOrderId,
       razorpayPaymentId,
       signature,
     );
     if (!checkPayment) return undefined;
-    const content = await this.prisma.payment.update({
-      where: { orderId: razorpayOrderId },
+    const content = await this.prisma.eventRegistration.create({
       data: {
         paymentReferenceId: razorpayPaymentId,
-        status: 'PAID_FULL',
+        orderId: razorpayOrderId,
+        name,
+        email,
+        phone,
+        message,
+        receipt,
+        amount: contentCheckFirst.amount,
+        eventId: contentCheckFirst.id,
       },
     });
-    const payment = await this.prisma.payment.findFirst({
+    // this.mailService.paymentContent(payment);
+    return content;
+  }
+
+  async eventRegister(
+    dto: EventRegisterUserDto,
+    url: string,
+  ): Promise<any | undefined> {
+    const contentCheckFirst = await this.prisma.event.findFirst({
       where: {
-        orderId: razorpayOrderId,
-        status: 'PAID_FULL',
-        id: content.id,
+        url: url,
+        draft: false,
       },
       select: {
-        orderId: true,
+        id: true,
+        title: true,
+        draft: true,
+        paid: true,
         amount: true,
-        paymentReferenceId: true,
-        updatedAt: true,
-        createdAt: true,
-        paymentDoneBy: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
-        },
-        forContentAssigned: {
-          select: {
-            assignedContent: {
-              select: {
-                id: true,
-                uuid: true,
-                name: true,
-                heading: true,
-              },
-            },
-          },
-        },
       },
     });
-    this.mailService.paymentContent(payment);
+    if (!contentCheckFirst) return undefined;
+    if (contentCheckFirst.paid === true) return undefined;
+    const { name, email, phone, message } = dto;
+    const content = await this.prisma.eventRegistration.create({
+      data: {
+        name,
+        email,
+        phone,
+        message,
+        eventId: contentCheckFirst.id,
+      },
+    });
+    // this.mailService.paymentContent(payment);
     return content;
   }
 }

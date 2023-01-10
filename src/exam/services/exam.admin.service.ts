@@ -82,6 +82,9 @@ export class ExamAdminService {
 
   async findAll(): Promise<ExamAdminGetDto[]> {
     return await this.prisma.exam.findMany({
+      orderBy: {
+        id: 'desc',
+      },
       include: {
         uploadBy: {
           select: this.User,
@@ -98,6 +101,9 @@ export class ExamAdminService {
     const data = await this.prisma.exam.findMany({
       skip: skip ? skip : 0,
       take: take ? take : 10,
+      orderBy: {
+        id: 'desc',
+      },
       include: {
         uploadBy: {
           select: this.User,

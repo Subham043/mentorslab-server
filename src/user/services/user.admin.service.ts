@@ -133,6 +133,9 @@ export class UserProfileAdminService {
 
   async findAll(): Promise<UserProfileAdminGetDto[]> {
     return await this.prisma.user.findMany({
+      orderBy: {
+        id: 'desc',
+      },
       where: {
         role: 'USER',
       },
@@ -144,6 +147,9 @@ export class UserProfileAdminService {
     id: number,
   ): Promise<UserProfileAdminGetDto[]> {
     return await this.prisma.user.findMany({
+      orderBy: {
+        id: 'desc',
+      },
       where: {
         role: 'USER',
       },
@@ -169,6 +175,9 @@ export class UserProfileAdminService {
   }): Promise<UserProfileAdminPaginateDto> {
     const { skip, take } = params;
     const data = await this.prisma.user.findMany({
+      orderBy: {
+        id: 'desc',
+      },
       skip: skip ? skip : 0,
       take: take ? take : 10,
       where: {

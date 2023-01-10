@@ -146,6 +146,9 @@ export class AssignedContentAdminService {
 
   async findAll(): Promise<AssignedContentGetAdminDto[]> {
     return await this.prisma.contentAssigned.findMany({
+      orderBy: {
+        id: 'desc',
+      },
       include: {
         assignedBy: {
           select: this.User,

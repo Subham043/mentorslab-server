@@ -82,6 +82,9 @@ export class LiveSessionContentAdminService {
 
   async findAll(): Promise<LiveSessionContentAdminGetDto[]> {
     return await this.prisma.liveSessionContent.findMany({
+      orderBy: {
+        id: 'desc',
+      },
       include: {
         uploadBy: {
           select: this.User,
@@ -98,6 +101,9 @@ export class LiveSessionContentAdminService {
     const data = await this.prisma.liveSessionContent.findMany({
       skip: skip ? skip : 0,
       take: take ? take : 10,
+      orderBy: {
+        id: 'desc',
+      },
       include: {
         uploadBy: {
           select: this.User,

@@ -23,6 +23,9 @@ export class LiveSessionAssignedContentAdminService {
     const data = await this.prisma.liveSessionContentAssigned.findMany({
       skip: skip ? skip : 0,
       take: take ? take : 10,
+      orderBy: {
+        id: 'desc',
+      },
       select: {
         id: true,
         createdAt: true,

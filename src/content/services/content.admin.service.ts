@@ -134,6 +134,9 @@ export class ContentAdminService {
 
   async findAll(): Promise<ContentAdminGetDto[]> {
     return await this.prisma.content.findMany({
+      orderBy: {
+        id: 'desc',
+      },
       include: {
         uploadBy: {
           select: this.User,
@@ -150,6 +153,9 @@ export class ContentAdminService {
     const data = await this.prisma.content.findMany({
       skip: skip ? skip : 0,
       take: take ? take : 10,
+      orderBy: {
+        id: 'desc',
+      },
       include: {
         uploadBy: {
           select: this.User,

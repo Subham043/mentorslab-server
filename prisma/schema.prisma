@@ -214,6 +214,7 @@ model Event {
   paid  Boolean    @default(false)
   EventCallToAction   EventCallToAction?
   EventAbout   EventAbout?
+  EventRegistration   EventRegistration[]
   EventTestimonial EventTestimonial[]
   EventInstructor EventInstructor[]
   EventSchedule EventSchedule[]
@@ -289,6 +290,22 @@ model EventGallery {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   image String?    @db.Text
+  event   Event? @relation(fields: [eventId], references: [id], onDelete: SetNull, onUpdate: SetNull)
+  eventId Int?
+}
+
+model EventRegistration {
+  id        Int      @id @default(autoincrement())
+  orderId     String?  @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  amount     String?  @db.Text
+  receipt     String?   @db.Text
+  name     String?   @db.Text
+  phone     String?   @db.Text
+  email     String?   @db.Text
+  message     String?   @db.Text
+  paymentReferenceId     String?   @db.Text
   event   Event? @relation(fields: [eventId], references: [id], onDelete: SetNull, onUpdate: SetNull)
   eventId Int?
 }

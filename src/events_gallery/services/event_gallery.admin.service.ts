@@ -30,6 +30,9 @@ export class EventGalleryAdminService {
   async findAll(event_id: number): Promise<EventGalleryAdminGetDto[]> {
     return await this.prisma.eventGallery.findMany({
       where: { eventId: Number(event_id) },
+      orderBy: {
+        id: 'desc',
+      },
     });
   }
 
@@ -45,6 +48,9 @@ export class EventGalleryAdminService {
       skip: skip ? skip : 0,
       take: take ? take : 10,
       where: { eventId: Number(event_id) },
+      orderBy: {
+        id: 'desc',
+      },
     });
     const count = await this.prisma.eventGallery.count({
       where: { eventId: Number(event_id) },

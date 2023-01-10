@@ -35,6 +35,9 @@ export class ExamUserService {
     const data = await this.prisma.exam.findMany({
       skip: skip ? skip : 0,
       take: take ? take : 10,
+      orderBy: {
+        id: 'desc',
+      },
       where: {
         draft: false,
       },
@@ -102,6 +105,9 @@ export class ExamUserService {
     const data = await this.prisma.exam.findMany({
       skip: skip ? skip : 0,
       take: take ? take : 10,
+      orderBy: {
+        id: 'desc',
+      },
       where: {
         draft: false,
         paid: false,
@@ -171,6 +177,9 @@ export class ExamUserService {
     const data = await this.prisma.exam.findMany({
       skip: skip ? skip : 0,
       take: take ? take : 10,
+      orderBy: {
+        id: 'desc',
+      },
       where: {
         draft: false,
         paid: true,

@@ -69,6 +69,9 @@ export class EventTestimonialAdminService {
   async findAll(event_id: number): Promise<EventTestimonialAdminGetDto[]> {
     return await this.prisma.eventTestimonial.findMany({
       where: { eventId: Number(event_id) },
+      orderBy: {
+        id: 'desc',
+      },
     });
   }
 
@@ -84,6 +87,9 @@ export class EventTestimonialAdminService {
       skip: skip ? skip : 0,
       take: take ? take : 10,
       where: { eventId: Number(event_id) },
+      orderBy: {
+        id: 'desc',
+      },
     });
     const count = await this.prisma.eventTestimonial.count({
       where: { eventId: Number(event_id) },

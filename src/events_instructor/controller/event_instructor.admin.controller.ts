@@ -108,6 +108,6 @@ export class EventInstructorAdminController {
   @Public()
   @Get('file/:imgpath')
   seeUploadedFile(@Param('imgpath') image, @Res() res: Response) {
-    return res.sendFile(image, { root: './uploads/events_testimonial' });
+    return res.sendFile(image, { root: './uploads/events_instructor' });
   }
 }

@@ -35,6 +35,9 @@ export class ContentUserService {
     const data = await this.prisma.content.findMany({
       skip: skip ? skip : 0,
       take: take ? take : 10,
+      orderBy: {
+        id: 'desc',
+      },
       where: {
         draft: false,
         OR: [
@@ -114,6 +117,9 @@ export class ContentUserService {
     const data = await this.prisma.content.findMany({
       skip: skip ? skip : 0,
       take: take ? take : 10,
+      orderBy: {
+        id: 'desc',
+      },
       where: {
         draft: false,
         paid: false,
@@ -181,6 +187,9 @@ export class ContentUserService {
     const data = await this.prisma.content.findMany({
       skip: skip ? skip : 0,
       take: take ? take : 10,
+      orderBy: {
+        id: 'desc',
+      },
       where: {
         draft: false,
         paid: true,

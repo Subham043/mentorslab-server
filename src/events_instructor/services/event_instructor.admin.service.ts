@@ -92,6 +92,9 @@ export class EventInstructorAdminService {
   async findAll(event_id: number): Promise<EventInstructorAdminGetDto[]> {
     return await this.prisma.eventInstructor.findMany({
       where: { eventId: Number(event_id) },
+      orderBy: {
+        id: 'desc',
+      },
     });
   }
 
@@ -107,6 +110,9 @@ export class EventInstructorAdminService {
       skip: skip ? skip : 0,
       take: take ? take : 10,
       where: { eventId: Number(event_id) },
+      orderBy: {
+        id: 'desc',
+      },
     });
     const count = await this.prisma.eventInstructor.count({
       where: { eventId: Number(event_id) },

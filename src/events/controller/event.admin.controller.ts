@@ -20,6 +20,7 @@ import {
   EventAdminGetDto,
   EventAdminPaginateDto,
   EventAdminUpdateDto,
+  EventRegistrationAdminPaginateDto,
 } from '../dto';
 import { Response } from 'express';
 import { Public } from 'src/common/decorator/public.decorator';
@@ -73,6 +74,19 @@ export class EventAdminController {
     @Query('take', ValidPaginatePipe) take: string,
   ): Promise<EventAdminPaginateDto> {
     const result = await this.eventService.findAllPaginate({
+      skip: Number(skip),
+      take: Number(take),
+    });
+    return result;
+  }
+
+  @Get('registration')
+  @Roles('ADMIN')
+  async getAllRegistrationPaginate(
+    @Query('skip', ValidPaginatePipe) skip: string,
+    @Query('take', ValidPaginatePipe) take: string,
+  ): Promise<EventRegistrationAdminPaginateDto> {
+    const result = await this.eventService.findAllRegistrationPaginate({
       skip: Number(skip),
       take: Number(take),
     });

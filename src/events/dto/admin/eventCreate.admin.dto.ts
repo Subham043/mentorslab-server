@@ -13,6 +13,7 @@ import {
   HasExtension,
 } from 'nestjs-form-data';
 import { Transform } from 'class-transformer';
+import { UniqueUrl } from 'src/common/validator/unique_url.validator';
 
 export class EventAdminCreateDto {
   @IsString()
@@ -21,6 +22,7 @@ export class EventAdminCreateDto {
 
   @IsString()
   @IsNotEmpty()
+  @UniqueUrl()
   url: string;
 
   @IsString()

@@ -13,7 +13,7 @@ import {
   MaxFileSize,
   HasExtension,
 } from 'nestjs-form-data';
-import { ContentTypeAdmin } from 'src/content/dto';
+import { CorrectAnswerAdmin } from './correctAnswer.admin.enum';
 
 export class ExamQuestionAnswerAdminUpdateDto {
   @IsString()
@@ -37,8 +37,8 @@ export class ExamQuestionAnswerAdminUpdateDto {
   answer_d: string;
 
   @IsNotEmpty()
-  @IsEnum(ContentTypeAdmin)
-  correct_answer: ContentTypeAdmin;
+  @IsEnum(CorrectAnswerAdmin)
+  correct_answer: CorrectAnswerAdmin;
 
   @IsOptional()
   @Transform(({ value }) => value === 'true' || value === true || value === 1)
@@ -47,8 +47,10 @@ export class ExamQuestionAnswerAdminUpdateDto {
 
   @IsNotEmpty()
   @IsNumber()
+  @Transform(({ value }) => Number(value))
   duration: number;
 
+  @IsOptional()
   @IsFile()
   @MaxFileSize(5e6)
   @HasExtension(['jpg', 'jpeg', 'webp', 'png'])

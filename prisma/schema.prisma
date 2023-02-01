@@ -32,6 +32,7 @@ model User {
   ContentAssignedTo ContentAssigned[] @relation("assignedTo")
   LiveSessionContentRequestedBy LiveSessionContentAssigned[] @relation("requestedBy")
   Event   Event[]
+  ExamQuestionAnswer   ExamQuestionAnswer[]
 }
 
 enum Role {
@@ -172,6 +173,7 @@ model Exam {
   uploadedBy Int?
   draft  Boolean    @default(false)
   paid  Boolean    @default(false)
+  ExamQuestionAnswer   ExamQuestionAnswer[]
 }
 model Enquiries {
   id        Int      @id @default(autoincrement())
@@ -308,4 +310,31 @@ model EventRegistration {
   paymentReferenceId     String?   @db.Text
   event   Event? @relation(fields: [eventId], references: [id], onDelete: SetNull, onUpdate: SetNull)
   eventId Int?
+}
+
+enum CorrectAnswer {
+  answer_a
+  answer_b
+  answer_c
+  answer_d
+}
+
+model ExamQuestionAnswer {
+  id        Int      @id @default(autoincrement())
+  uuid     String?  @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  image String?    @db.Text
+  question     String  @db.Text
+  answer_a     String?  @db.Text
+  answer_b     String?   @db.Text
+  answer_c     String?   @db.Text
+  answer_d     String?   @db.Text
+  correct_answer      CorrectAnswer     @default(answer_a)
+  duration      Int?
+  uploadBy   User? @relation(fields: [uploadedBy], references: [id], onDelete: SetNull, onUpdate: SetNull)
+  uploadedBy Int?
+  exam   Exam? @relation(fields: [examId], references: [id], onDelete: SetNull, onUpdate: SetNull)
+  examId Int?
+  draft  Boolean    @default(false)
 }

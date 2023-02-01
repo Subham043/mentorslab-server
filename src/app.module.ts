@@ -77,6 +77,9 @@ import { EventScheduleAdminService } from './events_schedule/services/event_sche
 import { EventGalleryModule } from './events_gallery/event_gallery.module';
 import { EventGalleryAdminController } from './events_gallery/controller/event_gallery.admin.controller';
 import { EventGalleryAdminService } from './events_gallery/services/event_gallery.admin.service';
+import { ExamQuestionAnswerModule } from './exam_question_answer/exam_question_answer.module';
+import { ExamQuestionAnswerAdminController } from './exam_question_answer/controller/exam_question_answer.admin.controller';
+import { ExamQuestionAnswerAdminService } from './exam_question_answer/services/exam_question_answer.admin.service';
 
 @Module({
   imports: [
@@ -111,6 +114,7 @@ import { EventGalleryAdminService } from './events_gallery/services/event_galler
     EventTestimonialModule,
     EventInstructorModule,
     EventGalleryModule,
+    ExamQuestionAnswerModule,
   ],
   controllers: [
     AppController,
@@ -140,6 +144,7 @@ import { EventGalleryAdminService } from './events_gallery/services/event_galler
     EventInstructorAdminController,
     EventScheduleAdminController,
     EventGalleryAdminController,
+    ExamQuestionAnswerAdminController,
   ],
   providers: [
     AppService,
@@ -173,6 +178,7 @@ import { EventGalleryAdminService } from './events_gallery/services/event_galler
     EventInstructorAdminService,
     EventScheduleAdminService,
     EventGalleryAdminService,
+    ExamQuestionAnswerAdminService,
   ],
 })
 export class AppModule {}

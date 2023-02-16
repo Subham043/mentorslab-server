@@ -36,6 +36,7 @@ export class ExamQuestionAnswerAdminService {
       answer_c,
       answer_d,
       duration,
+      marks,
       draft,
     } = dto;
     const uuid = uuidV4();
@@ -47,6 +48,7 @@ export class ExamQuestionAnswerAdminService {
         answer_c,
         answer_d,
         duration,
+        marks,
         uuid,
         draft,
         examId: exam_id,
@@ -83,6 +85,7 @@ export class ExamQuestionAnswerAdminService {
       answer_c,
       answer_d,
       duration,
+      marks,
       draft,
     } = dto;
     const event = await this.prisma.examQuestionAnswer.update({
@@ -94,6 +97,7 @@ export class ExamQuestionAnswerAdminService {
         answer_c,
         answer_d,
         duration,
+        marks,
         draft,
       },
     });

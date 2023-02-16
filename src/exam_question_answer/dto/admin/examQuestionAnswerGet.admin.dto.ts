@@ -9,5 +9,6 @@ export interface ExamQuestionAnswerAdminGetDto {
   answer_d?: string;
   correct_answer?: string;
   duration?: number;
+  marks?: number;
   image?: string;
 }

@@ -87,27 +87,38 @@ export class ExamUserController {
     return result;
   }
 
-  // @Get('generate-payment-order/:id')
-  // async getContentPaymentOrder(
-  //   @Param('id', ValidExamUuidPipe) id: string,
-  //   @GetCurrentUserId() userId: number,
-  // ): Promise<any> {
-  //   const result = await this.examService.findOneWithPaymentOrder(id, userId);
-  //   if (!result)
-  //     throw new HttpException('Data not found', HttpStatus.NOT_FOUND);
-  //   return result;
-  // }
+  @Get('generate-payment-order/:id')
+  async getContentPaymentOrder(
+    @Param('id', ValidExamUuidPipe) id: string,
+    @GetCurrentUserId() userId: number,
+  ): Promise<any> {
+    const result = await this.examService.findOneWithPaymentOrder(id, userId);
+    if (!result)
+      throw new HttpException('Data not found', HttpStatus.NOT_FOUND);
+    return result;
+  }
 
-  // @Post('verify-payment')
-  // async verifyPayment(
-  //   @Body() dto: PaymentVerifyUserDto,
-  //   @GetCurrentUserId() userId: number,
-  // ): Promise<any> {
-  //   const result = await this.examService.verifyPaymentRecieved(dto, userId);
-  //   if (!result)
-  //     throw new HttpException('Payment Unsuccessful', HttpStatus.NOT_FOUND);
-  //   return { status: true, message: 'Payment Successful' };
-  // }
+  @Post('verify-payment')
+  async verifyPayment(
+    @Body() dto: PaymentVerifyUserDto,
+    @GetCurrentUserId() userId: number,
+  ): Promise<any> {
+    const result = await this.examService.verifyPaymentRecieved(dto, userId);
+    if (!result)
+      throw new HttpException('Payment Unsuccessful', HttpStatus.NOT_FOUND);
+    return { status: true, message: 'Payment Successful' };
+  }
+
+  @Get('appear/:id')
+  async requestSession(
+    @Param('id', ValidExamUuidPipe) id: string,
+    @GetCurrentUserId() userId: number,
+  ): Promise<string> {
+    const result = await this.examService.requestSession(id, userId);
+    if (!result)
+      throw new HttpException('Data not found', HttpStatus.NOT_FOUND);
+    return result;
+  }
 
   @Public()
   @Get('image/:id')

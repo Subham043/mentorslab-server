@@ -50,6 +50,11 @@ export class ExamQuestionAnswerAdminUpdateDto {
   @Transform(({ value }) => Number(value))
   duration: number;
 
+  @IsNotEmpty()
+  @IsNumber()
+  @Transform(({ value }) => Number(value))
+  marks: number;
+
   @IsOptional()
   @IsFile()
   @MaxFileSize(5e6)

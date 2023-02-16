@@ -17,9 +17,6 @@ import {
 import { Transform } from 'class-transformer';
 
 export class ExamAdminCreateDto {
-  @IsOptional()
-  file_path: string;
-
   @IsNotEmpty()
   name: string;
 

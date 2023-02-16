@@ -45,6 +45,11 @@ export class ExamQuestionAnswerAdminCreateDto {
   @Transform(({ value }) => Number(value))
   duration: number;
 
+  @IsNotEmpty()
+  @IsNumber()
+  @Transform(({ value }) => Number(value))
+  marks: number;
+
   @IsOptional()
   @Transform(({ value }) => value === 'true' || value === true || value === 1)
   @IsBoolean()

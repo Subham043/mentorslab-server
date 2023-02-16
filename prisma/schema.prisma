@@ -26,6 +26,7 @@ model User {
   Content   Content[]
   Payment   Payment[]
   PaymentLiveSession   PaymentLiveSession[]
+  PaymentExam   PaymentExam[]
   LiveSessionContent   LiveSessionContent[]
   Exam   Exam[]
   ContentAssignedBy ContentAssigned[] @relation("assignedBy")
@@ -33,6 +34,7 @@ model User {
   LiveSessionContentRequestedBy LiveSessionContentAssigned[] @relation("requestedBy")
   Event   Event[]
   ExamQuestionAnswer   ExamQuestionAnswer[]
+  ExamRequestedBy ExamAssigned[] @relation("requestedBy")
 }
 
 enum Role {
@@ -78,6 +80,11 @@ model ContentAssigned {
 }
 
 enum AssignedRole {
+  ASSIGNED
+  PURCHASED
+}
+
+enum ExamRole {
   ASSIGNED
   PURCHASED
 }
@@ -174,6 +181,7 @@ model Exam {
   draft  Boolean    @default(false)
   paid  Boolean    @default(false)
   ExamQuestionAnswer   ExamQuestionAnswer[]
+  ExamAssigned ExamAssigned[] @relation("exam")
 }
 model Enquiries {
   id        Int      @id @default(autoincrement())
@@ -331,10 +339,50 @@ model ExamQuestionAnswer {
   answer_c     String?   @db.Text
   answer_d     String?   @db.Text
   correct_answer      CorrectAnswer     @default(answer_a)
+  marks      Int? @default(1)
   duration      Int?
   uploadBy   User? @relation(fields: [uploadedBy], references: [id], onDelete: SetNull, onUpdate: SetNull)
   uploadedBy Int?
   exam   Exam? @relation(fields: [examId], references: [id], onDelete: SetNull, onUpdate: SetNull)
   examId Int?
   draft  Boolean    @default(false)
+  ExamAssigned ExamAssigned[] @relation("currentQuestionAnswer")
+}
+
+enum ExamStatus {
+  PENDING
+  ONGOING
+  COMPLETED
+  ABORTED
+}
+
+model ExamAssigned {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  requestedBy       User?     @relation("requestedBy", fields: [requestedById], references: [id], onDelete: SetNull, onUpdate: SetNull)
+  requestedById     Int?
+  exam   Exam?     @relation("exam", fields: [examId], references: [id], onDelete: SetNull, onUpdate: SetNull)
+  examId Int?
+  currentQuestionAnswer   ExamQuestionAnswer?     @relation("currentQuestionAnswer", fields: [questionAnswerId], references: [id], onDelete: SetNull, onUpdate: SetNull)
+  questionAnswerId Int?
+  assignedRole      ExamRole     @default(ASSIGNED)
+  status      ExamStatus     @default(PENDING)
+  reason     String?  @db.Text
+  PaymentInformation   PaymentExam[]
+}
+
+model PaymentExam {
+  id        Int      @id @default(autoincrement())
+  orderId     String?  @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  status      PaymentStatus     @default(PENDING)
+  amount     String  @db.Text
+  receipt     String?   @db.Text
+  paymentReferenceId     String?   @db.Text
+  paymentDoneBy   User? @relation(fields: [paymentBy], references: [id], onDelete: SetNull, onUpdate: SetNull)
+  paymentBy Int?
+  forExamAssigned   ExamAssigned? @relation(fields: [forExamAssignedId], references: [id], onDelete: SetNull, onUpdate: SetNull)
+  forExamAssignedId Int?
 }

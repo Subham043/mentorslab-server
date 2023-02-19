@@ -5,3 +5,4 @@ export * from './admin/examUpdate.admin.dto';
 export * from './user/examGet.user.dto';
 export * from './user/examPaginate.user.dto';
 export * from './user/paymentVerify.user.dto';
+export * from './user/examAnswerModify.user.dto';

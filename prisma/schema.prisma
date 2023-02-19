@@ -34,6 +34,7 @@ model User {
   LiveSessionContentRequestedBy LiveSessionContentAssigned[] @relation("requestedBy")
   Event   Event[]
   ExamQuestionAnswer   ExamQuestionAnswer[]
+  ExamSelectedAnswer   ExamSelectedAnswer[] @relation("attendedBy")
   ExamRequestedBy ExamAssigned[] @relation("requestedBy")
 }
 
@@ -182,6 +183,7 @@ model Exam {
   paid  Boolean    @default(false)
   ExamQuestionAnswer   ExamQuestionAnswer[]
   ExamAssigned ExamAssigned[] @relation("exam")
+  examSelectedAnswer   ExamSelectedAnswer[] @relation("exam")
 }
 model Enquiries {
   id        Int      @id @default(autoincrement())
@@ -347,6 +349,7 @@ model ExamQuestionAnswer {
   examId Int?
   draft  Boolean    @default(false)
   ExamAssigned ExamAssigned[] @relation("currentQuestionAnswer")
+  eXamSelectedAnswer   ExamSelectedAnswer[] @relation("currentQuestionAnswer")
 }
 
 enum ExamStatus {
@@ -370,6 +373,24 @@ model ExamAssigned {
   status      ExamStatus     @default(PENDING)
   reason     String?  @db.Text
   PaymentInformation   PaymentExam[]
+  exAmSelectedAnswer   ExamSelectedAnswer[] @relation("examAssigned")
+}
+
+model ExamSelectedAnswer {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  attendedBy       User?     @relation("attendedBy", fields: [attendedById], references: [id], onDelete: SetNull, onUpdate: SetNull)
+  attendedById     Int?
+  exam   Exam?     @relation("exam", fields: [examId], references: [id], onDelete: SetNull, onUpdate: SetNull)
+  examId Int?
+  currentQuestionAnswer   ExamQuestionAnswer?     @relation("currentQuestionAnswer", fields: [currentQuestionAnswerId], references: [id], onDelete: SetNull, onUpdate: SetNull)
+  currentQuestionAnswerId Int?
+  examAssigned   ExamAssigned?     @relation("examAssigned", fields: [examAssignedId], references: [id], onDelete: SetNull, onUpdate: SetNull)
+  examAssignedId Int?
+  selected_answer      CorrectAnswer?     @default(answer_a)
+  correct_answer      CorrectAnswer?     @default(answer_a)
+  marks      Int? @default(0)
 }
 
 model PaymentExam {

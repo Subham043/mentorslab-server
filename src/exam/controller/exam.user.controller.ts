@@ -16,12 +16,14 @@ import {
   ExamUserGetDto,
   ExamUserPaginateDto,
   PaymentVerifyUserDto,
+  ExamAnswerUserModifyDto,
 } from '../dto';
 import { Response } from 'express';
 import { Public } from 'src/common/decorator/public.decorator';
 import { ValidPaginatePipe } from 'src/common/pipes/valid_paginate.pipes';
 import { ExamUserService } from '../services/exam.user.service';
 import { ValidExamUuidPipe } from 'src/common/pipes/valid_exam_uuid.pipes';
+import { ValidExamQuestionAnswerUuidPipe } from 'src/common/pipes/valid_exam_question_answer_uuid.pipes';
 
 @UseGuards(AccessTokenGuard)
 @Controller('exam-user')
@@ -120,6 +122,51 @@ export class ExamUserController {
     return result;
   }
 
+  @Get('sets/:id')
+  async getExamQuestion(
+    @Param('id', ValidExamUuidPipe) id: string,
+    @GetCurrentUserId() userId: number,
+  ): Promise<any> {
+    const result = await this.examService.getExamQuestion(id, userId);
+    if (!result)
+      throw new HttpException('Data not found', HttpStatus.NOT_FOUND);
+    return result;
+  }
+
+  @Post('answer/:id')
+  async postExamQuestionAnswer(
+    @Param('id', ValidExamUuidPipe) id: string,
+    @GetCurrentUserId() userId: number,
+    @Body() answer: ExamAnswerUserModifyDto,
+  ): Promise<any> {
+    const result = await this.examService.postExamQuestionAnswer(
+      id,
+      userId,
+      answer,
+    );
+    if (!result)
+      throw new HttpException('Data not found', HttpStatus.NOT_FOUND);
+    return result;
+  }
+
+  @Get('report/:id')
+  async getExamReportPagination(
+    @Query('skip', ValidPaginatePipe) skip: string,
+    @Query('take', ValidPaginatePipe) take: string,
+    @Param('id', ValidExamUuidPipe) id: string,
+    @GetCurrentUserId() userId: number,
+  ): Promise<any> {
+    const result = await this.examService.getExamReport(
+      {
+        skip: Number(skip),
+        take: Number(take),
+      },
+      id,
+      userId,
+    );
+    return result;
+  }
+
   @Public()
   @Get('image/:id')
   async seeUploadedFile(
@@ -131,6 +178,14 @@ export class ExamUserController {
       throw new HttpException('Data not found', HttpStatus.NOT_FOUND);
     return res.sendFile(result.image, {
       root: './uploads/exam_images',
+    });
+  }
+
+  @Public()
+  @Get('question-answer-image/:id')
+  async seeUploadedQuestionFile(@Param('id') file, @Res() res: Response) {
+    return res.sendFile(file, {
+      root: './uploads/exam_question_answer',
     });
   }
 }

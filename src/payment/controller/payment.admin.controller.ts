@@ -34,4 +34,17 @@ export class PaymentAdminController {
     });
     return result;
   }
+
+  @Get('exam-paginate')
+  @Roles('ADMIN')
+  async getAllExamPaginate(
+    @Query('skip', ValidPaginatePipe) skip: string,
+    @Query('take', ValidPaginatePipe) take: string,
+  ): Promise<any> {
+    const result = await this.paymentService.findExamAllPaginate({
+      skip: Number(skip),
+      take: Number(take),
+    });
+    return result;
+  }
 }

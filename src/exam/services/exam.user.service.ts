@@ -1,6 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import {
+  ExamAnswerUserModifyDto,
   ExamUserGetDto,
   ExamUserPaginateDto,
   PaymentVerifyUserDto,
@@ -301,6 +302,7 @@ export class ExamUserService {
             requestedById: true,
             assignedRole: true,
             status: true,
+            reason: true,
             currentQuestionAnswer: {
               select: {
                 uuid: true,
@@ -520,7 +522,7 @@ export class ExamUserService {
     return content;
   }
 
-  async requestSession(id: string, userId: number): Promise<any> {
+  async requestSession(id: string, userId: number): Promise<string> {
     const exam = await this.prisma.exam.findFirst({
       where: {
         uuid: id,
@@ -635,5 +637,374 @@ export class ExamUserService {
       // this.mailService.sessionRequested(liveSes2);
       return 'Start Exam.';
     }
+  }
+
+  async getExamQuestion(id: string, userId: number): Promise<any> {
+    const exam = await this.prisma.exam.findFirst({
+      where: {
+        uuid: id,
+        draft: false,
+      },
+      select: {
+        id: true,
+        paid: true,
+        ExamQuestionAnswer: true,
+      },
+    });
+    if (!exam)
+      throw new HttpException('Invalid Exam ID', HttpStatus.BAD_REQUEST);
+    if (exam?.ExamQuestionAnswer.length === 0)
+      throw new HttpException(
+        'No Questions are ready for this exam. Kindly try again later!',
+        HttpStatus.BAD_REQUEST,
+      );
+    const examAssigned = await this.prisma.examAssigned.findMany({
+      take: 1,
+      orderBy: {
+        id: 'asc',
+      },
+      where: {
+        examId: exam.id,
+        requestedById: userId,
+      },
+    });
+    if (!examAssigned || examAssigned.length === 0)
+      throw new HttpException(
+        'Please apply for this exam before you can appear for it!',
+        HttpStatus.BAD_REQUEST,
+      );
+    if (exam.paid === true && examAssigned[0].status === 'PENDING')
+      throw new HttpException(
+        'Please apply for this exam before you can appear for it!',
+        HttpStatus.BAD_REQUEST,
+      );
+    if (examAssigned[0].status === 'COMPLETED')
+      return {
+        exam_status: 'COMPLETED',
+        status: false,
+        message: 'You have completed your exam successfully!',
+      };
+    if (examAssigned[0].status === 'ABORTED')
+      return {
+        exam_status: 'ABORTED',
+        status: false,
+        message:
+          'You have been barred from giving this exam because ' +
+          examAssigned[0].reason,
+      };
+    const examQuestionAnswer = await this.prisma.examQuestionAnswer.findFirst({
+      orderBy: {
+        id: 'asc',
+      },
+      where: {
+        draft: false,
+        examId: exam.id,
+        id: examAssigned[0].questionAnswerId,
+      },
+      select: {
+        id: true,
+        uuid: true,
+        question: true,
+        answer_a: true,
+        answer_b: true,
+        answer_c: true,
+        answer_d: true,
+        image: true,
+        marks: true,
+        duration: true,
+      },
+    });
+    const totalQuestion = await this.prisma.examQuestionAnswer.count({
+      where: {
+        examId: exam.id,
+      },
+    });
+    const currentQuestion = await this.prisma.examSelectedAnswer.count({
+      where: {
+        examId: exam.id,
+        attendedById: userId,
+      },
+    });
+    return {
+      exam_status: 'ONGOING',
+      status: true,
+      sets: examQuestionAnswer,
+      totalQuestion,
+      currentQuestion: currentQuestion + 1,
+    };
+  }
+
+  async postExamQuestionAnswer(
+    id: string,
+    userId: number,
+    answer: ExamAnswerUserModifyDto,
+  ): Promise<any> {
+    const exam = await this.prisma.exam.findFirst({
+      where: {
+        uuid: id,
+        draft: false,
+      },
+      select: {
+        id: true,
+        paid: true,
+        ExamQuestionAnswer: true,
+      },
+    });
+    if (!exam)
+      throw new HttpException('Invalid Exam ID', HttpStatus.BAD_REQUEST);
+    if (exam?.ExamQuestionAnswer.length === 0)
+      throw new HttpException(
+        'No Questions are ready for this exam. Kindly try again later!',
+        HttpStatus.BAD_REQUEST,
+      );
+    const examAssigned = await this.prisma.examAssigned.findMany({
+      take: 1,
+      orderBy: {
+        id: 'asc',
+      },
+      where: {
+        examId: exam.id,
+        requestedById: userId,
+      },
+      select: {
+        status: true,
+        reason: true,
+        questionAnswerId: true,
+        id: true,
+        currentQuestionAnswer: true,
+      },
+    });
+    if (!examAssigned || examAssigned.length === 0)
+      throw new HttpException(
+        'Please apply for this exam before you can appear for it!',
+        HttpStatus.BAD_REQUEST,
+      );
+    if (exam.paid === true && examAssigned[0].status === 'PENDING')
+      throw new HttpException(
+        'Please apply for this exam before you can appear for it!',
+        HttpStatus.BAD_REQUEST,
+      );
+    if (examAssigned[0].status === 'COMPLETED')
+      return {
+        exam_status: 'COMPLETED',
+        status: false,
+        message: 'You have completed your exam successfully!',
+      };
+    if (examAssigned[0].status === 'ABORTED')
+      return {
+        exam_status: 'ABORTED',
+        status: false,
+        message:
+          'You have been barred from giving this exam because ' +
+          examAssigned[0].reason,
+      };
+    if (answer.status === 'ABORTED') {
+      await this.prisma.examAssigned.update({
+        where: { id: Number(examAssigned[0].id) },
+        data: {
+          status: 'ABORTED',
+          reason: answer.reason,
+        },
+      });
+      return {
+        exam_status: 'ABORTED',
+        status: false,
+        message:
+          'You have been barred from giving this exam because ' + answer.reason,
+      };
+    }
+    if (answer.status === 'ONGOING') {
+      await this.prisma.examSelectedAnswer.create({
+        data: {
+          examId: exam.id,
+          attendedById: userId,
+          examAssignedId: examAssigned[0].id,
+          currentQuestionAnswerId: examAssigned[0].questionAnswerId,
+          selected_answer: answer.selected_answer
+            ? answer.selected_answer
+            : null,
+          correct_answer: examAssigned[0].currentQuestionAnswer.correct_answer,
+          marks:
+            answer.selected_answer ===
+            examAssigned[0].currentQuestionAnswer.correct_answer
+              ? examAssigned[0].currentQuestionAnswer.marks
+              : 0,
+        },
+      });
+      const totalAnswered = await this.prisma.examSelectedAnswer.count({
+        where: {
+          examId: exam.id,
+          attendedById: userId,
+        },
+      });
+      const qA = await this.prisma.examQuestionAnswer.findMany({
+        skip: totalAnswered,
+        take: 1,
+        orderBy: {
+          id: 'asc',
+        },
+        where: {
+          draft: false,
+          examId: exam.id,
+        },
+      });
+      if (qA.length > 0) {
+        await this.prisma.examAssigned.update({
+          where: { id: Number(examAssigned[0].id) },
+          data: {
+            status: 'ONGOING',
+            questionAnswerId: qA[0].id,
+          },
+        });
+        return {
+          exam_status: 'ONGOING',
+          status: true,
+          message: 'Answer submitted successfully',
+        };
+      } else {
+        await this.prisma.examAssigned.update({
+          where: { id: Number(examAssigned[0].id) },
+          data: {
+            status: 'COMPLETED',
+          },
+        });
+        return {
+          exam_status: 'COMPLETED',
+          status: false,
+          message: 'You have completed your exam successfully!',
+        };
+      }
+    }
+  }
+
+  async getExamReport(
+    params: {
+      skip?: number;
+      take?: number;
+    },
+    id: string,
+    userId: number,
+  ): Promise<any> {
+    const { skip, take } = params;
+    const exam = await this.prisma.exam.findFirst({
+      where: {
+        uuid: id,
+        draft: false,
+      },
+      select: {
+        id: true,
+        paid: true,
+        ExamQuestionAnswer: true,
+      },
+    });
+    if (!exam)
+      throw new HttpException('Invalid Exam ID', HttpStatus.BAD_REQUEST);
+    if (exam?.ExamQuestionAnswer.length === 0)
+      throw new HttpException(
+        'No Questions are ready for this exam. Kindly try again later!',
+        HttpStatus.BAD_REQUEST,
+      );
+    const examAssigned = await this.prisma.examAssigned.findMany({
+      take: 1,
+      orderBy: {
+        id: 'asc',
+      },
+      where: {
+        examId: exam.id,
+        requestedById: userId,
+      },
+    });
+    if (!examAssigned || examAssigned.length === 0)
+      throw new HttpException(
+        'Please apply for this exam before you can appear for it!',
+        HttpStatus.BAD_REQUEST,
+      );
+    if (exam.paid === true && examAssigned[0].status === 'PENDING')
+      throw new HttpException(
+        'Please apply for this exam before you can appear for it!',
+        HttpStatus.BAD_REQUEST,
+      );
+    if (examAssigned[0].status === 'ABORTED')
+      throw new HttpException(
+        'You had been barred from giving this exam because ' +
+          examAssigned[0].reason +
+          ', therefore you cannot view result of this exam!',
+        HttpStatus.BAD_REQUEST,
+      );
+    if (examAssigned[0].status === 'ONGOING')
+      throw new HttpException(
+        'The exam is currently in progress therefore you cannot view result of this exam!',
+        HttpStatus.BAD_REQUEST,
+      );
+    const sA = await this.prisma.examSelectedAnswer.findMany({
+      skip: skip ? skip : 0,
+      take: take ? take : 1,
+      orderBy: {
+        id: 'asc',
+      },
+      where: {
+        examId: exam.id,
+        attendedById: userId,
+      },
+    });
+    let qA = null;
+    if (sA.length > 0)
+      qA = await this.prisma.examQuestionAnswer.findFirst({
+        orderBy: {
+          id: 'asc',
+        },
+        where: {
+          id: sA[0].currentQuestionAnswerId,
+        },
+      });
+    const count = await this.prisma.examSelectedAnswer.count({
+      where: {
+        examId: exam.id,
+        attendedById: userId,
+      },
+    });
+    const total_questions = await this.prisma.examQuestionAnswer.count({
+      where: {
+        examId: exam.id,
+      },
+    });
+    const attempted = await this.prisma.examSelectedAnswer.count({
+      where: {
+        examId: exam.id,
+        attendedById: userId,
+        NOT: {
+          selected_answer: null,
+        },
+      },
+    });
+    const total_marks = await this.prisma.examQuestionAnswer.aggregate({
+      _sum: {
+        marks: true,
+      },
+      where: {
+        examId: exam.id,
+      },
+    });
+    const marks_alloted = await this.prisma.examSelectedAnswer.aggregate({
+      _sum: {
+        marks: true,
+      },
+      where: {
+        examId: exam.id,
+        attendedById: userId,
+      },
+    });
+    const percentage =
+      (marks_alloted._sum.marks / total_marks._sum.marks) * 100;
+    return {
+      data: sA,
+      questionSet: qA,
+      total_questions,
+      attempted,
+      total_marks: total_marks._sum.marks,
+      marks_alloted: marks_alloted._sum.marks,
+      percentage,
+      count,
+    };
   }
 }

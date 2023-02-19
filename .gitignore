@@ -2,6 +2,7 @@
 /dist
 /node_modules
 /mysql
+/prisam/migrations/*
 .env
 .env.docker
 docker-compose.yml

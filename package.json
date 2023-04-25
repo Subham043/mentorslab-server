@@ -35,7 +35,7 @@
     "class-validator": "^0.13.2",
     "cookie-parser": "^1.4.6",
     "handlebars": "^4.7.7",
-    "helmet": "^6.0.0",
+    "helmet": "^6.1.5",
     "jsonwebtoken": "^8.5.1",
     "jsrsasign": "^10.5.27",
     "nestjs-form-data": "^1.8.3",

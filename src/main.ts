@@ -14,9 +14,33 @@ async function bootstrap() {
   app.useGlobalInterceptors(new TransformInterceptor());
   app.use(
     helmet({
-      contentSecurityPolicy: false,
-      crossOriginResourcePolicy: false,
-      frameguard: false,
+      contentSecurityPolicy: {
+        directives: {
+          'default-src': ["'self'"],
+          'style-src': ["'self'"],
+          'script-src': ["'self'"],
+          'font-src': ["'self'"],
+          'object-src': ["'self'"],
+          'img-src': ["'self'", process.env.CLIENT_URL],
+          'frame-src': ["'self'", process.env.CLIENT_URL],
+          'frame-ancestors': ["'self'", process.env.CLIENT_URL],
+          'connect-src': ["'self'", process.env.CLIENT_URL],
+          'form-action': ["'self'"],
+        },
+      },
+      crossOriginResourcePolicy: { policy: 'cross-origin' },
+      frameguard: {
+        action: 'sameorigin',
+      },
+      crossOriginOpenerPolicy: { policy: 'same-origin-allow-popups' },
+      referrerPolicy: { policy: 'no-referrer' },
+      hidePoweredBy: true,
+      hsts: {
+        maxAge: 15552000,
+        includeSubDomains: true,
+        preload: true,
+      },
+      xssFilter: true,
     }),
   );
   app.use(cookieParser());

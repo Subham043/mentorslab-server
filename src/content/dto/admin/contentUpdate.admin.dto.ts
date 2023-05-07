@@ -36,9 +36,9 @@ export class ContentAdminUpdateDto {
   @IsNotEmpty()
   heading: string;
 
-  @Transform((param) => ValidHtml(param.value))
   @IsOptional()
   @IsString()
+  @Transform((param) => ValidHtml(param.value))
   description: string;
 
   @Transform((param) => ValidHtml(param.value))

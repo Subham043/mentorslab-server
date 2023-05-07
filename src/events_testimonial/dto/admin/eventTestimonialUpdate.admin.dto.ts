@@ -1,3 +1,4 @@
+import { Transform } from 'class-transformer';
 import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import {
   MemoryStoredFile,
@@ -5,16 +6,20 @@ import {
   MaxFileSize,
   HasExtension,
 } from 'nestjs-form-data';
+import { ValidHtml } from 'src/common/decorator/valid_html.decorator';
 
 export class EventTestimonialAdminUpdateDto {
+  @Transform((param) => ValidHtml(param.value))
   @IsNotEmpty()
   @IsString()
   name: string;
 
+  @Transform((param) => ValidHtml(param.value))
   @IsNotEmpty()
   @IsString()
   designation: string;
 
+  @Transform((param) => ValidHtml(param.value))
   @IsNotEmpty()
   @IsString()
   message: string;

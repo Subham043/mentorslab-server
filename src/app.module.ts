@@ -80,6 +80,17 @@ import { EventGalleryAdminService } from './events_gallery/services/event_galler
 import { ExamQuestionAnswerModule } from './exam_question_answer/exam_question_answer.module';
 import { ExamQuestionAnswerAdminController } from './exam_question_answer/controller/exam_question_answer.admin.controller';
 import { ExamQuestionAnswerAdminService } from './exam_question_answer/services/exam_question_answer.admin.service';
+import { AssessmentModule } from './assessment/assessment.module';
+import { AssessmentCategoryModule } from './assessment_category/assessment_category.module';
+import { AssessmentAdminController } from './assessment/controller/assessment.admin.controller';
+import { AssessmentUserController } from './assessment/controller/assessment.user.controller';
+import { AssessmentCategoryAdminController } from './assessment_category/controller/assessment_category.admin.controller';
+import { AssessmentAdminService } from './assessment/services/assessment.admin.service';
+import { AssessmentUserService } from './assessment/services/assessment.user.service';
+import { AssessmentCategoryAdminService } from './assessment_category/services/assessment_category.admin.service';
+import { AssessmentQuestionAnswerModule } from './assessment_question_answer/assessment_question_answer.module';
+import { AssessmentQuestionAnswerAdminController } from './assessment_question_answer/controller/assessment_question_answer.admin.controller';
+import { AssessmentQuestionAnswerAdminService } from './assessment_question_answer/services/assessment_question_answer.admin.service';
 
 @Module({
   imports: [
@@ -106,6 +117,8 @@ import { ExamQuestionAnswerAdminService } from './exam_question_answer/services/
     LiveSessionAssignedContentModule,
     LiveSessionAssignedContentModule,
     ExamModule,
+    AssessmentModule,
+    AssessmentCategoryModule,
     EnquiryModule,
     DemoSessionModule,
     EventModule,
@@ -115,6 +128,7 @@ import { ExamQuestionAnswerAdminService } from './exam_question_answer/services/
     EventInstructorModule,
     EventGalleryModule,
     ExamQuestionAnswerModule,
+    AssessmentQuestionAnswerModule,
   ],
   controllers: [
     AppController,
@@ -132,6 +146,8 @@ import { ExamQuestionAnswerAdminService } from './exam_question_answer/services/
     LiveSessionAssignedContentUserController,
     ExamAdminController,
     ExamUserController,
+    AssessmentAdminController,
+    AssessmentUserController,
     EnquiryAdminController,
     EnquiryUserController,
     DemoSessionAdminController,
@@ -145,6 +161,8 @@ import { ExamQuestionAnswerAdminService } from './exam_question_answer/services/
     EventScheduleAdminController,
     EventGalleryAdminController,
     ExamQuestionAnswerAdminController,
+    AssessmentQuestionAnswerAdminController,
+    AssessmentCategoryAdminController,
   ],
   providers: [
     AppService,
@@ -166,6 +184,8 @@ import { ExamQuestionAnswerAdminService } from './exam_question_answer/services/
     LiveSessionAssignedContentUserService,
     ExamAdminService,
     ExamUserService,
+    AssessmentAdminService,
+    AssessmentUserService,
     EnquiryAdminService,
     EnquiryUserService,
     DemoSessionAdminService,
@@ -179,6 +199,8 @@ import { ExamQuestionAnswerAdminService } from './exam_question_answer/services/
     EventScheduleAdminService,
     EventGalleryAdminService,
     ExamQuestionAnswerAdminService,
+    AssessmentQuestionAnswerAdminService,
+    AssessmentCategoryAdminService,
   ],
 })
 export class AppModule {}

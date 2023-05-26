@@ -27,15 +27,21 @@ model User {
   Payment   Payment[]
   PaymentLiveSession   PaymentLiveSession[]
   PaymentExam   PaymentExam[]
+  PaymentAssessment   PaymentAssessment[]
   LiveSessionContent   LiveSessionContent[]
   Exam   Exam[]
+  Assessment   Assessment[]
   ContentAssignedBy ContentAssigned[] @relation("assignedBy")
   ContentAssignedTo ContentAssigned[] @relation("assignedTo")
   LiveSessionContentRequestedBy LiveSessionContentAssigned[] @relation("requestedBy")
   Event   Event[]
   ExamQuestionAnswer   ExamQuestionAnswer[]
+  AssessmentCategory   AssessmentCategory[]
+  AssessmentQuestionAnswer   AssessmentQuestionAnswer[]
   ExamSelectedAnswer   ExamSelectedAnswer[] @relation("attendedBy")
+  AssessmentSelectedAnswer   AssessmentSelectedAnswer[] @relation("attendedBy")
   ExamRequestedBy ExamAssigned[] @relation("requestedBy")
+  AssessmentRequestedBy AssessmentAssigned[] @relation("requestedBy")
 }
 
 enum Role {
@@ -185,6 +191,27 @@ model Exam {
   ExamAssigned ExamAssigned[] @relation("exam")
   examSelectedAnswer   ExamSelectedAnswer[] @relation("exam")
 }
+
+model Assessment {
+  id        Int      @id @default(autoincrement())
+  uuid     String?  @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  image String?    @db.Text
+  name     String  @db.Text
+  heading     String  @db.Text
+  description     String?   @db.Text
+  amount     String?
+  uploadBy   User? @relation(fields: [uploadedBy], references: [id], onDelete: SetNull, onUpdate: SetNull)
+  uploadedBy Int?
+  draft  Boolean    @default(false)
+  paid  Boolean    @default(false)
+  AssessmentCategory   AssessmentCategory[]
+  AssessmentQuestionAnswer   AssessmentQuestionAnswer[]
+  AssessmentAssigned AssessmentAssigned[] @relation("assessment")
+  assessmentSelectedAnswer   AssessmentSelectedAnswer[] @relation("assessment")
+}
+
 model Enquiries {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
@@ -352,11 +379,64 @@ model ExamQuestionAnswer {
   eXamSelectedAnswer   ExamSelectedAnswer[] @relation("currentQuestionAnswer")
 }
 
+model AssessmentCategory {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  category     String  @db.Text
+  choices     String?  @db.Text
+  message     String?   @db.Text
+  uploadBy   User? @relation(fields: [uploadedBy], references: [id], onDelete: SetNull, onUpdate: SetNull)
+  uploadedBy Int?
+  assessment   Assessment? @relation(fields: [assessmentId], references: [id], onDelete: SetNull, onUpdate: SetNull)
+  assessmentId Int?
+  draft  Boolean    @default(false)
+  answerAChoice   AssessmentQuestionAnswer[] @relation("answer_a_choice")
+  answerBChoice   AssessmentQuestionAnswer[] @relation("answer_b_choice")
+  answerCChoice   AssessmentQuestionAnswer[] @relation("answer_c_choice")
+  answerDChoice   AssessmentQuestionAnswer[] @relation("answer_d_choice")
+  selectedChoice   AssessmentSelectedAnswer[] @relation("selected_answer")
+}
+
+model AssessmentQuestionAnswer {
+  id        Int      @id @default(autoincrement())
+  uuid     String?  @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  image String?    @db.Text
+  question     String  @db.Text
+  answer_a     String?  @db.Text
+  answer_a_choice   AssessmentCategory?     @relation("answer_a_choice", fields: [answer_a_choice_id], references: [id], onDelete: SetNull, onUpdate: SetNull)
+  answer_a_choice_id Int?
+  answer_b     String?   @db.Text
+  answer_b_choice   AssessmentCategory?     @relation("answer_b_choice", fields: [answer_b_choice_id], references: [id], onDelete: SetNull, onUpdate: SetNull)
+  answer_b_choice_id Int?
+  answer_c     String?   @db.Text
+  answer_c_choice   AssessmentCategory?     @relation("answer_c_choice", fields: [answer_c_choice_id], references: [id], onDelete: SetNull, onUpdate: SetNull)
+  answer_c_choice_id Int?
+  answer_d     String?   @db.Text
+  answer_d_choice   AssessmentCategory?     @relation("answer_d_choice", fields: [answer_d_choice_id], references: [id], onDelete: SetNull, onUpdate: SetNull)
+  answer_d_choice_id Int?
+  uploadBy   User? @relation(fields: [uploadedBy], references: [id], onDelete: SetNull, onUpdate: SetNull)
+  uploadedBy Int?
+  assessment   Assessment? @relation(fields: [assessmentId], references: [id], onDelete: SetNull, onUpdate: SetNull)
+  assessmentId Int?
+  draft  Boolean    @default(false)
+  AssessmentAssigned AssessmentAssigned[] @relation("currentQuestionAnswer")
+  assessmentSelectedAnswer   AssessmentSelectedAnswer[] @relation("currentQuestionAnswer")
+}
+
 enum ExamStatus {
   PENDING
   ONGOING
   COMPLETED
   ABORTED
+}
+
+enum AssessmentStatus {
+  PENDING
+  ONGOING
+  COMPLETED
 }
 
 model ExamAssigned {
@@ -376,6 +456,23 @@ model ExamAssigned {
   exAmSelectedAnswer   ExamSelectedAnswer[] @relation("examAssigned")
 }
 
+model AssessmentAssigned {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  requestedBy       User?     @relation("requestedBy", fields: [requestedById], references: [id], onDelete: SetNull, onUpdate: SetNull)
+  requestedById     Int?
+  assessment   Assessment?     @relation("assessment", fields: [assessmentId], references: [id], onDelete: SetNull, onUpdate: SetNull)
+  assessmentId Int?
+  currentQuestionAnswer   AssessmentQuestionAnswer?     @relation("currentQuestionAnswer", fields: [questionAnswerId], references: [id], onDelete: SetNull, onUpdate: SetNull)
+  questionAnswerId Int?
+  assignedRole      ExamRole     @default(ASSIGNED)
+  status      AssessmentStatus     @default(PENDING)
+  reason     String?  @db.Text
+  PaymentInformation   PaymentAssessment[]
+  AssessmentSelectedAnswer   AssessmentSelectedAnswer[] @relation("assessmentAssigned")
+}
+
 model ExamSelectedAnswer {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
@@ -393,6 +490,22 @@ model ExamSelectedAnswer {
   marks      Int? @default(0)
 }
 
+model AssessmentSelectedAnswer {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  attendedBy       User?     @relation("attendedBy", fields: [attendedById], references: [id], onDelete: SetNull, onUpdate: SetNull)
+  attendedById     Int?
+  assessment   Assessment?     @relation("assessment", fields: [assessmentId], references: [id], onDelete: SetNull, onUpdate: SetNull)
+  assessmentId Int?
+  currentQuestionAnswer   AssessmentQuestionAnswer?     @relation("currentQuestionAnswer", fields: [currentQuestionAnswerId], references: [id], onDelete: SetNull, onUpdate: SetNull)
+  currentQuestionAnswerId Int?
+  assessmentAssigned   AssessmentAssigned?     @relation("assessmentAssigned", fields: [assessmentAssignedId], references: [id], onDelete: SetNull, onUpdate: SetNull)
+  assessmentAssignedId Int?
+  selected_answer   AssessmentCategory?     @relation("selected_answer", fields: [selected_answer_id], references: [id], onDelete: SetNull, onUpdate: SetNull)
+  selected_answer_id Int?
+}
+
 model PaymentExam {
   id        Int      @id @default(autoincrement())
   orderId     String?  @unique
@@ -406,4 +519,19 @@ model PaymentExam {
   paymentBy Int?
   forExamAssigned   ExamAssigned? @relation(fields: [forExamAssignedId], references: [id], onDelete: SetNull, onUpdate: SetNull)
   forExamAssignedId Int?
+}
+
+model PaymentAssessment {
+  id        Int      @id @default(autoincrement())
+  orderId     String?  @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  status      PaymentStatus     @default(PENDING)
+  amount     String  @db.Text
+  receipt     String?   @db.Text
+  paymentReferenceId     String?   @db.Text
+  paymentDoneBy   User? @relation(fields: [paymentBy], references: [id], onDelete: SetNull, onUpdate: SetNull)
+  paymentBy Int?
+  forAssessmentAssigned   AssessmentAssigned? @relation(fields: [forAssessmentAssignedId], references: [id], onDelete: SetNull, onUpdate: SetNull)
+  forAssessmentAssignedId Int?
 }

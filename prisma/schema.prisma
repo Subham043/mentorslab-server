@@ -422,7 +422,7 @@ model AssessmentQuestionAnswer {
   assessment   Assessment? @relation(fields: [assessmentId], references: [id], onDelete: SetNull, onUpdate: SetNull)
   assessmentId Int?
   draft  Boolean    @default(false)
-  AssessmentAssigned AssessmentAssigned[] @relation("currentQuestionAnswer")
+  AssessmentAssigned AssessmentAssigned[] @relation("currentQuestionAnswerAssigned")
   assessmentSelectedAnswer   AssessmentSelectedAnswer[] @relation("currentQuestionAnswer")
 }
 
@@ -464,7 +464,7 @@ model AssessmentAssigned {
   requestedById     Int?
   assessment   Assessment?     @relation("assessment", fields: [assessmentId], references: [id], onDelete: SetNull, onUpdate: SetNull)
   assessmentId Int?
-  currentQuestionAnswer   AssessmentQuestionAnswer?     @relation("currentQuestionAnswer", fields: [questionAnswerId], references: [id], onDelete: SetNull, onUpdate: SetNull)
+  currentQuestionAnswerAssigned   AssessmentQuestionAnswer?     @relation("currentQuestionAnswerAssigned", fields: [questionAnswerId], references: [id], onDelete: SetNull, onUpdate: SetNull)
   questionAnswerId Int?
   assignedRole      ExamRole     @default(ASSIGNED)
   status      AssessmentStatus     @default(PENDING)

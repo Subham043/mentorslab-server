@@ -171,4 +171,58 @@ export class PaymentAdminService {
       count,
     };
   }
+
+  async findAssessmentAllPaginate(params: {
+    skip?: number;
+    take?: number;
+  }): Promise<any> {
+    const { skip, take } = params;
+    const data = await this.prisma.paymentAssessment.findMany({
+      skip: skip ? skip : 0,
+      take: take ? take : 10,
+      orderBy: {
+        id: 'desc',
+      },
+      where: {
+        status: 'PAID_FULL',
+      },
+      select: {
+        amount: true,
+        createdAt: true,
+        updatedAt: true,
+        status: true,
+        orderId: true,
+        id: true,
+        paymentDoneBy: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true,
+          },
+        },
+        forAssessmentAssigned: {
+          select: {
+            id: true,
+            assessment: {
+              select: {
+                id: true,
+                name: true,
+                heading: true,
+              },
+            },
+          },
+        },
+      },
+    });
+    const count = await this.prisma.paymentAssessment.count({
+      where: {
+        status: 'PAID_FULL',
+      },
+    });
+    return {
+      data,
+      count,
+    };
+  }
 }

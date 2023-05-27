@@ -163,9 +163,7 @@ export class ExamAdminService {
     await this.prisma.exam.delete({
       where: { id: Number(id) },
     });
-    await this.removeFile(
-      './uploads/live_session_content_images/' + result.image,
-    );
+    await this.removeFile('./uploads/exam_images/' + result.image);
     return 'Content deleted successfully';
   }
 

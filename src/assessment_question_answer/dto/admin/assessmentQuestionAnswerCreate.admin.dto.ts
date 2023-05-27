@@ -26,6 +26,7 @@ export class AssessmentQuestionAnswerAdminCreateDto {
   answer_a: string;
 
   @Transform((param) => ValidHtml(param.value))
+  @Transform((param) => Number(param.value))
   @IsNumber()
   @IsNotEmpty()
   answer_a_choice_id: number;
@@ -36,6 +37,7 @@ export class AssessmentQuestionAnswerAdminCreateDto {
   answer_b: string;
 
   @Transform((param) => ValidHtml(param.value))
+  @Transform((param) => Number(param.value))
   @IsNumber()
   @IsNotEmpty()
   answer_b_choice_id: number;
@@ -46,6 +48,7 @@ export class AssessmentQuestionAnswerAdminCreateDto {
   answer_c: string;
 
   @Transform((param) => ValidHtml(param.value))
+  @Transform((param) => Number(param.value))
   @IsNumber()
   @IsNotEmpty()
   answer_c_choice_id: number;
@@ -56,6 +59,7 @@ export class AssessmentQuestionAnswerAdminCreateDto {
   answer_d: string;
 
   @Transform((param) => ValidHtml(param.value))
+  @Transform((param) => Number(param.value))
   @IsNumber()
   @IsNotEmpty()
   answer_d_choice_id: number;

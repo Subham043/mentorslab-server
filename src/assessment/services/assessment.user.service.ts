@@ -56,7 +56,7 @@ export class AssessmentUserService {
         AssessmentAssigned: {
           where: {
             requestedById: userId,
-            currentQuestionAnswer: {
+            currentQuestionAnswerAssigned: {
               draft: false,
             },
             OR: [
@@ -77,7 +77,7 @@ export class AssessmentUserService {
             requestedById: true,
             assignedRole: true,
             status: true,
-            currentQuestionAnswer: {
+            currentQuestionAnswerAssigned: {
               select: {
                 uuid: true,
                 question: true,
@@ -86,8 +86,6 @@ export class AssessmentUserService {
                 answer_b: true,
                 answer_c: true,
                 answer_d: true,
-                marks: true,
-                duration: true,
                 draft: true,
               },
             },
@@ -157,7 +155,7 @@ export class AssessmentUserService {
             requestedById: true,
             assignedRole: true,
             status: true,
-            currentQuestionAnswer: {
+            currentQuestionAnswerAssigned: {
               select: {
                 uuid: true,
                 question: true,
@@ -166,8 +164,6 @@ export class AssessmentUserService {
                 answer_b: true,
                 answer_c: true,
                 answer_d: true,
-                marks: true,
-                duration: true,
                 draft: true,
               },
             },
@@ -230,7 +226,7 @@ export class AssessmentUserService {
             requestedById: true,
             assignedRole: true,
             status: true,
-            currentQuestionAnswer: {
+            currentQuestionAnswerAssigned: {
               select: {
                 uuid: true,
                 question: true,
@@ -239,8 +235,6 @@ export class AssessmentUserService {
                 answer_b: true,
                 answer_c: true,
                 answer_d: true,
-                marks: true,
-                duration: true,
                 draft: true,
               },
             },
@@ -303,7 +297,8 @@ export class AssessmentUserService {
             assignedRole: true,
             status: true,
             reason: true,
-            currentQuestionAnswer: {
+            questionAnswerId: true,
+            currentQuestionAnswerAssigned: {
               select: {
                 uuid: true,
                 question: true,
@@ -312,8 +307,6 @@ export class AssessmentUserService {
                 answer_b: true,
                 answer_c: true,
                 answer_d: true,
-                marks: true,
-                duration: true,
                 draft: true,
               },
             },
@@ -697,14 +690,6 @@ export class AssessmentUserService {
         status: false,
         message: 'You have completed your assessment successfully!',
       };
-    // if (assessmentAssigned[0].status === 'ABORTED')
-    //   return {
-    //     assessment_status: 'ABORTED',
-    //     status: false,
-    //     message:
-    //       'You have been barred from giving this assessment because ' +
-    //       assessmentAssigned[0].reason,
-    //   };
     const assessmentQuestionAnswer =
       await this.prisma.assessmentQuestionAnswer.findFirst({
         orderBy: {
@@ -720,9 +705,13 @@ export class AssessmentUserService {
           uuid: true,
           question: true,
           answer_a: true,
+          answer_a_choice_id: true,
           answer_b: true,
+          answer_b_choice_id: true,
           answer_c: true,
+          answer_c_choice_id: true,
           answer_d: true,
+          answer_d_choice_id: true,
           image: true,
         },
       });
@@ -746,279 +735,265 @@ export class AssessmentUserService {
     };
   }
 
-  // async postAssessmentQuestionAnswer(
-  //   id: string,
-  //   userId: number,
-  //   answer: AssessmentAnswerUserModifyDto,
-  // ): Promise<any> {
-  //   const assessment = await this.prisma.assessment.findFirst({
-  //     where: {
-  //       uuid: id,
-  //       draft: false,
-  //     },
-  //     select: {
-  //       id: true,
-  //       paid: true,
-  //       AssessmentQuestionAnswer: true,
-  //     },
-  //   });
-  //   if (!assessment)
-  //     throw new HttpException('Invalid Assessment ID', HttpStatus.BAD_REQUEST);
-  //   if (assessment?.AssessmentQuestionAnswer.length === 0)
-  //     throw new HttpException(
-  //       'No Questions are ready for this assessment. Kindly try again later!',
-  //       HttpStatus.BAD_REQUEST,
-  //     );
-  //   const assessmentAssigned = await this.prisma.assessmentAssigned.findMany({
-  //     take: 1,
-  //     orderBy: {
-  //       id: 'asc',
-  //     },
-  //     where: {
-  //       assessmentId: assessment.id,
-  //       requestedById: userId,
-  //     },
-  //     select: {
-  //       status: true,
-  //       reason: true,
-  //       questionAnswerId: true,
-  //       id: true,
-  //       currentQuestionAnswer: true,
-  //     },
-  //   });
-  //   if (!assessmentAssigned || assessmentAssigned.length === 0)
-  //     throw new HttpException(
-  //       'Please apply for this assessment before you can appear for it!',
-  //       HttpStatus.BAD_REQUEST,
-  //     );
-  //   if (assessment.paid === true && assessmentAssigned[0].status === 'PENDING')
-  //     throw new HttpException(
-  //       'Please apply for this assessment before you can appear for it!',
-  //       HttpStatus.BAD_REQUEST,
-  //     );
-  //   if (assessmentAssigned[0].status === 'COMPLETED')
-  //     return {
-  //       assessment_status: 'COMPLETED',
-  //       status: false,
-  //       message: 'You have completed your assessment successfully!',
-  //     };
-  //   // if (assessmentAssigned[0].status === 'ABORTED')
-  //   //   return {
-  //   //     assessment_status: 'ABORTED',
-  //   //     status: false,
-  //   //     message:
-  //   //       'You have been barred from giving this assessment because ' +
-  //   //       assessmentAssigned[0].reason,
-  //   //   };
-  //   // if (answer.status === 'ABORTED') {
-  //   //   await this.prisma.assessmentAssigned.update({
-  //   //     where: { id: Number(assessmentAssigned[0].id) },
-  //   //     data: {
-  //   //       status: 'ABORTED',
-  //   //       reason: answer.reason,
-  //   //     },
-  //   //   });
-  //   //   return {
-  //   //     assessment_status: 'ABORTED',
-  //   //     status: false,
-  //   //     message:
-  //   //       'You have been barred from giving this assessment because ' +
-  //   //       answer.reason,
-  //   //   };
-  //   // }
-  //   if (answer.status === 'ONGOING') {
-  //     await this.prisma.assessmentSelectedAnswer.create({
-  //       data: {
-  //         assessmentId: assessment.id,
-  //         attendedById: userId,
-  //         assessmentAssignedId: assessmentAssigned[0].id,
-  //         currentQuestionAnswerId: assessmentAssigned[0].questionAnswerId,
-  //         selected_answer: answer.selected_answer
-  //           ? answer.selected_answer
-  //           : null,
-  //         correct_answer:
-  //           assessmentAssigned[0].currentQuestionAnswer.correct_answer,
-  //         marks:
-  //           answer.selected_answer ===
-  //           assessmentAssigned[0].currentQuestionAnswer.correct_answer
-  //             ? assessmentAssigned[0].currentQuestionAnswer.marks
-  //             : 0,
-  //       },
-  //     });
-  //     const totalAnswered = await this.prisma.assessmentSelectedAnswer.count({
-  //       where: {
-  //         assessmentId: assessment.id,
-  //         attendedById: userId,
-  //       },
-  //     });
-  //     const qA = await this.prisma.assessmentQuestionAnswer.findMany({
-  //       skip: totalAnswered,
-  //       take: 1,
-  //       orderBy: {
-  //         id: 'asc',
-  //       },
-  //       where: {
-  //         draft: false,
-  //         assessmentId: assessment.id,
-  //       },
-  //     });
-  //     if (qA.length > 0) {
-  //       await this.prisma.assessmentAssigned.update({
-  //         where: { id: Number(assessmentAssigned[0].id) },
-  //         data: {
-  //           status: 'ONGOING',
-  //           questionAnswerId: qA[0].id,
-  //         },
-  //       });
-  //       return {
-  //         assessment_status: 'ONGOING',
-  //         status: true,
-  //         message: 'Answer submitted successfully',
-  //       };
-  //     } else {
-  //       await this.prisma.assessmentAssigned.update({
-  //         where: { id: Number(assessmentAssigned[0].id) },
-  //         data: {
-  //           status: 'COMPLETED',
-  //         },
-  //       });
-  //       return {
-  //         assessment_status: 'COMPLETED',
-  //         status: false,
-  //         message: 'You have completed your assessment successfully!',
-  //       };
-  //     }
-  //   }
-  // }
+  async postAssessmentQuestionAnswer(
+    id: string,
+    userId: number,
+    answer: AssessmentAnswerUserModifyDto,
+  ): Promise<any> {
+    const assessment = await this.prisma.assessment.findFirst({
+      where: {
+        uuid: id,
+        draft: false,
+      },
+      select: {
+        id: true,
+        paid: true,
+        AssessmentQuestionAnswer: true,
+      },
+    });
+    if (!assessment)
+      throw new HttpException('Invalid Assessment ID', HttpStatus.BAD_REQUEST);
+    if (assessment?.AssessmentQuestionAnswer.length === 0)
+      throw new HttpException(
+        'No Questions are ready for this assessment. Kindly try again later!',
+        HttpStatus.BAD_REQUEST,
+      );
+    const assessmentAssigned = await this.prisma.assessmentAssigned.findMany({
+      take: 1,
+      orderBy: {
+        id: 'asc',
+      },
+      where: {
+        assessmentId: assessment.id,
+        requestedById: userId,
+      },
+      select: {
+        status: true,
+        reason: true,
+        questionAnswerId: true,
+        id: true,
+        currentQuestionAnswerAssigned: true,
+      },
+    });
+    if (!assessmentAssigned || assessmentAssigned.length === 0)
+      throw new HttpException(
+        'Please apply for this assessment before you can appear for it!',
+        HttpStatus.BAD_REQUEST,
+      );
+    if (assessment.paid === true && assessmentAssigned[0].status === 'PENDING')
+      throw new HttpException(
+        'Please apply for this assessment before you can appear for it!',
+        HttpStatus.BAD_REQUEST,
+      );
+    if (assessmentAssigned[0].status === 'COMPLETED')
+      return {
+        assessment_status: 'COMPLETED',
+        status: false,
+        message: 'You have completed your assessment successfully!',
+      };
+    if (answer.status === 'ONGOING') {
+      await this.prisma.assessmentSelectedAnswer.create({
+        data: {
+          assessmentId: assessment.id,
+          attendedById: userId,
+          assessmentAssignedId: assessmentAssigned[0].id,
+          currentQuestionAnswerId: assessmentAssigned[0].questionAnswerId,
+          selected_answer_id: Number(answer.selected_answer_id),
+        },
+      });
+      const totalAnswered = await this.prisma.assessmentSelectedAnswer.count({
+        where: {
+          assessmentId: assessment.id,
+          attendedById: userId,
+        },
+      });
+      const qA = await this.prisma.assessmentQuestionAnswer.findMany({
+        skip: totalAnswered,
+        take: 1,
+        orderBy: {
+          id: 'asc',
+        },
+        where: {
+          draft: false,
+          assessmentId: assessment.id,
+        },
+      });
+      if (qA.length > 0) {
+        await this.prisma.assessmentAssigned.update({
+          where: { id: Number(assessmentAssigned[0].id) },
+          data: {
+            status: 'ONGOING',
+            questionAnswerId: qA[0].id,
+          },
+        });
+        return {
+          assessment_status: 'ONGOING',
+          status: true,
+          message: 'Answer submitted successfully',
+        };
+      } else {
+        await this.prisma.assessmentAssigned.update({
+          where: { id: Number(assessmentAssigned[0].id) },
+          data: {
+            status: 'COMPLETED',
+          },
+        });
+        return {
+          assessment_status: 'COMPLETED',
+          status: false,
+          message: 'You have completed your assessment successfully!',
+        };
+      }
+    }
+  }
 
-  // async getAssessmentReport(
-  //   params: {
-  //     skip?: number;
-  //     take?: number;
-  //   },
-  //   id: string,
-  //   userId: number,
-  // ): Promise<any> {
-  //   const { skip, take } = params;
-  //   const assessment = await this.prisma.assessment.findFirst({
-  //     where: {
-  //       uuid: id,
-  //       draft: false,
-  //     },
-  //     select: {
-  //       id: true,
-  //       paid: true,
-  //       AssessmentQuestionAnswer: true,
-  //     },
-  //   });
-  //   if (!assessment)
-  //     throw new HttpException('Invalid Assessment ID', HttpStatus.BAD_REQUEST);
-  //   if (assessment?.AssessmentQuestionAnswer.length === 0)
-  //     throw new HttpException(
-  //       'No Questions are ready for this assessment. Kindly try again later!',
-  //       HttpStatus.BAD_REQUEST,
-  //     );
-  //   const assessmentAssigned = await this.prisma.assessmentAssigned.findMany({
-  //     take: 1,
-  //     orderBy: {
-  //       id: 'asc',
-  //     },
-  //     where: {
-  //       assessmentId: assessment.id,
-  //       requestedById: userId,
-  //     },
-  //   });
-  //   if (!assessmentAssigned || assessmentAssigned.length === 0)
-  //     throw new HttpException(
-  //       'Please apply for this assessment before you can appear for it!',
-  //       HttpStatus.BAD_REQUEST,
-  //     );
-  //   if (assessment.paid === true && assessmentAssigned[0].status === 'PENDING')
-  //     throw new HttpException(
-  //       'Please apply for this assessment before you can appear for it!',
-  //       HttpStatus.BAD_REQUEST,
-  //     );
-  //   // if (assessmentAssigned[0].status === 'ABORTED')
-  //   //   throw new HttpException(
-  //   //     'You had been barred from giving this assessment because ' +
-  //   //       assessmentAssigned[0].reason +
-  //   //       ', therefore you cannot view result of this assessment!',
-  //   //     HttpStatus.BAD_REQUEST,
-  //   //   );
-  //   if (assessmentAssigned[0].status === 'ONGOING')
-  //     throw new HttpException(
-  //       'The assessment is currently in progress therefore you cannot view result of this assessment!',
-  //       HttpStatus.BAD_REQUEST,
-  //     );
-  //   const sA = await this.prisma.assessmentSelectedAnswer.findMany({
-  //     skip: skip ? skip : 0,
-  //     take: take ? take : 1,
-  //     orderBy: {
-  //       id: 'asc',
-  //     },
-  //     where: {
-  //       assessmentId: assessment.id,
-  //       attendedById: userId,
-  //     },
-  //   });
-  //   let qA = null;
-  //   if (sA.length > 0)
-  //     qA = await this.prisma.assessmentQuestionAnswer.findFirst({
-  //       orderBy: {
-  //         id: 'asc',
-  //       },
-  //       where: {
-  //         id: sA[0].currentQuestionAnswerId,
-  //       },
-  //     });
-  //   const count = await this.prisma.assessmentSelectedAnswer.count({
-  //     where: {
-  //       assessmentId: assessment.id,
-  //       attendedById: userId,
-  //     },
-  //   });
-  //   const total_questions = await this.prisma.assessmentQuestionAnswer.count({
-  //     where: {
-  //       assessmentId: assessment.id,
-  //     },
-  //   });
-  //   const attempted = await this.prisma.assessmentSelectedAnswer.count({
-  //     where: {
-  //       assessmentId: assessment.id,
-  //       attendedById: userId,
-  //       NOT: {
-  //         selected_answer: null,
-  //       },
-  //     },
-  //   });
-  //   const total_marks = await this.prisma.assessmentQuestionAnswer.aggregate({
-  //     _sum: {
-  //       marks: true,
-  //     },
-  //     where: {
-  //       assessmentId: assessment.id,
-  //     },
-  //   });
-  //   const marks_alloted = await this.prisma.assessmentSelectedAnswer.aggregate({
-  //     _sum: {
-  //       marks: true,
-  //     },
-  //     where: {
-  //       assessmentId: assessment.id,
-  //       attendedById: userId,
-  //     },
-  //   });
-  //   const percentage =
-  //     (marks_alloted._sum.marks / total_marks._sum.marks) * 100;
-  //   return {
-  //     data: sA,
-  //     questionSet: qA,
-  //     total_questions,
-  //     attempted,
-  //     total_marks: total_marks._sum.marks,
-  //     marks_alloted: marks_alloted._sum.marks,
-  //     percentage,
-  //     count,
-  //   };
-  // }
+  async getAssessmentReport(
+    params: {
+      skip?: number;
+      take?: number;
+    },
+    id: string,
+    userId: number,
+  ): Promise<any> {
+    const { skip, take } = params;
+    const assessment = await this.prisma.assessment.findFirst({
+      where: {
+        uuid: id,
+        draft: false,
+      },
+      select: {
+        id: true,
+        paid: true,
+        AssessmentCategory: true,
+        AssessmentQuestionAnswer: true,
+      },
+    });
+    if (!assessment)
+      throw new HttpException('Invalid Assessment ID', HttpStatus.BAD_REQUEST);
+    if (assessment?.AssessmentQuestionAnswer.length === 0)
+      throw new HttpException(
+        'No Questions are ready for this assessment. Kindly try again later!',
+        HttpStatus.BAD_REQUEST,
+      );
+    const assessmentAssigned = await this.prisma.assessmentAssigned.findMany({
+      take: 1,
+      orderBy: {
+        id: 'asc',
+      },
+      where: {
+        assessmentId: assessment.id,
+        requestedById: userId,
+      },
+    });
+    if (!assessmentAssigned || assessmentAssigned.length === 0)
+      throw new HttpException(
+        'Please apply for this assessment before you can appear for it!',
+        HttpStatus.BAD_REQUEST,
+      );
+    if (assessment.paid === true && assessmentAssigned[0].status === 'PENDING')
+      throw new HttpException(
+        'Please apply for this assessment before you can appear for it!',
+        HttpStatus.BAD_REQUEST,
+      );
+    if (assessmentAssigned[0].status === 'ONGOING')
+      throw new HttpException(
+        'The assessment is currently in progress therefore you cannot view result of this assessment!',
+        HttpStatus.BAD_REQUEST,
+      );
+    const sA = await this.prisma.assessmentSelectedAnswer.findMany({
+      skip: skip ? skip : 0,
+      take: take ? take : 1,
+      orderBy: {
+        id: 'asc',
+      },
+      where: {
+        assessmentId: assessment.id,
+        attendedById: userId,
+      },
+    });
+    let qA = null;
+    if (sA.length > 0)
+      qA = await this.prisma.assessmentQuestionAnswer.findFirst({
+        orderBy: {
+          id: 'asc',
+        },
+        where: {
+          id: sA[0].currentQuestionAnswerId,
+        },
+        select: {
+          answer_a: true,
+          answer_a_choice: true,
+          answer_a_choice_id: true,
+          answer_b: true,
+          answer_b_choice_id: true,
+          answer_b_choice: true,
+          answer_c: true,
+          answer_c_choice_id: true,
+          answer_c_choice: true,
+          answer_d: true,
+          answer_d_choice: true,
+          answer_d_choice_id: true,
+          assessmentId: true,
+          createdAt: true,
+          draft: true,
+          id: true,
+          image: true,
+          updatedAt: true,
+          question: true,
+          uploadBy: true,
+          uuid: true,
+        },
+      });
+    const count = await this.prisma.assessmentSelectedAnswer.count({
+      where: {
+        assessmentId: assessment.id,
+        attendedById: userId,
+      },
+    });
+    const total_questions = await this.prisma.assessmentQuestionAnswer.count({
+      where: {
+        assessmentId: assessment.id,
+      },
+    });
+    const attempted = await this.prisma.assessmentSelectedAnswer.count({
+      where: {
+        assessmentId: assessment.id,
+        attendedById: userId,
+        NOT: {
+          selected_answer: null,
+        },
+      },
+    });
+    const main_report = [];
+    if (assessment?.AssessmentCategory?.length > 0) {
+      for (
+        let index = 0;
+        index < assessment?.AssessmentCategory?.length;
+        index++
+      ) {
+        const point = await this.prisma.assessmentSelectedAnswer.count({
+          where: {
+            assessmentId: assessment.id,
+            attendedById: userId,
+            selected_answer_id: assessment?.AssessmentCategory[index].id,
+            NOT: {
+              selected_answer: null,
+            },
+          },
+        });
+        main_report.push({
+          ...assessment?.AssessmentCategory[index],
+          point,
+        });
+      }
+    }
+    return {
+      data: sA,
+      questionSet: qA,
+      total_questions,
+      attempted,
+      main_report,
+      count,
+    };
+  }
 }

@@ -103,6 +103,6 @@ export class ExamAdminController {
   @Public()
   @Get('file/:imgpath')
   seeUploadedFile(@Param('imgpath') image, @Res() res: Response) {
-    return res.sendFile(image, { root: './uploads/pdf' });
+    return res.sendFile(image, { root: './uploads/exam_images' });
   }
 }

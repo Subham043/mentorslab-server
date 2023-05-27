@@ -27,7 +27,7 @@ import { ValidAssessmentIdPipe } from 'src/common/pipes/valid_assessment_id.pipe
 import { GetCurrentUserId } from 'src/common/decorator/get_current_user_id.decorator';
 
 @UseGuards(AccessTokenGuard)
-@Controller('assessment-category')
+@Controller('category')
 export class AssessmentCategoryAdminController {
   constructor(
     private assessmentCategoryService: AssessmentCategoryAdminService,

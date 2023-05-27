@@ -142,39 +142,39 @@ export class AssessmentUserController {
     return result;
   }
 
-  // @Post('answer/:id')
-  // async postAssessmentQuestionAnswer(
-  //   @Param('id', ValidAssessmentUuidPipe) id: string,
-  //   @GetCurrentUserId() userId: number,
-  //   @Body() answer: AssessmentAnswerUserModifyDto,
-  // ): Promise<any> {
-  //   const result = await this.assessmentService.postAssessmentQuestionAnswer(
-  //     id,
-  //     userId,
-  //     answer,
-  //   );
-  //   if (!result)
-  //     throw new HttpException('Data not found', HttpStatus.NOT_FOUND);
-  //   return result;
-  // }
+  @Post('answer/:id')
+  async postAssessmentQuestionAnswer(
+    @Param('id', ValidAssessmentUuidPipe) id: string,
+    @GetCurrentUserId() userId: number,
+    @Body() answer: AssessmentAnswerUserModifyDto,
+  ): Promise<any> {
+    const result = await this.assessmentService.postAssessmentQuestionAnswer(
+      id,
+      userId,
+      answer,
+    );
+    if (!result)
+      throw new HttpException('Data not found', HttpStatus.NOT_FOUND);
+    return result;
+  }
 
-  // @Get('report/:id')
-  // async getAssessmentReportPagination(
-  //   @Query('skip', ValidPaginatePipe) skip: string,
-  //   @Query('take', ValidPaginatePipe) take: string,
-  //   @Param('id', ValidAssessmentUuidPipe) id: string,
-  //   @GetCurrentUserId() userId: number,
-  // ): Promise<any> {
-  //   const result = await this.assessmentService.getAssessmentReport(
-  //     {
-  //       skip: Number(skip),
-  //       take: Number(take),
-  //     },
-  //     id,
-  //     userId,
-  //   );
-  //   return result;
-  // }
+  @Get('report/:id')
+  async getAssessmentReportPagination(
+    @Query('skip', ValidPaginatePipe) skip: string,
+    @Query('take', ValidPaginatePipe) take: string,
+    @Param('id', ValidAssessmentUuidPipe) id: string,
+    @GetCurrentUserId() userId: number,
+  ): Promise<any> {
+    const result = await this.assessmentService.getAssessmentReport(
+      {
+        skip: Number(skip),
+        take: Number(take),
+      },
+      id,
+      userId,
+    );
+    return result;
+  }
 
   @Public()
   @Get('image/:id')

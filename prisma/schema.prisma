@@ -535,3 +535,18 @@ model PaymentAssessment {
   forAssessmentAssigned   AssessmentAssigned? @relation(fields: [forAssessmentAssignedId], references: [id], onDelete: SetNull, onUpdate: SetNull)
   forAssessmentAssignedId Int?
 }
+
+model IttcRegistration {
+  id        Int      @id @default(autoincrement())
+  orderId     String?  @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  amount     String?  @db.Text
+  receipt     String?   @db.Text
+  name     String?   @db.Text
+  phone     String?   @db.Text
+  email     String?   @db.Text
+  message     String?   @db.Text
+  status      PaymentStatus     @default(PENDING)
+  paymentReferenceId     String?   @db.Text
+}

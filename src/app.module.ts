@@ -91,6 +91,11 @@ import { AssessmentCategoryAdminService } from './assessment_category/services/a
 import { AssessmentQuestionAnswerModule } from './assessment_question_answer/assessment_question_answer.module';
 import { AssessmentQuestionAnswerAdminController } from './assessment_question_answer/controller/assessment_question_answer.admin.controller';
 import { AssessmentQuestionAnswerAdminService } from './assessment_question_answer/services/assessment_question_answer.admin.service';
+import { IttcModule } from './ittc/ittc.module';
+import { IttcAdminController } from './ittc/controller/ittc.admin.controller';
+import { IttcUserController } from './ittc/controller/ittc.user.controller';
+import { IttcAdminService } from './ittc/services/ittc.admin.service';
+import { IttcUserService } from './ittc/services/ittc.user.service';
 
 @Module({
   imports: [
@@ -129,6 +134,7 @@ import { AssessmentQuestionAnswerAdminService } from './assessment_question_answ
     EventGalleryModule,
     ExamQuestionAnswerModule,
     AssessmentQuestionAnswerModule,
+    IttcModule,
   ],
   controllers: [
     AppController,
@@ -163,6 +169,8 @@ import { AssessmentQuestionAnswerAdminService } from './assessment_question_answ
     ExamQuestionAnswerAdminController,
     AssessmentQuestionAnswerAdminController,
     AssessmentCategoryAdminController,
+    IttcAdminController,
+    IttcUserController,
   ],
   providers: [
     AppService,
@@ -201,6 +209,8 @@ import { AssessmentQuestionAnswerAdminService } from './assessment_question_answ
     ExamQuestionAnswerAdminService,
     AssessmentQuestionAnswerAdminService,
     AssessmentCategoryAdminService,
+    IttcAdminService,
+    IttcUserService,
   ],
 })
 export class AppModule {}

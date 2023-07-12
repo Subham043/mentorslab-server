@@ -71,7 +71,12 @@ async function bootstrap() {
       'Range',
     ],
     origin: function (origin, callback) {
-      const whitelist = ['http://127.0.0.1:3000', 'http://localhost:3000'];
+      const whitelist = [
+        'http://127.0.0.1:3000',
+        'http://localhost:3000',
+        'https://mentorslab.in',
+        'https://www.mentorslab.in',
+      ];
       if (origin) {
         if (whitelist.includes(origin)) {
           callback(null, true);

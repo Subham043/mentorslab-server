@@ -42,26 +42,28 @@ export class AssessmentQuestionAnswerAdminCreateDto {
   @IsNotEmpty()
   answer_b_choice_id: number;
 
+  @IsOptional()
   @Transform((param) => ValidHtml(param.value))
   @IsString()
-  @IsNotEmpty()
   answer_c: string;
 
+  @IsOptional()
   @Transform((param) => ValidHtml(param.value))
   @Transform((param) => Number(param.value))
+  @Transform((param) => (param.value.length > 0 ? param.value : null))
   @IsNumber()
-  @IsNotEmpty()
   answer_c_choice_id: number;
 
+  @IsOptional()
   @Transform((param) => ValidHtml(param.value))
   @IsString()
-  @IsNotEmpty()
   answer_d: string;
 
+  @IsOptional()
   @Transform((param) => ValidHtml(param.value))
   @Transform((param) => Number(param.value))
+  @Transform((param) => (param.value.length > 0 ? param.value : null))
   @IsNumber()
-  @IsNotEmpty()
   answer_d_choice_id: number;
 
   @Transform((param) => ValidHtml(param.value))

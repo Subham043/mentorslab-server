@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
-export class IttcAdminService {
+export class TtpAdminService {
   private readonly User = {
     id: true,
     name: true,
@@ -15,7 +15,7 @@ export class IttcAdminService {
     take?: number;
   }): Promise<any> {
     const { skip, take } = params;
-    const data = await this.prisma.ttpRegistration.findMany({
+    const data = await this.prisma.ittcRegistration.findMany({
       skip: skip ? skip : 0,
       take: take ? take : 10,
       orderBy: {

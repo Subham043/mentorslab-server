@@ -96,6 +96,11 @@ import { IttcAdminController } from './ittc/controller/ittc.admin.controller';
 import { IttcUserController } from './ittc/controller/ittc.user.controller';
 import { IttcAdminService } from './ittc/services/ittc.admin.service';
 import { IttcUserService } from './ittc/services/ittc.user.service';
+import { TtpModule } from './ttp/ttp.module';
+import { TtpAdminController } from './ttp/controller/ttp.admin.controller';
+import { TtpUserController } from './ttp/controller/ttp.user.controller';
+import { TtpAdminService } from './ttp/services/ttp.admin.service';
+import { TtpUserService } from './ttp/services/ttp.user.service';
 
 @Module({
   imports: [
@@ -135,6 +140,7 @@ import { IttcUserService } from './ittc/services/ittc.user.service';
     ExamQuestionAnswerModule,
     AssessmentQuestionAnswerModule,
     IttcModule,
+    TtpModule,
   ],
   controllers: [
     AppController,
@@ -171,6 +177,8 @@ import { IttcUserService } from './ittc/services/ittc.user.service';
     AssessmentCategoryAdminController,
     IttcAdminController,
     IttcUserController,
+    TtpAdminController,
+    TtpUserController,
   ],
   providers: [
     AppService,
@@ -211,6 +219,8 @@ import { IttcUserService } from './ittc/services/ittc.user.service';
     AssessmentCategoryAdminService,
     IttcAdminService,
     IttcUserService,
+    TtpAdminService,
+    TtpUserService,
   ],
 })
 export class AppModule {}

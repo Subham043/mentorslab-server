@@ -206,6 +206,11 @@ model Assessment {
   uploadedBy Int?
   draft  Boolean    @default(false)
   paid  Boolean    @default(false)
+  // display_graph  Boolean    @default(false)
+  // display_pie_chart  Boolean    @default(false)
+  // display_category_ranking  Boolean    @default(false)
+  // display_analysis  Boolean    @default(false)
+  // common_report_message     String?   @db.Text
   AssessmentCategory   AssessmentCategory[]
   AssessmentQuestionAnswer   AssessmentQuestionAnswer[]
   AssessmentAssigned AssessmentAssigned[] @relation("assessment")
@@ -537,6 +542,20 @@ model PaymentAssessment {
 }
 
 model IttcRegistration {
+  id        Int      @id @default(autoincrement())
+  orderId     String?  @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  amount     String?  @db.Text
+  receipt     String?   @db.Text
+  name     String?   @db.Text
+  phone     String?   @db.Text
+  email     String?   @db.Text
+  message     String?   @db.Text
+  status      PaymentStatus     @default(PENDING)
+  paymentReferenceId     String?   @db.Text
+}
+model TtpRegistration {
   id        Int      @id @default(autoincrement())
   orderId     String?  @unique
   createdAt DateTime @default(now())

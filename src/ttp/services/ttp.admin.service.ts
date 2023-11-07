@@ -15,7 +15,7 @@ export class TtpAdminService {
     take?: number;
   }): Promise<any> {
     const { skip, take } = params;
-    const data = await this.prisma.ittcRegistration.findMany({
+    const data = await this.prisma.ttpRegistration.findMany({
       skip: skip ? skip : 0,
       take: take ? take : 10,
       orderBy: {

@@ -46,7 +46,7 @@ export class TtpUserService {
       signature,
     );
     if (!checkPayment) return undefined;
-    const content = await this.prisma.ittcRegistration.create({
+    const content = await this.prisma.ttpRegistration.create({
       data: {
         paymentReferenceId: razorpayPaymentId,
         orderId: razorpayOrderId,

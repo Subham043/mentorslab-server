@@ -9,7 +9,7 @@ import { v4 as uuidV4 } from 'uuid';
 import { MailService } from 'src/mail/mail.service';
 
 @Injectable()
-export class IttcUserService {
+export class IttcAdvancedUserService {
   private readonly User = {
     id: true,
     name: true,
@@ -22,7 +22,7 @@ export class IttcUserService {
 
   async findOneWithPaymentOrder(): Promise<any | undefined> {
     const uuid = uuidV4();
-    const order = await createRazorpayOrder(26000, uuid);
+    const order = await createRazorpayOrder(500, uuid);
 
     return order;
   }
@@ -46,7 +46,7 @@ export class IttcUserService {
       signature,
     );
     if (!checkPayment) return undefined;
-    const content = await this.prisma.ittcRegistration.create({
+    const content = await this.prisma.ittcAdvancedRegistration.create({
       data: {
         paymentReferenceId: razorpayPaymentId,
         orderId: razorpayOrderId,
@@ -55,7 +55,7 @@ export class IttcUserService {
         phone,
         message,
         receipt,
-        amount: '26000',
+        amount: '500',
         status: 'PAID_FULL',
       },
     });

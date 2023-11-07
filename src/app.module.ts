@@ -101,6 +101,11 @@ import { TtpAdminController } from './ttp/controller/ttp.admin.controller';
 import { TtpUserController } from './ttp/controller/ttp.user.controller';
 import { TtpAdminService } from './ttp/services/ttp.admin.service';
 import { TtpUserService } from './ttp/services/ttp.user.service';
+import { IttcAdvancedModule } from './ittc_advanced/ittc_advanced.module';
+import { IttcAdvancedAdminController } from './ittc_advanced/controller/ittc_advanced.admin.controller';
+import { IttcAdvancedUserController } from './ittc_advanced/controller/ittc_advanced.user.controller';
+import { IttcAdvancedAdminService } from './ittc_advanced/services/ittc_advanced.admin.service';
+import { IttcAdvancedUserService } from './ittc_advanced/services/ittc_advanced.user.service';
 
 @Module({
   imports: [
@@ -140,6 +145,7 @@ import { TtpUserService } from './ttp/services/ttp.user.service';
     ExamQuestionAnswerModule,
     AssessmentQuestionAnswerModule,
     IttcModule,
+    IttcAdvancedModule,
     TtpModule,
   ],
   controllers: [
@@ -177,6 +183,8 @@ import { TtpUserService } from './ttp/services/ttp.user.service';
     AssessmentCategoryAdminController,
     IttcAdminController,
     IttcUserController,
+    IttcAdvancedAdminController,
+    IttcAdvancedUserController,
     TtpAdminController,
     TtpUserController,
   ],
@@ -219,6 +227,8 @@ import { TtpUserService } from './ttp/services/ttp.user.service';
     AssessmentCategoryAdminService,
     IttcAdminService,
     IttcUserService,
+    IttcAdvancedAdminService,
+    IttcAdvancedUserService,
     TtpAdminService,
     TtpUserService,
   ],

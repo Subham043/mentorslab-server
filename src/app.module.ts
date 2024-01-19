@@ -106,6 +106,9 @@ import { IttcAdvancedAdminController } from './ittc_advanced/controller/ittc_adv
 import { IttcAdvancedUserController } from './ittc_advanced/controller/ittc_advanced.user.controller';
 import { IttcAdvancedAdminService } from './ittc_advanced/services/ittc_advanced.admin.service';
 import { IttcAdvancedUserService } from './ittc_advanced/services/ittc_advanced.user.service';
+import { SubscriptionUserService } from './subscription/services/subscription.user.service';
+import { SubscriptionUserController } from './subscription/controller/subscription.user.controller';
+import { SubscriptionModule } from './subscription/subscription.module';
 
 @Module({
   imports: [
@@ -147,6 +150,7 @@ import { IttcAdvancedUserService } from './ittc_advanced/services/ittc_advanced.
     IttcModule,
     IttcAdvancedModule,
     TtpModule,
+    SubscriptionModule,
   ],
   controllers: [
     AppController,
@@ -187,6 +191,7 @@ import { IttcAdvancedUserService } from './ittc_advanced/services/ittc_advanced.
     IttcAdvancedUserController,
     TtpAdminController,
     TtpUserController,
+    SubscriptionUserController,
   ],
   providers: [
     AppService,
@@ -231,6 +236,7 @@ import { IttcAdvancedUserService } from './ittc_advanced/services/ittc_advanced.
     IttcAdvancedUserService,
     TtpAdminService,
     TtpUserService,
+    SubscriptionUserService,
   ],
 })
 export class AppModule {}

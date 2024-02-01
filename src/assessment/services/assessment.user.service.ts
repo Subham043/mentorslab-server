@@ -517,7 +517,7 @@ export class AssessmentUserService {
         },
       },
     });
-    // this.mailService.paymentLiveSessionContent(payment);
+    this.mailService.paymentLiveSessionContent(payment);
     return content;
   }
 
@@ -569,7 +569,7 @@ export class AssessmentUserService {
             questionAnswerId: assessmentQuestionAnswer[0].id,
           },
         });
-        // this.mailService.sessionRequested(dta);
+        this.mailService.sessionRequested(dta);
         return 'Start Assessment.';
       }
     } else {
@@ -640,7 +640,7 @@ export class AssessmentUserService {
         },
       });
 
-      // this.mailService.sessionRequested(liveSes2);
+      this.mailService.sessionRequested(liveSes2);
       return 'Start Assessment.';
     }
   }

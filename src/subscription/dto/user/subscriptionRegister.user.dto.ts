@@ -1,5 +1,11 @@
 import { Transform } from 'class-transformer';
-import { IsEmail, IsNotEmpty, IsString, Matches } from 'class-validator';
+import {
+  IsEmail,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  Matches,
+} from 'class-validator';
 import {
   HasExtension,
   IsFile,
@@ -37,7 +43,7 @@ export class SubscriptionRegisterUserDto {
   })
   message: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsFile()
   @MaxFileSize(5e6)
   @HasExtension(['pdf'])

@@ -31,7 +31,8 @@ export class MailService {
     await this.mailerService.sendMail({
       to: email,
       // from: '"Support Team" <support@example.com>', // override default from
-      subject: 'Welcome to Mentorslab! Verify your Email',
+      // subject: 'Welcome to Mentorslab! Verify your Email',
+      subject: 'Welcome to Mentorslab!',
       template: './email_verification', // `.hbs` extension is appended automatically
       context: {
         name,
@@ -155,6 +156,26 @@ export class MailService {
       template: './demo_session', // `.hbs` extension is appended automatically
       context: {
         data,
+      },
+    });
+  }
+
+  async subscriptionContent(data: any) {
+    await this.mailerService.sendMail({
+      to: data.email,
+      subject: 'Mentorslab - Subscription Successful',
+      template: './payment_subscription', // `.hbs` extension is appended automatically
+      context: {
+        ...data,
+        client_url: process.env.CLIENT_URL,
+      },
+    });
+    await this.mailerService.sendMail({
+      to: process.env.ADMIN_EMAIL,
+      subject: 'Mentorslab - Subscription Successful By ' + data.name,
+      template: './payment_subscription_admin', // `.hbs` extension is appended automatically
+      context: {
+        ...data,
       },
     });
   }

@@ -12,6 +12,9 @@ import { join } from 'path';
       transport: {
         host: process.env.MAIL_HOST,
         port: Number(process.env.MAIL_PORT),
+        tls: {
+          rejectUnauthorized: false,
+        },
         secure: false,
         auth: {
           user: process.env.MAIL_USERNAME,
@@ -19,7 +22,7 @@ import { join } from 'path';
         },
       },
       defaults: {
-        from: '"No Reply" <no-reply@pfla.in>',
+        from: '"No Reply - Mentorslab" <no-reply@mentorslab.in>',
       },
       template: {
         dir: join(__dirname, 'templates'),

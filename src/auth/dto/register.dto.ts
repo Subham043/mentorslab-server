@@ -5,7 +5,6 @@ import {
   IsOptional,
   IsPhoneNumber,
   IsString,
-  Validate,
 } from 'class-validator';
 import { ValidHtml } from 'src/common/decorator/valid_html.decorator';
 import { UniqueEmail } from 'src/common/validator/unique_email.validator';

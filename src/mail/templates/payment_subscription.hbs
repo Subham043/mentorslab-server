@@ -1,0 +1,21 @@
+<p>Hey {{ name }},</p>
+<p>You have subscribed to <b>School Leader</b> successfully.</p>
+<p>Here are the details of your subscription :</p>
+<p>Subscription : <b>School Leader</b></p>
+<p>Amount : <b>Rs. {{ amount }}</b></p>
+<p>Order ID : <b>{{ orderId }}</b></p>
+<p>Payment Reference ID  : <b>{{ paymentReferenceId }}</b></p>
+<p>Date Of Subscription & Payment : <b>{{ updatedAt }}</b></p>
+<br/>
+<p>You can access our digital content from <a href="{{client_url}}/dashboard" target="_blank">Here</a>.</p>
+{{#if new_user}}
+<p>Here are the credentials :</p>
+<p>Email : <b>{{ email }}</b></p>
+<p>Password : <b>{{ password }}</b></p>
+{{else}}
+<p>You can use your existing credentials to access it.</p>
+{{/if}}
+
+<br/>
+<p>Thank You.</p>
+<p>Team Mentorslab</p>

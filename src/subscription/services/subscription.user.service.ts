@@ -22,7 +22,7 @@ export class SubscriptionUserService {
 
   async findOneWithPaymentOrder(): Promise<any | undefined> {
     const uuid = uuidV4();
-    const order = await createRazorpayOrder(500, uuid);
+    const order = await createRazorpayOrder(599, uuid);
     return order;
   }
 
@@ -57,7 +57,7 @@ export class SubscriptionUserService {
         phone,
         message,
         receipt,
-        amount: '500',
+        amount: '599',
         paymentReferenceId: razorpayPaymentId,
         orderId: razorpayOrderId,
         cv: savedFileName,

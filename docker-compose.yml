@@ -1,0 +1,60 @@
+version: '3'
+
+services:
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - NODE_ENV=development
+      target: development
+    container_name: mentorslab_nest_api
+    env_file:
+    - .env    
+    ports:
+      - 3300:3300
+    depends_on:
+      - mysql
+    volumes:
+      - .:/usr/app
+      - /usr/app/node_modules
+    command: npm run start:dev
+    networks:
+      mentorslab_nest:
+
+  mysql:
+    image: mariadb
+    container_name: mentorslab_nest_mysql
+    restart: unless-stopped
+    tty: true
+    volumes:
+      - ./mysql:/var/lib/mysql
+    env_file:
+      - .env.docker
+    healthcheck:
+      test: mysqladmin ping -h 127.0.0.1 -u $$MARIADB_USER --password=$$MARIADB_PASSWORD
+      start_period: 5s
+      interval: 5s
+      timeout: 5s
+      retries: 55
+
+    networks:
+      mentorslab_nest:
+  
+  phpmyadmin:
+    container_name: mentorslab_nest_php_my_admin
+    depends_on:
+      - mysql
+    image: arm64v8/phpmyadmin
+    restart: always
+    ports:
+      - 8082:80
+    env_file:
+      - .env.docker
+    networks:
+      mentorslab_nest:
+
+networks:
+  mentorslab_nest:
+    driver: bridge

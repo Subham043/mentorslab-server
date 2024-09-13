@@ -1,0 +1,64 @@
+version: '3'
+
+services:
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - NODE_ENV=production
+      target: production
+    container_name: mentorslab_nest_api
+    env_file:
+    - .env.docker    
+    depends_on:
+      - mysql
+    volumes:
+      - .:/usr/app
+      - /usr/app/node_modules
+    command: node dist/main.js
+    deploy:
+      mode: replicated
+      replicas: 3
+    labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.nestjs.rule=Host(`nestjs.localhost`)"  # Set your domain here
+        - "traefik.http.services.nestjs.loadbalancer.server.port=3300"  # Internal port exposed by NestJS
+    networks:
+      mentorslab_nest:
+
+  mysql:
+    image: mariadb
+    container_name: mentorslab_nest_mysql
+    restart: unless-stopped
+    # command: --default-authentication-plugin=mysql_native_password
+    tty: true
+    volumes:
+      - ./mysql:/var/lib/mysql
+    env_file:
+      - .env.docker
+    healthcheck:
+      test: mysqladmin ping -h 127.0.0.1 -u $$MARIADB_USER --password=$$MARIADB_PASSWORD
+      start_period: 5s
+      interval: 5s
+      timeout: 5s
+      retries: 55
+
+    networks:
+      mentorslab_nest:
+  
+  phpmyadmin:
+    container_name: mentorslab_nest_php_my_admin
+    depends_on:
+      - mysql
+    image: phpmyadmin/phpmyadmin
+    restart: always
+    env_file:
+      - .env.docker
+    networks:
+      mentorslab_nest:
+
+networks:
+  mentorslab_nest:
+    driver: overlay

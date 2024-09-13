@@ -10,7 +10,7 @@ import { MailService } from 'src/mail/mail.service';
 import { fileName } from 'src/common/hooks/fileName.hooks';
 import * as fs from 'fs/promises';
 import { AuthService } from 'src/auth/auth.service';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 
 @Injectable()
 export class SubscriptionUserService {

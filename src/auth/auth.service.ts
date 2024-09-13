@@ -13,7 +13,7 @@ import {
 } from './dto';
 import { JwtService } from '@nestjs/jwt';
 import { Token } from './dto/token.dto';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 import { decrypt, encrypt } from 'src/common/hooks/encryption.hooks';
 import { RegisterDto } from './dto/register.dto';
 import { PrismaService } from 'src/prisma/prisma.service';

@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  traefik:
+    image: traefik:v2.10
+    command:
+      - "--api.insecure=true"                          # Optional: Expose Traefik Dashboard at /traefik
+      - "--providers.docker.swarmMode=true"
+      - "--providers.docker.exposedbydefault=false"    # Only route explicitly exposed services
+      - "--entrypoints.web.address=:80"                # Listen on port 80
+    ports:
+      - "80:80"                                        # Expose HTTP port 80 for external traffic
+      - "8080:8080"                                    # Optional: Traefik dashboard
+    networks:
+      - traefik-network
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager                       # Run Traefik on manager node
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock      # Allow Traefik to access Docker
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.api.rule=Host(`traefik.localhost`)"
+      - "traefik.http.services.api.loadbalancer.server.port=8080"  # Traefik dashboard
+
+networks:
+  traefik-network:
+    driver: overlay

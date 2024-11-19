@@ -48,9 +48,9 @@ export class AssessmentQuestionAnswerAdminUpdateDto {
   answer_c: string;
 
   @IsOptional()
-  @Transform((param) => ValidHtml(param.value))
-  @Transform((param) => Number(param.value))
   @Transform((param) => (param.value.length > 0 ? param.value : null))
+  @Transform((param) => ValidHtml(param.value))
+  @Transform((param) => Number(param.value) || null)
   @IsNumber()
   answer_c_choice_id: number;
 
@@ -60,9 +60,9 @@ export class AssessmentQuestionAnswerAdminUpdateDto {
   answer_d: string;
 
   @IsOptional()
-  @Transform((param) => ValidHtml(param.value))
-  @Transform((param) => Number(param.value))
   @Transform((param) => (param.value.length > 0 ? param.value : null))
+  @Transform((param) => ValidHtml(param.value))
+  @Transform((param) => Number(param.value) || null)
   @IsNumber()
   answer_d_choice_id: number;
 
